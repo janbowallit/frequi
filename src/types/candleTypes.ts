@@ -97,6 +97,8 @@ export interface PairHistory {
   exit_short_signals?: number;
 
   last_analyzed: number;
+  /** Last analysis time as epoch seconds */
+  last_analyzed_ts?: number;
   /** Data start date in as millisecond timestamp */
   data_start_ts: number;
   /** Data start date in in the format YYYY-MM-DD HH24:MI:SS+00:00 */

@@ -406,6 +406,16 @@ export function createBotSubStore(botId: string, botName: string) {
           });
         }
       },
+      /**
+       * Fetch the latest analyzed candles of a pair with all strategy columns.
+       * Not stored, so the chart's (column-filtered) candle data stays untouched.
+       */
+      async getPairAnalysis(pair: string, timeframe: string, limit = 100): Promise<PairHistory> {
+        const { data } = await api.get<PairHistory>('/pair_candles', {
+          params: { pair, timeframe, limit },
+        });
+        return data;
+      },
       async getPairHistory(payload: PairHistoryPayload) {
         if (payload.pair && payload.timeframe) {
           this.historyStatus = LoadingStatus.loading;
