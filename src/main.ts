@@ -1,11 +1,16 @@
 import { createPinia } from 'pinia';
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 import ui from '@nuxt/ui/vue-plugin';
+import { addCollection } from '@iconify/vue';
+import mdiIcons from 'virtual:mdi-icons';
 
 import App from './App.vue';
 import { VueDraggableGrid } from './plugins/vue-grid-layout';
 import router from './router';
 import './styles/tailwind.css';
+
+// Icons are bundled with the app instead of loaded from the Iconify API
+addCollection(mdiIcons);
 
 const myApp = createApp(App);
 

@@ -36,6 +36,11 @@ onMounted(() => {
   if (settingsStore.currentTheme) setTheme(settingsStore.currentTheme);
 });
 
+const isLight = computed(() => ['light', 'bootstrap'].includes(activeTheme.value));
+const toggleLabel = computed(() =>
+  isLight.value ? 'Switch to dark mode' : 'Switch to light mode',
+);
+
 function toggleNight() {
   setTheme(['light', 'bootstrap'].includes(activeTheme.value) ? 'dark' : 'light');
 }
@@ -44,12 +49,11 @@ function toggleNight() {
 <template>
   <UButton
     variant="ghost"
-    title="Toggle Night Mode"
-    :aria-label="showText ? undefined : 'Toggle night mode'"
+    :title="toggleLabel"
+    :aria-label="showText ? undefined : toggleLabel"
     color="neutral"
-    :label="showText ? 'Toggle Night Mode' : ''"
+    :label="showText ? toggleLabel : ''"
+    :icon="isLight ? 'mdi:weather-night' : 'mdi:white-balance-sunny'"
     @click="toggleNight"
-    icon="mdi:brightness-6"
-  >
-  </UButton>
+  />
 </template>

@@ -104,56 +104,51 @@ const combinedPairList = computed(() => {
 </script>
 
 <template>
-  <div>
-    <div
-      label-for="trade-filter"
-      class="mb-2"
-      :class="{
-        'me-4': backtestMode,
-        'me-2': !backtestMode,
-      }"
-    >
-      <UInput
-        id="trade-filter"
-        v-model="filterText"
-        type="text"
-        placeholder="Filter"
-        class="w-full"
-      />
-    </div>
-    <ul
-      class="divide-y divide-neutral-300 dark:divide-neutral-700 divide-solid border-x border-y rounded-sm border-neutral-300 dark:border-neutral-700"
-    >
-      <li
-        v-for="comb in combinedPairList"
-        :key="comb.pair"
-        button
-        class="flex cursor-pointer last:rounded-b justify-between items-center px-1 py-1.5"
-        :class="{
-          'bg-primary dark:bg-primary-700 dark:border-primary text-white':
-            comb.pair === botStore.activeBot.selectedPair,
-        }"
-        :title="`${formatPriceCurrency(comb.profitAbs, botStore.activeBot.stakeCurrency, botStore.activeBot.stakeCurrencyDecimals)} - ${comb.pair} - ${comb.tradeCount} trades`"
-        @click="botStore.activeBot.selectedPair = comb.pair"
-      >
-        <div class="flex items-center gap-2">
-          {{ comb.pair }}
-          <span v-if="comb.locks" :title="comb.lockReason"> <i-mdi-lock /> </span>
-        </div>
+  <div class="flex flex-col gap-2 p-2">
+    <UInput
+      id="trade-filter"
+      v-model="filterText"
+      type="search"
+      icon="mdi:magnify"
+      placeholder="Filter pairs"
+      aria-label="Filter pairs"
+      class="w-full"
+      :class="{ 'pe-2': backtestMode }"
+    />
+    <EmptyState
+      v-if="combinedPairList.length === 0"
+      :title="filterText ? 'No matching pairs' : 'No pairs in the whitelist'"
+      icon="mdi:magnify-close"
+    />
+    <ul v-else class="flex flex-col gap-0.5" aria-label="Pairs">
+      <li v-for="comb in combinedPairList" :key="comb.pair">
+        <button
+          type="button"
+          class="flex w-full items-center justify-between gap-2 rounded-md border-s-2 px-2.5 py-2 text-left text-sm transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          :class="
+            comb.pair === botStore.activeBot.selectedPair
+              ? 'border-primary bg-primary/10 font-semibold text-highlighted'
+              : 'border-transparent text-default hover:bg-elevated'
+          "
+          :aria-current="comb.pair === botStore.activeBot.selectedPair ? 'true' : undefined"
+          :title="`${comb.pair} - ${comb.tradeCount} trade(s), ${formatPriceCurrency(comb.profitAbs, botStore.activeBot.stakeCurrency, botStore.activeBot.stakeCurrencyDecimals)}`"
+          @click="botStore.activeBot.selectedPair = comb.pair"
+        >
+          <span class="flex min-w-0 items-center gap-2">
+            <span class="truncate">{{ comb.pair }}</span>
+            <UTooltip v-if="comb.locks" :text="`Locked until ${comb.lockReason}`">
+              <UIcon name="mdi:lock" class="size-4 shrink-0 text-warning" aria-label="Locked" />
+            </UTooltip>
+          </span>
 
-        <TradeProfit v-if="comb.trade && !backtestMode" :trade="comb.trade" />
-        <ProfitPill
-          v-if="backtestMode && comb.tradeCount > 0"
-          :profit-ratio="comb.profit"
-          :stake-currency="botStore.activeBot.stakeCurrency"
-        />
+          <TradeProfit v-if="comb.trade && !backtestMode" :trade="comb.trade" />
+          <ProfitPill
+            v-if="backtestMode && comb.tradeCount > 0"
+            :profit-ratio="comb.profit"
+            :stake-currency="botStore.activeBot.stakeCurrency"
+          />
+        </button>
       </li>
     </ul>
   </div>
 </template>
-
-<style scoped>
-.list-group {
-  text-align: left;
-}
-</style>

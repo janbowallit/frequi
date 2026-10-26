@@ -103,6 +103,12 @@ html {
     font-size: 14px;
 }
 
+/* Panels jump straight into place on first render instead of flying in from the corner */
+.grid-settling.vue-grid-layout,
+.grid-settling .vue-grid-item {
+    transition: none !important;
+}
+
 .vue-grid-item {
     /*  Fix white corners in vue-grid-item. */
     background-color: unset !important;

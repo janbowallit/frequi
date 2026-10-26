@@ -81,7 +81,7 @@ test.describe('Chart', () => {
       },
     );
 
-    await page.getByRole('button', { name: 'Toggle Night Mode' }).click();
+    await page.getByRole('button', { name: /Switch to (light|dark) mode/ }).click();
 
     await expect(page.locator('canvas')).toHaveScreenshot('Chart-Plot-with_BollingerBands.png', {
       threshold: 0.15,

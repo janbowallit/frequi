@@ -6,6 +6,8 @@ const botStore = useBotStore();
 const layoutStore = useLayoutStore();
 const settingsStore = useSettingsStore();
 const currentBreakpoint = ref('');
+// The grid positions its items only after measuring its width - hide it until then
+const { isReady: gridReady, onLayoutReady } = useGridReady();
 
 const breakpointChanged = (newBreakpoint: string) => {
   // console.log('breakpoint:', newBreakpoint);
@@ -69,8 +71,8 @@ const tradingTabItems = computed<TabsItem[]>(() => {
     {
       slot: 'general',
       value: 'general',
-      label: 'General',
-      icon: 'i-mdi-information',
+      label: 'Status',
+      icon: 'i-mdi-information-outline',
     },
     {
       slot: 'performance',
@@ -109,6 +111,7 @@ const tradingTabItems = computed<TabsItem[]>(() => {
 <template>
   <GridLayout
     class="h-full w-full"
+    :class="{ 'grid-settling invisible': !gridReady }"
     style="padding: 8px"
     :row-height="50"
     :layout="gridLayoutData"
@@ -118,9 +121,10 @@ const tradingTabItems = computed<TabsItem[]>(() => {
     :is-resizable="!isLayoutLocked"
     :is-draggable="!isLayoutLocked"
     :responsive="true"
-    :cols="{ lg: 12, md: 12, sm: 12, xs: 4, xxs: 2 }"
+    :cols="{ lg: 12, md: 12, sm: 12, xs: 12, xxs: 12 }"
     :col-num="12"
     @update:breakpoint="breakpointChanged"
+    @layout-ready="onLayoutReady"
   >
     <template #default="{ gridItemProps }">
       <GridItem
@@ -133,8 +137,8 @@ const tradingTabItems = computed<TabsItem[]>(() => {
         :h="gridLayoutMultiPane.h"
         drag-allow-from=".drag-header"
       >
-        <DraggableContainer header="Multi Pane">
-          <div class="flex justify-center border-b border-default px-2 py-2">
+        <DraggableContainer header="Bot">
+          <div class="border-b border-default p-3">
             <BotControls />
           </div>
           <UTabs
@@ -142,7 +146,13 @@ const tradingTabItems = computed<TabsItem[]>(() => {
             :items="tradingTabItems"
             variant="link"
             default-value="pairs"
-            :ui="{ label: settingsStore.multiPaneButtonsShowText ? '' : 'sr-only' }"
+            :ui="{
+              list: 'flex-wrap gap-1 border-b border-default p-2',
+              indicator: 'hidden',
+              trigger:
+                'grow-0 rounded-md px-2.5 py-1.5 data-[state=active]:bg-primary/10 data-[state=active]:text-primary',
+              label: settingsStore.multiPaneButtonsShowText ? '' : 'sr-only',
+            }"
           >
             <template #pairs>
               <PairSummary

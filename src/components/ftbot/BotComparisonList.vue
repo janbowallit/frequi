@@ -109,20 +109,21 @@ const columns: TableColumn<ComparisonTableItems>[] = [
 <template>
   <UTable :data="tableItems" :columns="columns">
     <template #botName-header>
-      <div class="flex justify-between flex-row w-full">
-        <b>Bot Name</b
-        ><UBadge
-          class="items-center text-slate-200 bg-slate-800 cursor-pointer"
+      <div class="flex w-full flex-row items-center justify-between gap-2">
+        <span>Bot</span>
+        <UButton
+          v-if="botStore.botCount > 1"
           color="neutral"
-          title="Click to select all bots"
+          variant="soft"
+          size="xs"
+          label="Select all"
           @click="botStore.toggleBotsByState('all')"
-          >All</UBadge
-        >
+        />
       </div>
     </template>
     <template #botName-cell="{ row }">
-      <div class="flex flex-row justify-between items-center">
-        <div>
+      <div class="flex flex-row items-center justify-between gap-2">
+        <div :class="{ 'font-semibold': !row.original.botId }">
           <BaseCheckbox
             v-if="row.original.botId && botStore.botCount > 1"
             v-model="
@@ -143,23 +144,25 @@ const columns: TableColumn<ComparisonTableItems>[] = [
         </div>
         <UBadge
           v-if="row.original.isOnline && row.original.isDryRun"
-          class="items-center bg-green-800 text-slate-200 cursor-pointer"
-          color="success"
+          as="button"
+          color="neutral"
+          variant="soft"
+          :class="{ 'cursor-pointer': botStore.botCount > 1 }"
           title="Click to select all dry run bots"
           @click="botStore.toggleBotsByState('dry')"
-          >Dry</UBadge
+          >Dry run</UBadge
         >
         <UBadge
           v-if="row.original.isOnline && !row.original.isDryRun"
-          class="items-center cursor-pointer"
+          as="button"
           color="warning"
+          variant="soft"
+          :class="{ 'cursor-pointer': botStore.botCount > 1 }"
           title="Click to select all live bots"
           @click="botStore.toggleBotsByState('live')"
           >Live</UBadge
         >
-        <UBadge v-if="row.original.isOnline === false" class="items-center" color="neutral"
-          >Offline</UBadge
-        >
+        <UBadge v-if="row.original.isOnline === false" color="error" variant="soft">Offline</UBadge>
       </div>
     </template>
     <template #profitOpen-cell="{ row }">

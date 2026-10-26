@@ -24,7 +24,7 @@ test.describe('Trade', () => {
     ]);
 
     // // Check visibility of elements
-    await expect(page.locator('.drag-header', { hasText: 'Multi Pane' })).toBeInViewport();
+    await expect(page.locator('.drag-header', { hasText: 'Bot' })).toBeInViewport();
     await expect(page.locator('.drag-header', { hasText: 'Chart' })).toBeInViewport();
     // Pairlist elements
 
@@ -50,7 +50,7 @@ test.describe('Trade', () => {
 
     await expect(modalCancelButton).not.toBeVisible();
 
-    await page.getByRole('button', { name: 'Stop trading' }).click();
+    await page.getByRole('button', { name: 'Stop', exact: true }).click();
 
     // Modal open
     await expect(dialogModal).toBeVisible();
@@ -64,7 +64,7 @@ test.describe('Trade', () => {
     await expect(modalCancelButton).not.toBeVisible();
     await expect(modalCancelButton).not.toBeInViewport();
 
-    // // Click on General tab
+    // // Click on Status tab
     const performancePair = page.locator('td:has-text("XRP/USDT")');
     await expect(performancePair).toBeInViewport();
     await page.locator('button[role="tab"][id*="general"]').click();
@@ -81,7 +81,7 @@ test.describe('Trade', () => {
     await expect(page.locator('td:has-text("8070.5")')).toBeInViewport();
 
     // Scroll to top
-    const multiPane = page.locator('.drag-header', { hasText: 'Multi Pane' });
+    const multiPane = page.locator('.drag-header', { hasText: 'Bot' });
     await expect(multiPane).toBeVisible();
     await multiPane.scrollIntoViewIfNeeded();
     await expect(multiPane).toBeInViewport();
@@ -92,7 +92,7 @@ test.describe('Trade', () => {
     await expect(dialogModal).toBeVisible();
     await expect(dialogModal).toBeInViewport();
 
-    const modalOkButton = dialogModal.getByRole('button', { name: 'Ok' });
+    const modalOkButton = dialogModal.getByRole('button', { name: 'Reload', exact: true });
     await expect(modalOkButton).toBeVisible();
     await modalOkButton.click();
 
@@ -115,7 +115,7 @@ test.describe('Trade', () => {
     ]);
     // Wait for dynamic layout to settle
     await page.waitForTimeout(1000);
-    const multiPane = await page.locator('.drag-header', { hasText: 'Multi Pane' });
+    const multiPane = await page.locator('.drag-header', { hasText: 'Bot' });
 
     const multiPanebb = await multiPane.boundingBox();
 

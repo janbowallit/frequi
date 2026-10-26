@@ -20,8 +20,10 @@ function confirmRemoveBot() {
 async function removeBotQuestion() {
   if (
     await confirm({
-      title: 'Logout confirmation',
-      message: `Really remove (logout) from ${props.bot.botName} (${props.bot.botId})?`,
+      title: 'Remove bot?',
+      message: `Log out of ${props.bot.botName || props.bot.botId} and remove it from this browser? The bot itself keeps running.`,
+      confirmText: 'Remove',
+      danger: true,
     })
   ) {
     confirmRemoveBot();

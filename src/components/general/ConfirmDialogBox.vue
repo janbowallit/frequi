@@ -5,11 +5,14 @@ export interface ConfirmDialogBoxProps {
   message: string;
   cancelText?: string;
   confirmText?: string;
+  /** Destructive action - red confirm button, and focus starts on Cancel */
+  danger?: boolean;
 }
 withDefaults(defineProps<ConfirmDialogBoxProps>(), {
   description: 'Confirmation',
   cancelText: 'Cancel',
   confirmText: 'Ok',
+  danger: false,
 });
 defineEmits<{
   close: [value: boolean];
@@ -17,26 +20,31 @@ defineEmits<{
 </script>
 
 <template>
-  <UModal :title="title" :ui="{ footer: 'justify-end' }" :description="description">
+  <UModal
+    :title="title"
+    :description="description"
+    :ui="{ description: 'sr-only', footer: 'justify-end gap-2' }"
+  >
     <template #body>
-      <div class="whitespace-pre-wrap">
+      <p class="whitespace-pre-wrap text-default">
         {{ message }}
-      </div>
+      </p>
     </template>
     <template #footer>
       <UButton
-        class="min-w-30"
+        class="min-w-24 justify-center"
         :label="cancelText"
         variant="outline"
         color="neutral"
-        icon="mdi:close"
+        :autofocus="danger"
         @click="$emit('close', false)"
       />
       <UButton
-        class="min-w-30"
+        class="min-w-24 justify-center"
         :label="confirmText"
-        icon="mdi:check"
-        autofocus
+        :color="danger ? 'error' : 'primary'"
+        variant="solid"
+        :autofocus="!danger"
         @click="$emit('close', true)"
       />
     </template>

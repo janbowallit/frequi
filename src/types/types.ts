@@ -62,6 +62,7 @@ export interface Logs {
 export enum BotStates {
   RUNNING = 'running',
   STOPPED = 'stopped',
+  PAUSED = 'paused',
   RELOAD_CONFIG = 'reload_config',
 }
 

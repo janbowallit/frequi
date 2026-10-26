@@ -14,8 +14,10 @@ onMounted(() => {
 async function deleteBacktestResult(result: BacktestHistoryEntry) {
   if (
     await confirm({
-      title: 'Delete result',
-      message: `Delete result ${result.filename} from disk?`,
+      title: 'Delete result?',
+      message: `Delete ${result.filename} from disk? This cannot be undone.`,
+      confirmText: 'Delete',
+      danger: true,
     })
   ) {
     botStore.activeBot.deleteBacktestHistoryResult(result);

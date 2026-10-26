@@ -11,3 +11,9 @@ interface ImportMeta {
 }
 
 declare const __COMMIT_HASH__: string;
+
+declare module 'virtual:mdi-icons' {
+  import type { IconifyJSON } from '@iconify/vue';
+  const icons: IconifyJSON;
+  export default icons;
+}

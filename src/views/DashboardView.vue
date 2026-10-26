@@ -5,6 +5,8 @@ const botStore = useBotStore();
 
 const layoutStore = useLayoutStore();
 const currentBreakpoint = ref('');
+// The grid positions its items only after measuring its width - hide it until then
+const { isReady: gridReady, onLayoutReady } = useGridReady();
 
 function breakpointChanged(newBreakpoint: string) {
   // console.log('breakpoint:', newBreakpoint);
@@ -77,159 +79,166 @@ onMounted(async () => {
 </script>
 
 <template>
-  <GridLayout
-    class="h-full w-full"
-    style="padding: 8px"
-    :row-height="50"
-    :layout="gridLayoutData"
-    :vertical-compact="false"
-    :margin="[8, 8]"
-    :responsive-layouts="responsiveGridLayouts"
-    :is-resizable="!isLayoutLocked"
-    :is-draggable="!isLayoutLocked"
-    :responsive="true"
-    :prevent-collision="true"
-    :cols="{ lg: 12, md: 12, sm: 12, xs: 4, xxs: 2 }"
-    :col-num="12"
-    @layout-updated="layoutUpdatedEvent"
-    @update:breakpoint="breakpointChanged"
-  >
-    <template #default="{ gridItemProps }">
-      <GridItem
-        v-bind="gridItemProps"
-        :i="gridLayoutDaily.i"
-        :x="gridLayoutDaily.x"
-        :y="gridLayoutDaily.y"
-        :w="gridLayoutDaily.w"
-        :h="gridLayoutDaily.h"
-        :min-w="3"
-        :min-h="4"
-        drag-allow-from=".drag-header"
-      >
-        <DraggableContainer :header="`Profit over time ${botStore.botCount > 1 ? 'combined' : ''}`">
-          <PeriodBreakdown multi-bot-view />
-        </DraggableContainer>
-      </GridItem>
-      <GridItem
-        v-bind="gridItemProps"
-        :i="gridLayoutBotComparison.i"
-        :x="gridLayoutBotComparison.x"
-        :y="gridLayoutBotComparison.y"
-        :w="gridLayoutBotComparison.w"
-        :h="gridLayoutBotComparison.h"
-        :min-w="3"
-        :min-h="4"
-        drag-allow-from=".drag-header"
-      >
-        <DraggableContainer header="Bot comparison">
-          <BotComparisonList />
-        </DraggableContainer>
-      </GridItem>
-      <GridItem
-        v-bind="gridItemProps"
-        :i="gridLayoutAllOpenTrades.i"
-        :x="gridLayoutAllOpenTrades.x"
-        :y="gridLayoutAllOpenTrades.y"
-        :w="gridLayoutAllOpenTrades.w"
-        :h="gridLayoutAllOpenTrades.h"
-        :min-w="3"
-        :min-h="4"
-        drag-allow-from=".drag-header"
-      >
-        <DraggableContainer
-          header="Open Trades"
-          info-text="Open trades of all selected bots. Click on a trade to go to the trade page for that trade/bot."
+  <div class="flex w-full flex-col">
+    <BotSummaryStats class="px-4 pt-4" />
+    <GridLayout
+      class="h-full w-full"
+      :class="{ 'grid-settling invisible': !gridReady }"
+      style="padding: 8px"
+      :row-height="50"
+      :layout="gridLayoutData"
+      :vertical-compact="false"
+      :margin="[8, 8]"
+      :responsive-layouts="responsiveGridLayouts"
+      :is-resizable="!isLayoutLocked"
+      :is-draggable="!isLayoutLocked"
+      :responsive="true"
+      :prevent-collision="true"
+      :cols="{ lg: 12, md: 12, sm: 12, xs: 12, xxs: 12 }"
+      :col-num="12"
+      @layout-updated="layoutUpdatedEvent"
+      @update:breakpoint="breakpointChanged"
+      @layout-ready="onLayoutReady"
+    >
+      <template #default="{ gridItemProps }">
+        <GridItem
+          v-bind="gridItemProps"
+          :i="gridLayoutDaily.i"
+          :x="gridLayoutDaily.x"
+          :y="gridLayoutDaily.y"
+          :w="gridLayoutDaily.w"
+          :h="gridLayoutDaily.h"
+          :min-w="3"
+          :min-h="4"
+          drag-allow-from=".drag-header"
         >
-          <TradeList active-trades :trades="botStore.allOpenTradesSelectedBots" multi-bot-view />
-        </DraggableContainer>
-      </GridItem>
-      <GridItem
-        v-bind="gridItemProps"
-        :i="gridLayoutCumChart.i"
-        :x="gridLayoutCumChart.x"
-        :y="gridLayoutCumChart.y"
-        :w="gridLayoutCumChart.w"
-        :h="gridLayoutCumChart.h"
-        :min-w="3"
-        :min-h="4"
-        drag-allow-from=".drag-header"
-      >
-        <DraggableContainer header="Cumulative Profit">
-          <CumProfitChart
-            :trades="botStore.allTradesSelectedBots"
-            :open-trades="botStore.allOpenTradesSelectedBots"
-            :show-title="false"
-          />
-        </DraggableContainer>
-      </GridItem>
-      <GridItem
-        v-bind="gridItemProps"
-        :i="gridLayoutWalletHistory.i"
-        :x="gridLayoutWalletHistory.x"
-        :y="gridLayoutWalletHistory.y"
-        :w="gridLayoutWalletHistory.w"
-        :h="gridLayoutWalletHistory.h"
-        :min-w="3"
-        :min-h="4"
-        drag-allow-from=".drag-header"
-      >
-        <DraggableContainer header="Wallet History">
-          <WalletHistoryChart :wallet-data="botStore.allBalanceHistory" :show-title="false" />
-        </DraggableContainer>
-      </GridItem>
-      <GridItem
-        v-bind="gridItemProps"
-        :i="gridLayoutAllClosedTrades.i"
-        :x="gridLayoutAllClosedTrades.x"
-        :y="gridLayoutAllClosedTrades.y"
-        :w="gridLayoutAllClosedTrades.w"
-        :h="gridLayoutAllClosedTrades.h"
-        :min-w="3"
-        :min-h="4"
-        drag-allow-from=".drag-header"
-      >
-        <DraggableContainer
-          header="Closed Trades"
-          info-text="Closed trades for all selected bots. Click on a trade to go to the trade page for that trade/bot."
+          <DraggableContainer
+            :header="`Profit over time ${botStore.botCount > 1 ? 'combined' : ''}`"
+          >
+            <PeriodBreakdown multi-bot-view />
+          </DraggableContainer>
+        </GridItem>
+        <GridItem
+          v-bind="gridItemProps"
+          :i="gridLayoutBotComparison.i"
+          :x="gridLayoutBotComparison.x"
+          :y="gridLayoutBotComparison.y"
+          :w="gridLayoutBotComparison.w"
+          :h="gridLayoutBotComparison.h"
+          :min-w="3"
+          :min-h="4"
+          drag-allow-from=".drag-header"
         >
-          <TradeList
-            :active-trades="false"
-            show-filter
-            :trades="botStore.allClosedTradesSelectedBots"
-            multi-bot-view
-          />
-        </DraggableContainer>
-      </GridItem>
-      <GridItem
-        v-bind="gridItemProps"
-        :i="gridLayoutProfitDistribution.i"
-        :x="gridLayoutProfitDistribution.x"
-        :y="gridLayoutProfitDistribution.y"
-        :w="gridLayoutProfitDistribution.w"
-        :h="gridLayoutProfitDistribution.h"
-        :min-w="3"
-        :min-h="4"
-        drag-allow-from=".drag-header"
-      >
-        <DraggableContainer header="Profit Distribution">
-          <ProfitDistributionChart :trades="botStore.allTradesSelectedBots" :show-title="false" />
-        </DraggableContainer>
-      </GridItem>
-      <GridItem
-        v-bind="gridItemProps"
-        :i="gridLayoutTradesLogChart.i"
-        :x="gridLayoutTradesLogChart.x"
-        :y="gridLayoutTradesLogChart.y"
-        :w="gridLayoutTradesLogChart.w"
-        :h="gridLayoutTradesLogChart.h"
-        :min-w="3"
-        :min-h="4"
-        drag-allow-from=".drag-header"
-      >
-        <DraggableContainer header="Trades Log">
-          <TradesLogChart :trades="botStore.allTradesSelectedBots" :show-title="false" />
-        </DraggableContainer>
-      </GridItem>
-    </template>
-  </GridLayout>
+          <DraggableContainer header="Bot comparison">
+            <BotComparisonList />
+          </DraggableContainer>
+        </GridItem>
+        <GridItem
+          v-bind="gridItemProps"
+          :i="gridLayoutAllOpenTrades.i"
+          :x="gridLayoutAllOpenTrades.x"
+          :y="gridLayoutAllOpenTrades.y"
+          :w="gridLayoutAllOpenTrades.w"
+          :h="gridLayoutAllOpenTrades.h"
+          :min-w="3"
+          :min-h="4"
+          drag-allow-from=".drag-header"
+        >
+          <DraggableContainer
+            header="Open Trades"
+            info-text="Open trades of all selected bots. Click on a trade to go to the trade page for that trade/bot."
+          >
+            <TradeList active-trades :trades="botStore.allOpenTradesSelectedBots" multi-bot-view />
+          </DraggableContainer>
+        </GridItem>
+        <GridItem
+          v-bind="gridItemProps"
+          :i="gridLayoutCumChart.i"
+          :x="gridLayoutCumChart.x"
+          :y="gridLayoutCumChart.y"
+          :w="gridLayoutCumChart.w"
+          :h="gridLayoutCumChart.h"
+          :min-w="3"
+          :min-h="4"
+          drag-allow-from=".drag-header"
+        >
+          <DraggableContainer header="Cumulative Profit">
+            <CumProfitChart
+              :trades="botStore.allTradesSelectedBots"
+              :open-trades="botStore.allOpenTradesSelectedBots"
+              :show-title="false"
+            />
+          </DraggableContainer>
+        </GridItem>
+        <GridItem
+          v-bind="gridItemProps"
+          :i="gridLayoutWalletHistory.i"
+          :x="gridLayoutWalletHistory.x"
+          :y="gridLayoutWalletHistory.y"
+          :w="gridLayoutWalletHistory.w"
+          :h="gridLayoutWalletHistory.h"
+          :min-w="3"
+          :min-h="4"
+          drag-allow-from=".drag-header"
+        >
+          <DraggableContainer header="Wallet History">
+            <WalletHistoryChart :wallet-data="botStore.allBalanceHistory" :show-title="false" />
+          </DraggableContainer>
+        </GridItem>
+        <GridItem
+          v-bind="gridItemProps"
+          :i="gridLayoutAllClosedTrades.i"
+          :x="gridLayoutAllClosedTrades.x"
+          :y="gridLayoutAllClosedTrades.y"
+          :w="gridLayoutAllClosedTrades.w"
+          :h="gridLayoutAllClosedTrades.h"
+          :min-w="3"
+          :min-h="4"
+          drag-allow-from=".drag-header"
+        >
+          <DraggableContainer
+            header="Closed Trades"
+            info-text="Closed trades for all selected bots. Click on a trade to go to the trade page for that trade/bot."
+          >
+            <TradeList
+              :active-trades="false"
+              show-filter
+              :trades="botStore.allClosedTradesSelectedBots"
+              multi-bot-view
+            />
+          </DraggableContainer>
+        </GridItem>
+        <GridItem
+          v-bind="gridItemProps"
+          :i="gridLayoutProfitDistribution.i"
+          :x="gridLayoutProfitDistribution.x"
+          :y="gridLayoutProfitDistribution.y"
+          :w="gridLayoutProfitDistribution.w"
+          :h="gridLayoutProfitDistribution.h"
+          :min-w="3"
+          :min-h="4"
+          drag-allow-from=".drag-header"
+        >
+          <DraggableContainer header="Profit Distribution">
+            <ProfitDistributionChart :trades="botStore.allTradesSelectedBots" :show-title="false" />
+          </DraggableContainer>
+        </GridItem>
+        <GridItem
+          v-bind="gridItemProps"
+          :i="gridLayoutTradesLogChart.i"
+          :x="gridLayoutTradesLogChart.x"
+          :y="gridLayoutTradesLogChart.y"
+          :w="gridLayoutTradesLogChart.w"
+          :h="gridLayoutTradesLogChart.h"
+          :min-w="3"
+          :min-h="4"
+          drag-allow-from=".drag-header"
+        >
+          <DraggableContainer header="Trades Log">
+            <TradesLogChart :trades="botStore.allTradesSelectedBots" :show-title="false" />
+          </DraggableContainer>
+        </GridItem>
+      </template>
+    </GridLayout>
+  </div>
 </template>

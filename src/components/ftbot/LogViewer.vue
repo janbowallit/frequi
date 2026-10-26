@@ -1,10 +1,47 @@
 <script setup lang="ts">
+type LevelFilter = 'all' | 'warning' | 'error';
+
+const AUTO_REFRESH_MS = 10_000;
+
 const botStore = useBotStore();
 const scrollContainer = ref<HTMLElement | null>(null);
 const loading = ref(false);
+const search = ref('');
+const levelFilter = ref<LevelFilter>('all');
+const autoRefresh = useStorage('ftLogsAutoRefresh', false);
+/** Keep the view pinned to the newest entry while the user hasn't scrolled up */
+const following = ref(true);
 
-onMounted(async () => {
-  refreshLogs();
+const searchTerm = refDebounced(search, 150);
+
+function isError(level: string) {
+  return level === 'ERROR' || level === 'CRITICAL';
+}
+
+const levelCounts = computed(() => {
+  let warning = 0;
+  let error = 0;
+  for (const log of botStore.activeBot.lastLogs) {
+    if (log[3] === 'WARNING') warning += 1;
+    else if (isError(log[3])) error += 1;
+  }
+  return { warning, error };
+});
+
+const levelOptions = computed(() => [
+  { value: 'all' as const, label: 'All' },
+  { value: 'warning' as const, label: `Warnings (${levelCounts.value.warning})` },
+  { value: 'error' as const, label: `Errors (${levelCounts.value.error})` },
+]);
+
+const filteredLogs = computed(() => {
+  const term = searchTerm.value.trim().toLowerCase();
+  return botStore.activeBot.lastLogs.filter((log) => {
+    if (levelFilter.value === 'error' && !isError(log[3])) return false;
+    if (levelFilter.value === 'warning' && log[3] !== 'WARNING' && !isError(log[3])) return false;
+    if (!term) return true;
+    return log[4].toLowerCase().includes(term) || log[2].toLowerCase().includes(term);
+  });
 });
 
 async function refreshLogs() {
@@ -14,7 +51,31 @@ async function refreshLogs() {
   } finally {
     loading.value = false;
   }
-  scrollToBottom();
+  if (following.value) scrollToBottom();
+}
+
+const { pause, resume } = useIntervalFn(refreshLogs, AUTO_REFRESH_MS, { immediate: false });
+watch(
+  autoRefresh,
+  (enabled) => {
+    if (enabled) resume();
+    else pause();
+  },
+  { immediate: true },
+);
+
+onMounted(() => {
+  refreshLogs();
+});
+
+watch(filteredLogs, () => {
+  if (following.value) scrollToBottom();
+});
+
+function onScroll() {
+  const el = scrollContainer.value;
+  if (!el) return;
+  following.value = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
 }
 
 function levelClass(logLevel: string) {
@@ -35,6 +96,7 @@ function scrollToBottom() {
   nextTick(() => {
     if (scrollContainer.value) {
       scrollContainer.value.scrollTop = scrollContainer.value.scrollHeight;
+      following.value = true;
     }
   });
 }
@@ -42,17 +104,28 @@ function scrollToBottom() {
 
 <template>
   <section
-    class="flex h-full flex-col overflow-hidden rounded-xl border border-default bg-default text-left"
+    class="relative flex h-full flex-col overflow-hidden rounded-xl border border-default bg-default text-left"
     aria-label="Bot logs"
   >
-    <div class="flex items-center justify-between gap-2 border-b border-default px-3 py-2">
-      <p class="text-sm text-muted">
-        <span class="font-medium text-highlighted tabular-nums">{{
-          botStore.activeBot.lastLogs.length
-        }}</span>
-        recent entries
-      </p>
-      <div class="flex items-center gap-1">
+    <div class="flex flex-wrap items-center gap-2 border-b border-default px-3 py-2">
+      <UInput
+        v-model="search"
+        type="search"
+        icon="mdi:magnify"
+        placeholder="Search messages"
+        aria-label="Search log messages"
+        class="w-full sm:w-64"
+      />
+      <USegmentedControl
+        v-model="levelFilter"
+        :items="levelOptions"
+        label-key="label"
+        value-key="value"
+        size="md"
+        aria-label="Filter by level"
+      />
+      <div class="ms-auto flex items-center gap-3">
+        <USwitch v-model="autoRefresh" label="Auto-refresh" />
         <UButton
           id="refresh-logs"
           color="neutral"
@@ -62,43 +135,73 @@ function scrollToBottom() {
           :loading="loading"
           @click="refreshLogs"
         />
-        <UButton
-          color="neutral"
-          variant="ghost"
-          icon="mdi:arrow-down"
-          aria-label="Jump to latest entry"
-          title="Jump to latest entry"
-          @click="scrollToBottom"
-        />
       </div>
     </div>
+    <p class="border-b border-default px-3 py-1.5 text-xs text-muted" aria-live="polite">
+      <template v-if="filteredLogs.length === botStore.activeBot.lastLogs.length">
+        {{ botStore.activeBot.lastLogs.length }} recent entries
+      </template>
+      <template v-else>
+        Showing {{ filteredLogs.length }} of {{ botStore.activeBot.lastLogs.length }} entries
+      </template>
+    </p>
     <div
       ref="scrollContainer"
       class="h-full w-full overflow-auto bg-muted/40 py-2 font-mono text-[13px] leading-relaxed"
       tabindex="0"
       aria-label="Log entries"
+      @scroll.passive="onScroll"
     >
       <EmptyState
         v-if="botStore.activeBot.lastLogs.length === 0 && !loading"
         title="No log entries yet"
         icon="mdi:text-box-outline"
       />
-      <div
-        v-for="(log, index) in botStore.activeBot.lastLogs"
-        :key="index"
-        class="flex gap-3 px-3 py-0.5 hover:bg-elevated/50"
+      <EmptyState
+        v-else-if="filteredLogs.length === 0 && !loading"
+        title="No entries match"
+        description="Try a different search or level filter."
+        icon="mdi:magnify-close"
       >
-        <span class="shrink-0 whitespace-nowrap text-dimmed tabular-nums">{{ log[0] }}</span>
-        <span
-          class="h-fit w-16 shrink-0 rounded px-1.5 text-center text-[11px] font-semibold"
-          :class="levelClass(log[3])"
-          >{{ log[3] }}</span
-        >
+        <UButton
+          color="neutral"
+          variant="outline"
+          size="sm"
+          label="Clear filters"
+          @click="
+            search = '';
+            levelFilter = 'all';
+          "
+        />
+      </EmptyState>
+      <div
+        v-for="(log, index) in filteredLogs"
+        :key="`${log[1]}-${index}`"
+        class="flex flex-col gap-x-3 px-3 py-1 hover:bg-elevated/50 sm:flex-row sm:py-0.5"
+      >
+        <span class="flex shrink-0 items-center gap-3">
+          <span class="whitespace-nowrap text-dimmed tabular-nums">{{ log[0] }}</span>
+          <span
+            class="h-fit w-16 shrink-0 rounded px-1.5 text-center text-[11px] font-semibold"
+            :class="levelClass(log[3])"
+            >{{ log[3] }}</span
+          >
+        </span>
         <span class="min-w-0 break-words whitespace-pre-wrap">
           <span class="me-2 text-muted">{{ log[2] }}</span>
           <span class="text-default">{{ log[4] }}</span>
         </span>
       </div>
     </div>
+    <UButton
+      v-if="!following && filteredLogs.length > 0"
+      class="absolute bottom-4 left-1/2 -translate-x-1/2 shadow-lg"
+      color="primary"
+      variant="solid"
+      size="sm"
+      icon="mdi:arrow-down"
+      label="Jump to latest"
+      @click="scrollToBottom"
+    />
   </section>
 </template>

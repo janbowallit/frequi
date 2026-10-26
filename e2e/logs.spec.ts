@@ -25,7 +25,7 @@ test.describe('Logs', () => {
     );
     // const logsPromise = page.waitForResponse('**/api/v1/logs');
     const logsPromise = getWaitForResponse(page, '@Logs');
-    await page.getByRole('button', { name: 'Reload Logs' }).click();
+    await page.getByRole('button', { name: 'Refresh' }).click();
     await logsPromise;
   });
 });

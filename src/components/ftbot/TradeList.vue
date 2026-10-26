@@ -89,15 +89,15 @@ const filteredTrades = computed(() => {
 
 async function forceExitHandler(item: Trade, ordertype: string | undefined = undefined) {
   const message = ordertype
-    ? `Really exit trade ${item.trade_id} (Pair ${item.pair}) using a ${ordertype} order?`
-    : `Really exit trade ${item.trade_id} (Pair ${item.pair})?`;
+    ? `Sell trade #${item.trade_id} (${item.pair}) now using a ${ordertype} order? This cannot be undone.`
+    : `Sell trade #${item.trade_id} (${item.pair}) now? This cannot be undone.`;
   if (
     settingsStore.confirmDialog !== true ||
     (await confirm({
-      title: 'Force exit trade',
-      description: 'This action cannot be undone.',
+      title: 'Exit trade?',
       message,
-      confirmText: 'Confirm',
+      confirmText: 'Exit trade',
+      danger: true,
     }))
   ) {
     const payload: MultiForceExitPayload = {
@@ -117,10 +117,10 @@ async function forceExitHandler(item: Trade, ordertype: string | undefined = und
 async function removeTradeHandler(item: Trade) {
   if (
     await confirm({
-      title: 'Delete trade',
-      description: 'This action cannot be undone.',
-      message: `Really delete trade ${item.trade_id} (Pair ${item.pair})?`,
-      confirmText: 'Confirm',
+      title: 'Delete trade?',
+      message: `Remove trade #${item.trade_id} (${item.pair}) from the bot's database? Open orders are cancelled, but coins you hold are not sold. This cannot be undone.`,
+      confirmText: 'Delete trade',
+      danger: true,
     })
   ) {
     const payload: MultiDeletePayload = {
@@ -141,10 +141,11 @@ function forceExitPartialHandler(item: Trade) {
 async function cancelOpenOrderHandler(item: Trade) {
   if (
     await confirm({
-      title: 'Cancel open order',
-      description: 'This action cannot be undone.',
-      message: `Really cancel open order for trade ${item.trade_id} (Pair ${item.pair})?`,
-      confirmText: 'Confirm',
+      title: 'Cancel open order?',
+      message: `Cancel the open order of trade #${item.trade_id} (${item.pair})?`,
+      confirmText: 'Cancel order',
+      cancelText: 'Keep order',
+      danger: true,
     })
   ) {
     const payload: MultiDeletePayload = {
