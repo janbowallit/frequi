@@ -79,11 +79,11 @@ onMounted(async () => {
 <template>
   <GridLayout
     class="h-full w-full"
-    style="padding: 1px"
+    style="padding: 8px"
     :row-height="50"
     :layout="gridLayoutData"
     :vertical-compact="false"
-    :margin="[2, 2]"
+    :margin="[8, 8]"
     :responsive-layouts="responsiveGridLayouts"
     :is-resizable="!isLayoutLocked"
     :is-draggable="!isLayoutLocked"

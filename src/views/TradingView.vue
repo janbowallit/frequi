@@ -59,48 +59,47 @@ function refreshOHLCV(pair: string, columns: string[]) {
 }
 
 const tradingTabItems = computed<TabsItem[]>(() => {
-  const showText = settingsStore.multiPaneButtonsShowText;
   return [
     {
       slot: 'pairs',
       value: 'pairs',
-      label: showText ? 'Pairs combined' : undefined,
+      label: 'Pairs',
       icon: 'i-mdi-view-list',
     },
     {
       slot: 'general',
       value: 'general',
-      label: showText ? 'General' : undefined,
+      label: 'General',
       icon: 'i-mdi-information',
     },
     {
       slot: 'performance',
       value: 'performance',
-      label: showText ? 'Performance' : undefined,
+      label: 'Performance',
       icon: 'i-mdi-chart-line',
     },
     {
       slot: 'balance',
       value: 'balance',
-      label: showText ? 'Balance' : undefined,
+      label: 'Balance',
       icon: 'i-mdi-bank',
     },
     {
       slot: 'time-breakdown',
       value: 'time-breakdown',
-      label: showText ? 'Time Breakdown' : undefined,
+      label: 'Time Breakdown',
       icon: 'i-mdi-folder-clock',
     },
     {
       slot: 'pairlist',
       value: 'pairlist',
-      label: showText ? 'Pairlist' : undefined,
+      label: 'Pairlist',
       icon: 'i-mdi-format-list-group',
     },
     {
       slot: 'pair-locks',
       value: 'pair-locks',
-      label: showText ? 'Pair Locks' : undefined,
+      label: 'Pair Locks',
       icon: 'i-mdi-lock-alert',
     },
   ];
@@ -110,11 +109,11 @@ const tradingTabItems = computed<TabsItem[]>(() => {
 <template>
   <GridLayout
     class="h-full w-full"
-    style="padding: 1px"
+    style="padding: 8px"
     :row-height="50"
     :layout="gridLayoutData"
     :vertical-compact="false"
-    :margin="[1, 1]"
+    :margin="[8, 8]"
     :responsive-layouts="responsiveGridLayouts"
     :is-resizable="!isLayoutLocked"
     :is-draggable="!isLayoutLocked"
@@ -135,10 +134,16 @@ const tradingTabItems = computed<TabsItem[]>(() => {
         drag-allow-from=".drag-header"
       >
         <DraggableContainer header="Multi Pane">
-          <div class="mt-1 flex justify-center">
-            <BotControls class="mt-1 mb-2" />
+          <div class="flex justify-center border-b border-default px-2 py-2">
+            <BotControls />
           </div>
-          <UTabs color="neutral" :items="tradingTabItems" variant="link" default-value="pairs">
+          <UTabs
+            color="primary"
+            :items="tradingTabItems"
+            variant="link"
+            default-value="pairs"
+            :ui="{ label: settingsStore.multiPaneButtonsShowText ? '' : 'sr-only' }"
+          >
             <template #pairs>
               <PairSummary
                 :pairlist="botStore.activeBot.whitelist"

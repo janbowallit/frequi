@@ -18,7 +18,7 @@ const props = withDefaults(
     activeTrades: false,
     showFilter: false,
     multiBotView: false,
-    emptyText: 'No Trades to show.',
+    emptyText: 'No trades to show',
     stakeCurrencyDecimals: 3,
   },
 );
@@ -50,7 +50,11 @@ const tradeClick = (trade) => {
         <CustomTradeListEntry :trade="trade" :stake-currency-decimals="stakeCurrencyDecimals" />
       </div>
     </div>
-    <span v-if="trades.length === 0" class="mt-5">{{ emptyText }}</span>
+    <EmptyState
+      v-if="trades.length === 0"
+      :title="emptyText"
+      :icon="activeTrades ? 'mdi:swap-horizontal' : 'mdi:history'"
+    />
 
     <div class="w-full flex justify-content-between mt-1">
       <UPagination

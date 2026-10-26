@@ -32,7 +32,8 @@
   ::before,
   ::backdrop,
   ::file-selector-button {
-    border-color: var(--color-gray-200, currentColor);
+    /* Theme-aware default border (gray-200 was far too bright in dark mode) */
+    border-color: var(--ui-border, currentColor);
   }
 
   /* Cursor pointer for Buttons - workaround for Tailwind v4 change */
@@ -46,6 +47,43 @@
   /* default profit loss colors, can be overridden by custom style */
   --color-profit: #12bb7b;
   --color-loss: #ef5350;
+
+  --ui-radius: 0.5rem;
+  /* Page background - one step behind the cards so panels stand out */
+  --app-canvas: var(--ui-color-neutral-100);
+  --app-font:
+    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+}
+
+.dark {
+  --app-canvas: var(--ui-color-neutral-950);
+}
+
+body {
+  font-family: var(--app-font);
+  background-color: var(--app-canvas);
+}
+
+/* Numbers line up in columns */
+.tabular-nums,
+table td {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Slim, theme-aware scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ui-border-accented) transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 body.ft-theme-transition,

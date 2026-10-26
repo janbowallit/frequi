@@ -4,6 +4,8 @@ import { useSortable } from '@vueuse/integrations/useSortable';
 
 defineProps<{
   small?: boolean;
+  /** Rendered inside a page section that has its own heading and "add" action */
+  embedded?: boolean;
 }>();
 
 const botStore = useBotStore();
@@ -61,28 +63,34 @@ function stopEditBot(botId: string) {
 </script>
 
 <template>
-  <div v-if="botStore.botCount > 0" class="w-full mx-2">
-    <h3 v-if="!small" class="font-bold text-2xl mb-2">Available bots</h3>
+  <div v-if="botStore.botCount > 0" class="w-full">
+    <h3 v-if="!small && !embedded" class="mb-2 text-lg font-semibold">Available bots</h3>
     <ul
       ref="sortContainer"
-      class="flex flex-col divide-y border-x border-neutral-500 rounded-sm border-y divide-solid divide-neutral-500"
+      class="flex flex-col divide-y divide-default overflow-hidden rounded-xl border border-default bg-default"
     >
       <li
         v-for="bot in botListComp"
         :key="bot.botId"
-        :active="bot.botId === botStore.selectedBot"
-        button
         :title="`${bot.botId} - ${bot.botName} - ${bot.botUrl} - ${
           botStore.botStores[bot.botId]?.isBotLoggedIn ? '' : 'Login info expired!'
         }`"
-        class="flex items-center p-2"
+        tabindex="0"
+        :aria-current="bot.botId === botStore.selectedBot ? 'true' : undefined"
+        class="flex cursor-pointer items-center gap-2 px-3 py-2.5 text-left transition-colors duration-150 hover:bg-elevated/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
         :class="{
-          'bg-primary-100 dark:bg-primary-800 underline font-semibold':
+          'bg-primary/10 font-semibold shadow-[inset_3px_0_0_var(--ui-primary)]':
             bot.botId === botStore.selectedBot,
         }"
         @click="botStore.selectBot(bot.botId)"
+        @keydown.enter="botStore.selectBot(bot.botId)"
       >
-        <i-mdi-reorder-horizontal v-if="!small" class="handle cursor-pointer me-2 fs-4" />
+        <i-mdi-drag-vertical
+          v-if="!small"
+          class="handle size-5 shrink-0 cursor-grab text-dimmed"
+          aria-hidden="true"
+          title="Drag to reorder"
+        />
         <BotRename
           v-if="editingBots.includes(bot.botId)"
           :bot="bot"
@@ -100,11 +108,12 @@ function stopEditBot(botId: string) {
       </li>
     </ul>
     <UButton
-      v-if="!small"
+      v-if="!small && !embedded"
       color="neutral"
-      class="mt-2"
+      variant="outline"
+      class="mt-3"
       @click="loginDialog({})"
-      icon="mdi:login"
+      icon="mdi:plus"
       label="Add new Bot"
     />
   </div>

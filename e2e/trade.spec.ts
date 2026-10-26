@@ -50,7 +50,7 @@ test.describe('Trade', () => {
 
     await expect(modalCancelButton).not.toBeVisible();
 
-    await page.getByRole('button', { name: 'Stop Trading - Also stops' }).click();
+    await page.getByRole('button', { name: 'Stop trading' }).click();
 
     // Modal open
     await expect(dialogModal).toBeVisible();
@@ -119,7 +119,7 @@ test.describe('Trade', () => {
 
     const multiPanebb = await multiPane.boundingBox();
 
-    await page.getByRole('button', { name: 'FT' }).click();
+    await page.getByRole('button', { name: 'Account and layout menu' }).click();
     await page.getByText('Unlock Layout').click();
 
     const chartHeader = await page.locator('.drag-header:has-text("Chart")');

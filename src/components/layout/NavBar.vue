@@ -100,6 +100,16 @@ watch(
   },
 );
 
+const activeBot = computed(() => botStore.activeBotorUndefined);
+const botStatus = computed<{ label: string; dot: string }>(() => {
+  if (!activeBot.value) return { label: 'No bot', dot: 'bg-neutral-400' };
+  if (!activeBot.value.isBotLoggedIn) return { label: 'Login expired', dot: 'bg-error' };
+  return activeBot.value.isBotOnline
+    ? { label: 'Online', dot: 'bg-success' }
+    : { label: 'Offline', dot: 'bg-error' };
+});
+const isDryRun = computed(() => activeBot.value?.botState?.dry_run ?? false);
+
 // Navigation items array
 const navItems = ref([
   {
@@ -211,136 +221,183 @@ function editBotLogin(botId: string) {
 </script>
 
 <template>
-  <header>
-    <div class="flex border-b border-primary">
-      <RouterLink class="ms-2 flex flex-row items-center pe-2 gap-2" exact to="/">
-        <AppIcon class="h-9 w-9" />
-        <AppText class="md:hidden lg:inline" />
+  <header
+    class="sticky top-0 z-40 border-b border-default bg-default/85 backdrop-blur supports-[backdrop-filter]:bg-default/70"
+  >
+    <div class="flex h-14 items-center gap-2 px-3 lg:px-4">
+      <RouterLink
+        exact
+        to="/"
+        aria-label="FreqUI home"
+        class="flex shrink-0 items-center gap-2 rounded-md pe-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+      >
+        <AppIcon class="h-8 w-8" />
+        <AppText class="hidden text-lg lg:inline" />
       </RouterLink>
-      <div class="flex justify-between w-full text-center items-center ms-3">
-        <div class="items-center hidden md:flex gap-5 ms-5">
-          <UButton
-            v-for="(item, index) in navItems.filter(
-              (item) => (item.visible ?? true) && !item.mobileOnly,
-            )"
-            :key="index"
-            :to="item.to"
-            variant="link"
-            size="xl"
-            color="neutral"
-            active-class="underline"
-          >
-            {{ item.label }}
-          </UButton>
-          <ThemeSelect />
-        </div>
 
-        <!-- Right aligned nav items -->
-        <div v-if="!isMobile" class="flex ms-auto">
-          <!-- TODO This should show outside of the dropdown in XS mode -->
-          <div
+      <!-- Desktop navigation -->
+      <nav v-if="!isMobile" aria-label="Main" class="ms-3 flex items-center gap-1">
+        <UButton
+          v-for="(item, index) in navItems.filter(
+            (item) => (item.visible ?? true) && !item.mobileOnly,
+          )"
+          :key="index"
+          :to="item.to"
+          :icon="item.icon"
+          :label="item.label"
+          color="neutral"
+          variant="ghost"
+          size="md"
+          class="text-muted hover:text-highlighted"
+          active-class="bg-elevated text-highlighted"
+        />
+      </nav>
+
+      <div class="ms-auto flex min-w-0 items-center gap-2">
+        <template v-if="!isMobile">
+          <UTooltip
             v-if="!settingsStore.confirmDialog"
-            class="my-auto me-5 flex text-yellow-300"
-            title="Confirm dialog deactivated, Forced exits will be executed immediately. Be careful."
+            text="Confirm dialogs are off - force exits run immediately."
           >
-            <i-mdi-run-fast />
-            <i-mdi-alert />
-          </div>
-          <div class="hidden md:flex md:flex-nowrap items-center nav-item me-2">
-            <span class="text-sm me-2" title="Bot name">
-              {{
-                (botStore.activeBotorUndefined && botStore.activeBotorUndefined.botName) ||
-                'No bot selected'
-              }}
+            <UBadge
+              color="warning"
+              variant="subtle"
+              icon="mdi:alert-outline"
+              label="No confirmations"
+              class="cursor-help"
+            />
+          </UTooltip>
+
+          <!-- Active bot status -->
+          <div
+            v-if="botStore.hasBots"
+            class="flex h-9 items-center gap-2 rounded-full border border-default bg-elevated/40 ps-3 pe-1"
+          >
+            <span class="relative flex size-2.5 shrink-0" aria-hidden="true">
+              <span
+                v-if="botStatus.label === 'Online'"
+                class="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60 motion-reduce:hidden"
+              />
+              <span class="relative inline-flex size-2.5 rounded-full" :class="botStatus.dot" />
             </span>
-            <BotEntry
-              :bot="botStore.availableBots[botStore.selectedBot]"
-              noButtons
-              no-text
-              @edit-login="editBotLogin"
+            <span class="max-w-40 truncate text-sm font-medium text-highlighted">
+              {{ activeBot?.botName || 'No bot selected' }}
+            </span>
+            <span class="sr-only">{{ botStatus.label }}</span>
+            <UBadge v-if="isDryRun" color="neutral" variant="soft" size="sm" label="Dry run" />
+            <UButton
+              v-if="activeBot && !activeBot.isBotLoggedIn"
+              color="error"
+              variant="soft"
+              size="xs"
+              label="Log in again"
+              @click="editBotLogin(botStore.selectedBot)"
             />
             <BotSelect />
+            <ReloadControl />
+          </div>
+        </template>
 
-            <ReloadControl class="me-3" title="Confirm Dialog deactivated." />
-          </div>
-          <div v-if="botStore.hasBots" class="flex items-center">
-            <!-- Hide dropdown on xs, instead show below  -->
-            <UDropdownMenu :items="menuItems" size="lg">
-              <UButton color="neutral" variant="ghost" size="sm" trailing-icon="mdi:chevron-down">
-                <div class="flex items-center">
-                  <UAvatar size="sm"> FT </UAvatar>
-                </div>
-              </UButton>
-            </UDropdownMenu>
-          </div>
+        <ThemeSelect v-if="!isMobile" />
+
+        <template v-if="!isMobile">
+          <UDropdownMenu v-if="botStore.hasBots" :items="menuItems" size="lg">
+            <UButton
+              color="neutral"
+              variant="ghost"
+              icon="mdi:account-circle-outline"
+              trailing-icon="mdi:chevron-down"
+              aria-label="Account and layout menu"
+            />
+          </UDropdownMenu>
           <UButton
             v-else-if="route?.path !== '/login'"
-            color="neutral"
-            @click="loginDialog({})"
+            color="primary"
+            variant="solid"
             icon="mdi:login"
-            >Login
-          </UButton>
-        </div>
+            label="Login"
+            @click="loginDialog({})"
+          />
+        </template>
 
         <!-- Mobile menu -->
-        <div v-if="isMobile" class="ms-auto flex">
-          <USlideover
-            direction="right"
-            :close="{
-              color: 'primary',
-              variant: 'outline',
-              class: 'rounded-full',
-            }"
+        <template v-else>
+          <span
+            v-if="botStore.hasBots"
+            class="flex min-w-0 items-center gap-2 text-sm text-muted"
+            :title="botStatus.label"
           >
-            <UButton class="text-neutral-300 text-xl" size="xl" variant="ghost" icon="mdi:menu" />
+            <span class="size-2 shrink-0 rounded-full" :class="botStatus.dot" aria-hidden="true" />
+            <span class="truncate">{{ activeBot?.botName }}</span>
+          </span>
+          <USlideover title="Menu" :close="{ color: 'neutral', variant: 'ghost' }">
+            <UButton
+              color="neutral"
+              variant="ghost"
+              size="xl"
+              icon="mdi:menu"
+              aria-label="Open menu"
+            />
             <template #title>
-              <div class="flex flex-row items-center gap-2">
-                <AppIcon class="h-9 w-9" />
-                <AppText class="md:hidden lg:inline" />
+              <div class="flex items-center gap-2">
+                <AppIcon class="h-8 w-8" />
+                <AppText />
               </div>
             </template>
             <template #body="{ close }">
-              <div class="flex flex-col gap-1 items-center p-4 h-full">
-                <UButton
-                  v-for="(item, index) in navItems.filter((item) => item.visible ?? true)"
-                  :key="index"
-                  :to="item.to"
-                  class="p-2 justify-center w-full"
-                  variant="link"
-                  color="neutral"
-                  size="xl"
-                  active-class="underline font-bold"
-                  @click="close()"
-                  :label="item.label"
-                />
-                <USeparator class="my-2" />
-                <span>Version: {{ settingsStore.uiVersion }}</span>
+              <div class="flex h-full flex-col gap-6">
+                <nav aria-label="Main" class="flex flex-col gap-1">
+                  <UButton
+                    v-for="(item, index) in navItems.filter((item) => item.visible ?? true)"
+                    :key="index"
+                    :to="item.to"
+                    :icon="item.icon"
+                    :label="item.label"
+                    color="neutral"
+                    variant="ghost"
+                    size="xl"
+                    class="justify-start text-muted"
+                    active-class="bg-elevated text-highlighted"
+                    @click="close()"
+                  />
+                </nav>
 
-                <div class="flex flex-row items-center justify-center">
-                  <ThemeSelect show-text />
-                </div>
-                <USeparator class="my-2" />
-                <div class="flex flex-row items-center">
-                  <span class="text-sm me-2" title="Bot name">
-                    {{
-                      (botStore.activeBotorUndefined && botStore.activeBotorUndefined.botName) ||
-                      'No bot selected'
-                    }}
-                  </span>
-                  <BotEntry
-                    :bot="botStore.availableBots[botStore.selectedBot]"
-                    noButtons
-                    no-text
-                    @edit-login="editBotLogin"
+                <section v-if="botStore.hasBots" class="flex flex-col gap-3" aria-label="Bot">
+                  <h2 class="text-xs font-semibold uppercase tracking-wide text-muted">Bot</h2>
+                  <div
+                    class="flex items-center justify-between gap-2 rounded-lg border border-default p-3"
+                  >
+                    <span class="flex min-w-0 items-center gap-2">
+                      <span class="size-2.5 shrink-0 rounded-full" :class="botStatus.dot" />
+                      <span class="truncate font-medium">{{ activeBot?.botName }}</span>
+                      <span class="text-sm text-muted">· {{ botStatus.label }}</span>
+                    </span>
+                    <UBadge v-if="isDryRun" color="neutral" variant="soft" label="Dry run" />
+                  </div>
+                  <BotSelect />
+                  <ReloadControl show-label />
+                </section>
+
+                <ThemeSelect show-text class="justify-start" />
+
+                <div class="mt-auto flex items-center justify-between text-sm text-muted">
+                  <span>Version {{ settingsStore.uiVersion }}</span>
+                  <UButton
+                    v-if="botStore.hasBots && botStore.botCount === 1"
+                    color="neutral"
+                    variant="outline"
+                    icon="mdi:logout"
+                    label="Logout"
+                    @click="
+                      close();
+                      clickLogout();
+                    "
                   />
                 </div>
-                <BotSelect />
-                <USeparator class="my-2" />
-                <ReloadControl class="justify-center w-full" />
               </div>
             </template>
           </USlideover>
-        </div>
+        </template>
       </div>
     </div>
   </header>

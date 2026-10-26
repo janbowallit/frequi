@@ -6,44 +6,53 @@ const botStore = useBotStore();
 </script>
 
 <template>
-  <div>
-    <!-- <TradeList
-      class="open-trades"
-      :trades="openTrades"
-      title="Open trades"
-      :active-trades="true"
-      empty-text="Currently no open trades."
-    /> -->
-    <CustomTradeList
-      v-if="!history && !botStore.activeBot.detailTradeId"
-      :trades="botStore.activeBot.openTrades"
-      title="Open trades"
-      :active-trades="true"
-      :stake-currency-decimals="botStore.activeBot.stakeCurrencyDecimals"
-      empty-text="No open Trades."
-    />
-    <CustomTradeList
-      v-if="history && !botStore.activeBot.detailTradeId"
-      :trades="botStore.activeBot.closedTrades"
-      title="Trade history"
-      :stake-currency-decimals="botStore.activeBot.stakeCurrencyDecimals"
-      empty-text="No closed trades so far."
-    />
+  <div class="mx-auto flex w-full max-w-3xl flex-col gap-3 p-3">
+    <template v-if="!botStore.activeBot.detailTradeId">
+      <PageHeader
+        :title="history ? 'Trade history' : 'Open trades'"
+        :description="
+          history
+            ? `${botStore.activeBot.closedTrades.length} closed trades`
+            : `${botStore.activeBot.openTrades.length} open trades`
+        "
+        :icon="history ? 'mdi:history' : 'mdi:swap-horizontal-bold'"
+      />
+      <div class="overflow-hidden rounded-xl border border-default bg-default">
+        <CustomTradeList
+          v-if="!history"
+          :trades="botStore.activeBot.openTrades"
+          title="Open trades"
+          :active-trades="true"
+          :stake-currency-decimals="botStore.activeBot.stakeCurrencyDecimals"
+          empty-text="No open trades"
+        />
+        <CustomTradeList
+          v-else
+          :trades="botStore.activeBot.closedTrades"
+          title="Trade history"
+          :stake-currency-decimals="botStore.activeBot.stakeCurrencyDecimals"
+          empty-text="No closed trades yet"
+        />
+      </div>
+    </template>
     <div
       v-if="botStore.activeBot.detailTradeId && botStore.activeBot.tradeDetail"
-      class="flex flex-col"
+      class="flex flex-col gap-3"
     >
       <UButton
         color="neutral"
-        class="self-start my-1 ms-1"
+        variant="ghost"
+        class="self-start"
         @click="botStore.activeBot.setDetailTrade(null)"
-        label="Back"
+        label="Back to trades"
         icon="mdi:arrow-left"
       />
-      <TradeDetail
-        :trade="botStore.activeBot.tradeDetail"
-        :stake-currency="botStore.activeBot.stakeCurrency"
-      />
+      <div class="overflow-hidden rounded-xl border border-default bg-default">
+        <TradeDetail
+          :trade="botStore.activeBot.tradeDetail"
+          :stake-currency="botStore.activeBot.stakeCurrency"
+        />
+      </div>
     </div>
   </div>
 </template>

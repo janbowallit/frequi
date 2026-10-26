@@ -1,7 +1,12 @@
 <script setup lang="ts"></script>
 
 <template>
-  <div class="p-1 md:p-4 md:pe-2 h-full">
-    <LogViewer />
+  <div class="mx-auto flex h-full w-full max-w-7xl flex-col gap-4 p-3 md:p-6">
+    <PageHeader
+      title="Logs"
+      description="Recent messages from the bot, newest at the bottom."
+      icon="mdi:text-box-outline"
+    />
+    <LogViewer class="min-h-0 flex-1" />
   </div>
 </template>

@@ -65,6 +65,7 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('@/views/LoginView.vue'),
     meta: {
       allowAnonymous: true,
+      fullscreen: true,
     },
   },
   {
@@ -78,7 +79,7 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('@/views/DownloadDataView.vue'),
   },
   {
-    path: '/(.*)*',
+    path: '/:pathMatch(.*)*',
     name: '404',
     component: () => import('@/views/Error404View.vue'),
   },

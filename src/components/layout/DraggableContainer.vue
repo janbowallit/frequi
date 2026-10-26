@@ -17,24 +17,31 @@ withDefaults(
     infoText: '',
   },
 );
+const layoutStore = useLayoutStore();
 </script>
 
 <template>
-  <div
-    class="flex flex-col h-full w-full border dark:border-neutral-800 border-neutral-200 rounded-sm"
+  <section
+    class="flex h-full w-full flex-col overflow-hidden rounded-xl border border-default bg-default shadow-sm shadow-black/5 dark:shadow-black/30"
+    :aria-label="header || undefined"
   >
     <div
-      class="drag-header py-1 px-2 dark:bg-neutral-800 bg-neutral-100 border-b border-neutral-300 dark:border-neutral-700"
+      class="drag-header group flex min-h-10 items-center gap-2 border-b border-default px-3 py-1.5"
+      :class="{ 'cursor-grab active:cursor-grabbing': !layoutStore.layoutLocked }"
     >
       <slot name="header">
-        <div class="flex justify-center items-center gap-2">
-          {{ header }}
-          <InfoBox v-if="infoText" :hint="infoText" />
-        </div>
+        <h2 class="truncate text-sm font-semibold text-highlighted">{{ header }}</h2>
+        <InfoBox v-if="infoText" :hint="infoText" />
       </slot>
+      <UIcon
+        v-if="!layoutStore.layoutLocked"
+        name="mdi:drag"
+        class="ms-auto size-4 shrink-0 text-dimmed opacity-0 transition-opacity duration-150 group-hover:opacity-100"
+        aria-hidden="true"
+      />
     </div>
-    <div class="p-0 h-full w-full overflow-auto" v-bind="$attrs">
+    <div class="h-full w-full overflow-auto p-0" v-bind="$attrs">
       <slot></slot>
     </div>
-  </div>
+  </section>
 </template>

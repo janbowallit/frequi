@@ -30,7 +30,7 @@ export default defineConfig({
         colors: {
           primary: 'brand',
           // slate, gray or mist
-          neutral: 'mist',
+          neutral: 'slate',
         },
         alert: {
           defaultVariants: {
@@ -44,17 +44,27 @@ export default defineConfig({
         },
         table: {
           slots: {
-            td: 'px-2 py-2 text-default text-md text-left',
-            th: 'px-2 py-2 text-default text-md',
+            thead: 'bg-elevated/60',
+            th: 'px-3 py-2.5 text-[12px] font-semibold uppercase tracking-wide text-muted text-left whitespace-nowrap',
+            td: 'px-3 py-2 text-default text-md text-left tabular-nums',
+            tr: 'transition-colors duration-150 hover:bg-elevated/40',
+            empty: 'py-10 text-center text-muted',
           },
         },
         tabs: {
           variants: {
             variant: {
               link: {
-                trigger: 'grow focus:outline-none',
+                list: 'overflow-x-auto',
+                trigger:
+                  'grow whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm',
               },
             },
+          },
+        },
+        tooltip: {
+          slots: {
+            content: 'max-w-xs whitespace-normal',
           },
         },
       },

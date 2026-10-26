@@ -112,7 +112,9 @@ watch(
           </div>
         </Transition>
       </li>
-      <div v-if="trades.length === 0">No trades to show...</div>
+      <li v-if="trades.length === 0" class="list-none">
+        <EmptyState title="No trades to show" icon="mdi:history" />
+      </li>
     </ul>
   </div>
 </template>

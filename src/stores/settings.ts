@@ -35,7 +35,7 @@ export const useSettingsStore = defineStore('uiSettings', {
       chartDefaultCandleCount: 250,
       timeProfitPeriod: TimeSummaryOptions.daily,
       timeProfitPreference: TimeSummaryCols.abs_profit,
-      multiPaneButtonsShowText: false,
+      multiPaneButtonsShowText: true,
       multiPairSelection: false,
       backtestAdditionalMetrics: ['profit_factor', 'expectancy'] as string[],
     };

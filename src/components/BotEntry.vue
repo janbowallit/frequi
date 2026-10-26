@@ -32,6 +32,11 @@ const selectedBotStore = computed<BotSubStore>(() => {
   return botStore.botStores[props.bot.botId]!;
 });
 
+// Bots added without a display name fall back to the name from the bot's config
+const displayName = computed(
+  () => props.bot.botName || selectedBotStore.value?.uiBotName || props.bot.botId,
+);
+
 const autoRefreshLoc = computed({
   get() {
     return selectedBotStore.value.autoRefresh;
@@ -43,55 +48,63 @@ const autoRefreshLoc = computed({
 </script>
 
 <template>
-  <div v-if="bot" class="flex items-center justify-between w-full">
-    <span v-if="!noText" class="me-2">{{ bot.botName || bot.botId }}</span>
+  <div v-if="bot" class="flex w-full items-center justify-between gap-2">
+    <span v-if="!noText" class="min-w-0 truncate">{{ displayName }}</span>
 
     <div class="flex items-center gap-2">
-      <div class="flex items-center">
-        <USwitch
-          v-if="!noRefreshSwitch"
-          v-model="autoRefreshLoc"
-          class="mr-2"
-          :title="`Auto refresh for ${bot.botName || bot.botId}`"
+      <USwitch
+        v-if="!noRefreshSwitch"
+        v-model="autoRefreshLoc"
+        size="sm"
+        :aria-label="`Auto-refresh ${displayName}`"
+        :title="`Auto refresh for ${displayName}`"
+        @click.stop
+      />
+      <span
+        v-if="selectedBotStore.isBotLoggedIn"
+        class="flex items-center gap-1.5 text-xs font-medium"
+        :class="selectedBotStore.isBotOnline ? 'text-success' : 'text-error'"
+      >
+        <span
+          class="size-2 rounded-full"
+          :class="selectedBotStore.isBotOnline ? 'bg-success' : 'bg-error'"
+          aria-hidden="true"
         />
-        <div
-          v-if="selectedBotStore.isBotLoggedIn"
-          :title="selectedBotStore.isBotOnline ? 'Online' : 'Offline'"
-        >
-          <i-mdi-circle
-            class="mx-1"
-            :class="selectedBotStore.isBotOnline ? 'text-green-500' : 'text-red-500'"
-          />
-        </div>
-        <div v-else title="Login info expired, please login again.">
-          <i-mdi-cancel class="text-red-500 mx-1" />
-        </div>
-      </div>
+        <span :class="{ 'sr-only': noText }">
+          {{ selectedBotStore.isBotOnline ? 'Online' : 'Offline' }}
+        </span>
+      </span>
+      <span v-else class="flex items-center gap-1 text-xs font-medium text-error">
+        <i-mdi-cancel aria-hidden="true" />
+        <span :class="{ 'sr-only': noText }">Login expired</span>
+      </span>
 
-      <div class="flex items-center gap-1">
+      <div class="flex items-center gap-0.5">
         <UButton
           v-if="!noButtons && selectedBotStore.isBotLoggedIn"
           color="neutral"
-          variant="soft"
-          title="Edit bot"
-          @click="$emit('edit', bot.botId)"
-          icon="mdi:pencil"
+          variant="ghost"
+          aria-label="Rename bot"
+          title="Rename bot"
+          icon="mdi:pencil-outline"
+          @click.stop="$emit('edit', bot.botId)"
         />
         <UButton
           v-if="!noRefreshSwitch && !selectedBotStore.isBotLoggedIn"
           variant="soft"
-          color="neutral"
-          title="Login again"
-          @click="$emit('editLogin', bot.botId)"
+          color="error"
+          label="Log in again"
           icon="mdi:login"
+          @click.stop="$emit('editLogin', bot.botId)"
         />
         <UButton
           v-if="!noButtons"
-          variant="soft"
-          color="neutral"
-          title="Delete bot"
-          @click="removeBotQuestion"
-          icon="mdi:delete"
+          variant="ghost"
+          color="error"
+          aria-label="Remove bot"
+          title="Remove bot"
+          icon="mdi:delete-outline"
+          @click.stop="removeBotQuestion"
         />
       </div>
     </div>

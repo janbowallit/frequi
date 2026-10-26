@@ -1,10 +1,10 @@
 <template>
-  <div>
-    <h1 class="mb-5">404 Error.</h1>
-    <p class="h4">Ahhhhhhhh! The page you are looking for does not exist.</p>
-    <p>
-      Don't worry, you can head back to
-      <RouterLink to="/"> <span>the main page</span> </RouterLink>.
-    </p>
+  <div class="flex min-h-full items-center justify-center px-4 py-16">
+    <div class="flex max-w-md flex-col items-center gap-4 text-center">
+      <p class="text-6xl font-bold tracking-tight text-primary tabular-nums">404</p>
+      <h1 class="text-2xl font-semibold text-highlighted">Page not found</h1>
+      <p class="text-muted">The page you're looking for doesn't exist or has moved.</p>
+      <UButton to="/" variant="solid" icon="mdi:home-outline" label="Back to home" />
+    </div>
   </div>
 </template>

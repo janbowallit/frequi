@@ -21,7 +21,7 @@ const props = withDefaults(
     activeTrades: false,
     showFilter: false,
     multiBotView: false,
-    emptyText: 'No Trades to show.',
+    emptyText: 'No trades to show',
   },
 );
 
@@ -215,7 +215,15 @@ const rowSelection = computed({
       @select="onRowSelect"
     >
       <template #empty>
-        {{ emptyText }}
+        <EmptyState
+          :title="emptyText"
+          :icon="activeTrades ? 'mdi:swap-horizontal' : 'mdi:history'"
+          :description="
+            activeTrades
+              ? 'The bot opens a trade when the strategy signals an entry.'
+              : 'Closed trades will appear here.'
+          "
+        />
       </template>
       <template #trade_id-cell="{ row }">
         {{ row.original.trade_id }}

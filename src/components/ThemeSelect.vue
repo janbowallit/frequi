@@ -43,8 +43,9 @@ function toggleNight() {
 
 <template>
   <UButton
-    variant="link"
+    variant="ghost"
     title="Toggle Night Mode"
+    :aria-label="showText ? undefined : 'Toggle night mode'"
     color="neutral"
     :label="showText ? 'Toggle Night Mode' : ''"
     @click="toggleNight"

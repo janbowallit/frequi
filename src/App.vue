@@ -1,6 +1,9 @@
 <script setup lang="ts">
 const settingsStore = useSettingsStore();
 const colorStore = useColorStore();
+const route = useRoute();
+// Pages like login use the full screen - app navigation is useless before signing in.
+const showAppChrome = computed(() => !route.meta.fullscreen);
 onMounted(() => {
   setTimezone(settingsStore.timezone);
   colorStore.updateProfitLossColor();
@@ -17,16 +20,16 @@ watch(
 <template>
   <UApp>
     <div id="app" class="flex flex-col h-dvh" :style="colorStore.cssVars">
-      <NavBar />
+      <NavBar v-if="showAppChrome" />
       <BodyLayout class="grow overflow-auto" />
-      <NavFooter />
+      <NavFooter v-if="showAppChrome" />
     </div>
   </UApp>
 </template>
 
 <style scoped>
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
+  font-family: var(--app-font);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;

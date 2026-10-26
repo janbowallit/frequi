@@ -1,4 +1,6 @@
 <script setup lang="ts">
+withDefaults(defineProps<{ showLabel?: boolean }>(), { showLabel: false });
+
 const botStore = useBotStore();
 const autoRefreshLoc = computed({
   get() {
@@ -11,15 +13,24 @@ const autoRefreshLoc = computed({
 </script>
 
 <template>
-  <div class="flex items-center ms-2">
-    <BaseCheckbox v-model="autoRefreshLoc" size="sm" title="Auto Refresh for all bots" />
-    <UButton
-      class="m-1"
-      color="neutral"
-      variant="outline"
-      title="Auto Refresh all bots now"
-      icon="mdi:refresh"
-      @click="botStore.allRefreshFull"
-    />
+  <div class="flex items-center gap-1">
+    <UTooltip text="Refresh bot data automatically">
+      <USwitch
+        v-model="autoRefreshLoc"
+        size="sm"
+        :label="showLabel ? 'Auto-refresh' : undefined"
+        aria-label="Auto-refresh all bots"
+        class="px-1"
+      />
+    </UTooltip>
+    <UTooltip text="Refresh now">
+      <UButton
+        color="neutral"
+        variant="ghost"
+        icon="mdi:refresh"
+        aria-label="Refresh all bots now"
+        @click="botStore.allRefreshFull"
+      />
+    </UTooltip>
   </div>
 </template>
