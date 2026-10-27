@@ -180,12 +180,14 @@ const chartOptions = computed((): EChartsOption => {
 </script>
 
 <template>
-  <ECharts
-    v-if="trades.length > 0"
-    :option="chartOptions"
-    autoresize
-    :theme="settingsStore.chartTheme"
+  <EmptyState
+    v-if="!trades.some((t) => !t.is_open)"
+    class="h-full"
+    icon="i-mdi-chart-scatter-plot"
+    title="No closed trades yet"
+    description="Each closed trade is plotted here with its profit."
   />
+  <ECharts v-else :option="chartOptions" autoresize :theme="settingsStore.chartTheme" />
 </template>
 
 <style scoped>

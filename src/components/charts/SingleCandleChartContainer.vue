@@ -122,42 +122,42 @@ watch(
 
 <template>
   <div
-    class="flex-fill w-full flex-col align-items-stretch flex"
+    class="flex w-full min-w-0 flex-col"
     :class="{
       'h-full': isSinglePairView,
-      'h-150 border border-r border-b border-neutral-300 dark:border-neutral-700':
-        !isSinglePairView,
+      'h-150 border-b border-e border-default': !isSinglePairView,
     }"
   >
-    <div class="flex me-0 w-full items-center justify-between">
-      <div class="ms-1 md:ms-2 flex flex-wrap md:flex-nowrap items-center gap-1">
-        <div class="flex flex-col md:flex-row md:gap-2">
-          <div class="flex flex-row flex-wrap gap-2">
-            <small v-if="dataset" class="text-sm text-nowrap" title="Long entry signals"
-              >Long entries: {{ dataset.enter_long_signals || dataset.buy_signals }}</small
-            >
-            <small v-if="dataset" class="text-sm text-nowrap" title="Long exit signals"
-              >Long exit: {{ dataset.exit_long_signals || dataset.sell_signals }}</small
-            >
-          </div>
-          <div class="flex flex-row flex-wrap gap-2">
-            <small v-if="dataset && dataset.enter_short_signals" class="text-sm text-nowrap"
-              >Short entries: {{ dataset.enter_short_signals }}</small
-            >
-            <small v-if="dataset && dataset.exit_short_signals" class="text-sm text-nowrap"
-              >Short exits: {{ dataset.exit_short_signals }}</small
-            >
-          </div>
-        </div>
-      </div>
-      <div>
-        {{ pair || 'Pair' }}
-      </div>
-      <div class="w-4 h-4">
-        <UProgress v-if="isLoadingDataset" stroke-width="4" small label="Spinning" />
-      </div>
+    <div class="flex min-h-8 w-full items-center gap-3 px-2 py-1 text-xs text-muted">
+      <span v-if="!isSinglePairView" class="font-semibold text-highlighted">{{ pair }}</span>
+      <template v-if="dataset">
+        <span
+          class="inline-flex items-center gap-1.5 whitespace-nowrap"
+          title="Entry signals in the loaded candles"
+        >
+          <span class="size-2 rounded-full bg-[var(--color-profit)]" aria-hidden="true" />
+          {{ dataset.enter_long_signals ?? dataset.buy_signals ?? 0 }} entry signals
+        </span>
+        <span
+          class="inline-flex items-center gap-1.5 whitespace-nowrap"
+          title="Exit signals in the loaded candles"
+        >
+          <span class="size-2 rounded-full bg-amber-400" aria-hidden="true" />
+          {{ dataset.exit_long_signals ?? dataset.sell_signals ?? 0 }} exit signals
+        </span>
+        <span v-if="dataset.enter_short_signals" class="whitespace-nowrap">
+          {{ dataset.enter_short_signals }} short entries
+        </span>
+        <span v-if="dataset.exit_short_signals" class="whitespace-nowrap">
+          {{ dataset.exit_short_signals }} short exits
+        </span>
+      </template>
+      <span v-if="isLoadingDataset" class="ms-auto inline-flex items-center gap-1.5" role="status">
+        <UIcon name="mdi:loading" class="size-4 animate-spin" aria-hidden="true" />
+        Loading…
+      </span>
     </div>
-    <div class="h-full flex">
+    <div class="flex min-h-0 flex-1">
       <div class="min-w-0 w-full flex-1">
         <CandleChart
           v-if="hasDataset"
@@ -174,14 +174,16 @@ watch(
           :start-candle-count="settingsStore.chartDefaultCandleCount"
           :label-side="settingsStore.chartLabelSide"
         />
-        <div v-else class="m-auto">
-          <UProgress v-if="isLoadingDataset" class="m-5 w-5 h-5" label="Spinning" />
-          <div v-else class="text-lg">
-            {{ noDatasetText }}
-          </div>
-          <p v-if="botStore.activeBot.historyTakesLonger">
-            This is taking longer than expected ... Hold on ...
-          </p>
+        <div v-else class="flex h-full items-center justify-center">
+          <EmptyState
+            :icon="isLoadingDataset ? 'mdi:loading' : 'i-mdi-chart-line'"
+            :title="isLoadingDataset ? 'Loading chart…' : noDatasetText"
+            :description="
+              botStore.activeBot.historyTakesLonger
+                ? 'This is taking longer than expected - hold on.'
+                : ''
+            "
+          />
         </div>
       </div>
     </div>

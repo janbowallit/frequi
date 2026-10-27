@@ -131,7 +131,8 @@ const walletHistoryOptions: ComputedRef<EChartsOption> = computed(() => {
         label: {
           show: true,
           position: 'insideStartTop',
-          formatter: `Starting balance ${botName}`,
+          // The bot name only helps when several bots share the chart
+          formatter: walletEntries.length > 1 ? `Starting balance ${botName}` : 'Starting balance',
           color: captureLineColor,
         },
       },
@@ -156,7 +157,7 @@ const walletHistoryOptions: ComputedRef<EChartsOption> = computed(() => {
         label: {
           show: true,
           position: 'insideEndTop',
-          formatter: `Capture start ${botName}`,
+          formatter: walletEntries.length > 1 ? `Capture start ${botName}` : 'Capture start',
           color: captureLineColor,
         },
         lineStyle: {
@@ -291,6 +292,7 @@ const walletHistoryOptions: ComputedRef<EChartsOption> = computed(() => {
       {
         type: 'time',
         axisLine: { onZero: false },
+        axisLabel: { hideOverlap: true },
         axisPointer: {
           label: { show: false },
         },
@@ -312,8 +314,8 @@ const walletHistoryOptions: ComputedRef<EChartsOption> = computed(() => {
           },
         },
         nameGap: 35,
-        min: 'dataMin',
-        max: 'dataMax',
+        // Round axis bounds - 'dataMin' printed odd edge labels like 50.26 next to 60
+        scale: true,
       },
     ],
     dataZoom: [

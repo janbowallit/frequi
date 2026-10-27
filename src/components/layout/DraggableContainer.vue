@@ -40,7 +40,7 @@ const layoutStore = useLayoutStore();
         aria-hidden="true"
       />
     </div>
-    <div class="h-full w-full overflow-auto p-0" v-bind="$attrs">
+    <div class="min-h-0 w-full flex-1 overflow-auto p-0" v-bind="$attrs">
       <slot></slot>
     </div>
   </section>

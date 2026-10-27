@@ -19,7 +19,7 @@ import {
 import { registerTransform } from 'echarts';
 
 import type { TimeSummaryCols, TimeSummaryReturnValue } from '@/types';
-import type { EChartsOption, LinearGradientObject } from 'echarts';
+import type { EChartsOption } from 'echarts';
 
 use([
   BarChart,
@@ -73,31 +73,6 @@ const absoluteMax = computed(
 
 registerTransform(ftEchartsTransforms.multiple);
 
-const colorStops: LinearGradientObject = {
-  type: 'linear',
-  x: 0,
-  y: 0,
-  x2: 1,
-  y2: 0,
-  colorStops: [
-    {
-      offset: 0,
-      color: colorStore.colorProfit, // color at 0%
-    },
-    {
-      offset: 0.5,
-      color: colorStore.colorProfit, // color at 50%
-    },
-    {
-      offset: 0.5,
-      color: colorStore.colorLoss, // color at 50%
-    },
-    {
-      offset: 1,
-      color: colorStore.colorLoss, // color at 100%
-    },
-  ],
-};
 const dailyChartOptions: ComputedRef<EChartsOption> = computed(() => {
   return {
     title: {
@@ -162,17 +137,15 @@ const dailyChartOptions: ComputedRef<EChartsOption> = computed(() => {
       data: [
         {
           name: CHART_PROFIT.value,
-          lineStyle: {
-            color: colorStops,
-          },
-          itemStyle: {
-            color: colorStops,
-          },
+          icon: 'roundRect',
+          itemStyle: { color: colorStore.colorProfit },
         },
-        { name: CHART_TRADE_COUNT },
+        { name: CHART_TRADE_COUNT, icon: 'roundRect' },
       ],
       top: 0,
-      right: '5%',
+      left: 'center',
+      itemWidth: 12,
+      itemHeight: 8,
     },
     xAxis: [
       {
@@ -201,13 +174,9 @@ const dailyChartOptions: ComputedRef<EChartsOption> = computed(() => {
     yAxis: [
       {
         type: 'value',
-        name: CHART_PROFIT.value,
         splitLine: {
           show: false,
         },
-        nameRotate: 90,
-        nameLocation: 'middle',
-        nameGap: 35,
         axisLabel: {
           formatter: (value) => {
             return props.profitCol === 'rel_profit' ? `${value}%` : `${value}`;
@@ -216,21 +185,21 @@ const dailyChartOptions: ComputedRef<EChartsOption> = computed(() => {
       },
       {
         type: 'value',
-        name: CHART_TRADE_COUNT,
-        nameRotate: 90,
-        nameLocation: 'middle',
-        nameGap: 30,
+        minInterval: 1,
       },
     ],
     grid: {
-      left: '50',
-      right: '45',
-      bottom: '15%',
+      left: 8,
+      right: 8,
+      top: 32,
+      bottom: 8,
+      containLabel: true,
     },
     series: [
       {
         type: 'line',
         name: CHART_PROFIT.value,
+        symbolSize: 5,
         // Color is induced by visualMap
         datasetIndex: 1,
         encode: {

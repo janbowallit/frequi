@@ -93,7 +93,7 @@ function select(item: T) {
 </script>
 
 <template>
-  <UFieldGroup>
+  <UFieldGroup role="group">
     <UButton
       v-for="item in items"
       :key="String(getValue(item))"

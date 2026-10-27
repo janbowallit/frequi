@@ -305,12 +305,14 @@ watch(
 </script>
 
 <template>
-  <ECharts
-    v-if="trades"
-    :option="cumProfitChartOptions"
-    :theme="settingsStore.chartTheme"
-    autoresize
+  <EmptyState
+    v-if="trades.length === 0 && openTrades.length === 0"
+    class="h-full"
+    icon="i-mdi-chart-areaspline"
+    title="No profit history yet"
+    description="Cumulative profit is drawn here as trades close."
   />
+  <ECharts v-else :option="cumProfitChartOptions" :theme="settingsStore.chartTheme" autoresize />
 </template>
 
 <style scoped>

@@ -2,6 +2,9 @@
 import type { ForceExitPayload } from '@/types';
 import { BotStates } from '@/types';
 
+// In a narrow panel the icons push the labels into an ellipsis - drop the icons there instead.
+const narrowButtonUi = { leadingIcon: 'hidden @[18rem]:inline-flex' };
+
 const botStore = useBotStore();
 const { confirm } = useConfirmBox();
 
@@ -99,12 +102,12 @@ async function handleForceEntry() {
 </script>
 
 <template>
-  <div role="toolbar" aria-label="Bot controls" class="flex w-full flex-col gap-2">
+  <div role="toolbar" aria-label="Bot controls" class="@container flex w-full flex-col gap-2">
     <div class="flex items-center justify-between gap-2">
-      <div class="flex min-w-0 items-center gap-2" role="status">
+      <div class="flex min-w-0 flex-wrap items-center gap-x-2" role="status">
         <span class="size-2.5 shrink-0 rounded-full" :class="stateInfo.dot" aria-hidden="true" />
         <span class="text-sm font-semibold text-highlighted">{{ stateInfo.label }}</span>
-        <span class="truncate text-sm text-muted">{{ stateInfo.description }}</span>
+        <span class="text-sm text-muted">{{ stateInfo.description }}</span>
       </div>
     </div>
     <div class="grid grid-cols-3 gap-1.5">
@@ -115,6 +118,7 @@ async function handleForceEntry() {
         :disabled="!canTrade || isRunning"
         :label="isPaused ? 'Resume' : 'Start'"
         icon="mdi:play"
+        :ui="narrowButtonUi"
         title="Start trading"
         @click="botStore.activeBot.startBot()"
       />
@@ -125,6 +129,7 @@ async function handleForceEntry() {
         :disabled="!canTrade || !isRunning"
         label="Pause"
         icon="mdi:pause"
+        :ui="narrowButtonUi"
         title="Keep managing open trades, but don't enter new ones"
         @click="handleStopBuy()"
       />
@@ -135,6 +140,7 @@ async function handleForceEntry() {
         :disabled="!canTrade || !(isRunning || isPaused)"
         label="Stop"
         icon="mdi:stop"
+        :ui="narrowButtonUi"
         title="Stop trading - also stops handling open trades"
         @click="handleStopBot()"
       />

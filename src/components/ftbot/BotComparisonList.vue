@@ -107,7 +107,11 @@ const columns: TableColumn<ComparisonTableItems>[] = [
 </script>
 
 <template>
-  <UTable :data="tableItems" :columns="columns">
+  <!-- With a single bot the summary row only repeats it -->
+  <UTable
+    :data="botStore.botCount > 1 ? tableItems : tableItems.filter((i) => i.botId)"
+    :columns="columns"
+  >
     <template #botName-header>
       <div class="flex w-full flex-row items-center justify-between gap-2">
         <span>Bot</span>
@@ -175,6 +179,7 @@ const columns: TableColumn<ComparisonTableItems>[] = [
         )}`"
         :stake-currency="row.original.stakeCurrency"
       />
+      <span v-else class="text-dimmed">–</span>
     </template>
     <template #profitClosed-cell="{ row }">
       <ProfitPill
@@ -183,14 +188,16 @@ const columns: TableColumn<ComparisonTableItems>[] = [
         :profit-abs="row.original.profitClosed"
         :stake-currency="row.original.stakeCurrency"
       />
+      <span v-else class="text-dimmed">–</span>
     </template>
     <template #balance-cell="{ row }">
       <div v-if="row.original.balance">
         <span :title="row.original.stakeCurrency"
           >{{ formatPrice(row.original.balance ?? 0, row.original.stakeCurrencyDecimals) }}
         </span>
-        <span class="text-sm">{{
-          ` ${row.original.stakeCurrency}${row.original.balanceAppendix}`
+        <span class="text-sm">{{ ` ${row.original.stakeCurrency}` }}</span>
+        <span v-if="row.original.balanceAppendix" class="ms-1 text-xs text-muted">{{
+          row.original.balanceAppendix
         }}</span>
       </div>
     </template>

@@ -141,65 +141,97 @@ const singlePairSelection = computed({
 
 <template>
   <div class="flex h-full">
-    <div class="flex-fill w-full flex-col align-items-stretch flex h-full">
-      <div class="flex me-0 items-center md:gap-2 gap-1 flex-wrap mx-1 md:mx-0">
-        <span class="md:ms-2 text-nowrap">{{ strategyName }} | {{ timeframe || '' }}</span>
-
-        <div class="flex gap-1 md:gap-2 w-full md:w-auto">
+    <div class="flex h-full w-full min-w-0 flex-col">
+      <div
+        class="flex flex-wrap items-center gap-2 border-b border-default px-2 py-2"
+        role="toolbar"
+        aria-label="Chart controls"
+      >
+        <div class="flex min-w-0 grow items-center gap-2 sm:grow-0">
           <BaseStringMultiSelectMenu
             v-if="settingsStore.multiPairSelection"
             v-model="botStore.activeBot.plotMultiPairs"
-            class="md:w-80 w-full"
+            class="w-full min-w-0 sm:w-72"
             :items="availablePairs"
             placeholder="Select pairs to plot"
+            aria-label="Pairs to plot"
             virtualize
             size="md"
           />
           <USelectMenu
             v-else
             v-model="singlePairSelection"
-            class="md:w-80 w-full"
+            class="w-full min-w-0 sm:w-56"
             :items="availablePairs"
+            aria-label="Pair"
             size="md"
             virtualize
             @input="refresh"
           />
           <UButton
-            title="Refresh chart"
+            title="Reload chart data"
+            aria-label="Reload chart data"
             color="neutral"
+            variant="outline"
             :disabled="botStore.activeBot.plotMultiPairs.length === 0"
             icon="mdi:refresh"
             @click="refresh"
           />
         </div>
-        <BaseCheckbox v-model="settingsStore.multiPairSelection">
-          <span class="text-nowrap">Multi pair</span>
-        </BaseCheckbox>
-        <div class="ms-auto flex flex-wrap items-center gap-2">
-          <BaseCheckbox v-model="settingsStore.showMarkArea">
-            <span class="text-nowrap">Show Chart Areas</span>
-          </BaseCheckbox>
-          <BaseCheckbox v-model="settingsStore.useHeikinAshiCandles">
-            <span class="text-nowrap">Heikin Ashi</span>
-          </BaseCheckbox>
-
-          <div class="me-0 md:me-1 flex grow">
-            <PlotConfigSelect class="grow min-w-40"></PlotConfigSelect>
-
+        <USwitch
+          v-model="settingsStore.multiPairSelection"
+          label="Multi pair"
+          size="sm"
+          class="shrink-0"
+        />
+        <div class="ms-auto flex items-center gap-2">
+          <UBadge
+            v-if="strategyName"
+            color="neutral"
+            variant="subtle"
+            class="hidden max-w-56 truncate md:inline-flex"
+            :title="`Strategy ${strategyName} on ${timeframe} candles`"
+          >
+            {{ strategyName }}<span v-if="timeframe" class="text-dimmed">· {{ timeframe }}</span>
+          </UBadge>
+          <UPopover :content="{ align: 'end' }">
             <UButton
-              title="Plot configurator"
               color="neutral"
-              icon="mdi:cog"
-              @click="showConfigurator"
+              variant="outline"
+              icon="mdi:tune-variant"
+              label="Display"
+              aria-label="Chart display options"
             />
-          </div>
+            <template #content>
+              <div class="flex w-72 flex-col gap-3 p-3 text-start">
+                <p class="text-xs font-semibold uppercase tracking-wide text-muted">Candles</p>
+                <USwitch v-model="settingsStore.showMarkArea" label="Show chart areas" />
+                <USwitch
+                  v-model="settingsStore.useHeikinAshiCandles"
+                  label="Heikin Ashi candles"
+                  description="Smoothed candles - easier to read trends"
+                />
+                <USeparator />
+                <p class="text-xs font-semibold uppercase tracking-wide text-muted">Indicators</p>
+                <PlotConfigSelect class="w-full" />
+                <UButton
+                  color="neutral"
+                  variant="subtle"
+                  icon="mdi:cog"
+                  label="Edit indicators"
+                  block
+                  @click="showConfigurator"
+                />
+              </div>
+            </template>
+          </UPopover>
         </div>
       </div>
       <div
         v-if="botStore.activeBot.plotMultiPairs?.length > 0"
         :class="{
-          'min-w-0 w-full h-full ': isSinglePairView,
-          'grid grid-cols-1 lg:grid-cols-2': !isSinglePairView,
+          'flex min-h-0 w-full min-w-0 flex-1': isSinglePairView,
+          'grid min-h-0 flex-1 grid-cols-1 overflow-auto lg:grid-cols-2': !isSinglePairView,
         }"
       >
         <SingleCandleChartContainer
@@ -216,9 +248,13 @@ const singlePairSelection = computed({
         >
         </SingleCandleChartContainer>
       </div>
-      <div v-else class="flex flex-col items-center justify-center h-full w-full">
-        <span class="text-2xl font-semibold">No pair selected</span>
-      </div>
+      <EmptyState
+        v-else
+        class="h-full"
+        icon="i-mdi-chart-line"
+        title="No pair selected"
+        description="Pick a pair above to load its chart."
+      />
     </div>
     <DraggableModal
       v-model:open="showPlotConfigModal"

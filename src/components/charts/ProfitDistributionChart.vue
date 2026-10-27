@@ -127,7 +127,14 @@ const chartOptions = computed((): EChartsOption => {
 </script>
 
 <template>
-  <div class="flex flex-col h-full relative">
+  <EmptyState
+    v-if="!trades.some((t) => !t.is_open)"
+    class="h-full"
+    icon="i-mdi-chart-histogram"
+    title="No closed trades yet"
+    description="The spread of wins and losses shows here once trades close."
+  />
+  <div v-else class="flex flex-col h-full relative">
     <div class="grow mb-2">
       <ECharts v-if="trades" :option="chartOptions" autoresize :theme="settingsStore.chartTheme" />
     </div>

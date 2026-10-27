@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { LogLine } from '@/types';
+
 type LevelFilter = 'all' | 'warning' | 'error';
 
 const AUTO_REFRESH_MS = 10_000;
@@ -9,10 +11,22 @@ const loading = ref(false);
 const search = ref('');
 const levelFilter = ref<LevelFilter>('all');
 const autoRefresh = useStorage('ftLogsAutoRefresh', false);
+/** Hide routine chatter: this UI's own requests / websockets and the once-a-minute heartbeat */
+const hideRoutine = useStorage('ftLogsHideRoutine', true);
 /** Keep the view pinned to the newest entry while the user hasn't scrolled up */
 const following = ref(true);
 
 const searchTerm = refDebounced(search, 150);
+
+function isRoutine(log: LogLine) {
+  const logger = log[2];
+  if (log[3] !== 'INFO') return false;
+  return (
+    logger.startsWith('uvicorn') ||
+    logger.startsWith('freqtrade.rpc.api_server.ws') ||
+    log[4].startsWith('Bot heartbeat.')
+  );
+}
 
 function isError(level: string) {
   return level === 'ERROR' || level === 'CRITICAL';
@@ -37,6 +51,7 @@ const levelOptions = computed(() => [
 const filteredLogs = computed(() => {
   const term = searchTerm.value.trim().toLowerCase();
   return botStore.activeBot.lastLogs.filter((log) => {
+    if (hideRoutine.value && isRoutine(log)) return false;
     if (levelFilter.value === 'error' && !isError(log[3])) return false;
     if (levelFilter.value === 'warning' && log[3] !== 'WARNING' && !isError(log[3])) return false;
     if (!term) return true;
@@ -124,7 +139,12 @@ function scrollToBottom() {
         size="md"
         aria-label="Filter by level"
       />
-      <div class="ms-auto flex items-center gap-3">
+      <div class="ms-auto flex flex-wrap items-center gap-3">
+        <USwitch
+          v-model="hideRoutine"
+          label="Hide routine messages"
+          title="Hide heartbeats and the web server's connection messages (caused by this dashboard)"
+        />
         <USwitch v-model="autoRefresh" label="Auto-refresh" />
         <UButton
           id="refresh-logs"
@@ -171,6 +191,7 @@ function scrollToBottom() {
           @click="
             search = '';
             levelFilter = 'all';
+            hideRoutine = false;
           "
         />
       </EmptyState>

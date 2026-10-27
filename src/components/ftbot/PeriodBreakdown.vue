@@ -22,8 +22,8 @@ const periodicBreakdownSelections = computed(() => {
 });
 
 const absRelSelections = ref([
-  { value: 'abs_profit', text: 'Abs $' },
-  { value: 'rel_profit', text: 'Rel %' },
+  { value: 'abs_profit', text: 'Amount' },
+  { value: 'rel_profit', text: '%' },
 ]);
 
 const selectedStats = computed(() => {
@@ -56,6 +56,22 @@ const selectedStatsSorted = computed(() => {
       ? Object.values(selectedStats.value.data).sort((a, b) => (a.date > b.date ? 1 : -1))
       : [],
   };
+});
+
+// Days without closed trades are still returned (all zero) - a flat zero line tells nothing.
+const hasTrades = computed(() =>
+  (selectedStatsSorted.value.data ?? []).some((d) => (d.trade_count ?? 0) > 0),
+);
+
+const periodNoun = computed(() => {
+  switch (settingsStore.timeProfitPeriod) {
+    case TimeSummaryOptions.weekly:
+      return 'week';
+    case TimeSummaryOptions.monthly:
+      return 'month';
+    default:
+      return 'day';
+  }
 });
 
 function refreshSummary() {
@@ -95,38 +111,55 @@ watch(
 </script>
 
 <template>
-  <div class="flex flex-col h-full">
-    <div v-if="!props.multiBotView" class="mb-2">
-      <h3 class="me-auto inline text-xl">{{ hasWeekly ? 'Period' : 'Daily' }} Breakdown</h3>
-      <UButton class="float-end" color="neutral" icon="mdi:refresh" @click="refreshSummary" />
-    </div>
-    <div class="flex align-center justify-between">
+  <div class="flex h-full flex-col">
+    <div class="flex flex-wrap items-center gap-2 px-3 py-2">
+      <h3 v-if="!props.multiBotView" class="me-auto text-sm font-semibold text-highlighted">
+        {{ hasWeekly ? 'Profit per period' : 'Profit per day' }}
+      </h3>
       <USegmentedControl
         v-if="hasWeekly"
-        id="order-direction"
         v-model="settingsStore.timeProfitPeriod"
+        aria-label="Period"
         :items="periodicBreakdownSelections"
-        size="sm"
+        size="xs"
         label-key="text"
         value-key="value"
-      ></USegmentedControl>
+      />
       <USegmentedControl
         v-model="settingsStore.timeProfitPreference"
-        name="radios-btn-select"
-        size="sm"
+        aria-label="Profit unit"
+        size="xs"
         label-key="text"
         value-key="value"
         :items="absRelSelections"
-      >
-      </USegmentedControl>
+        :class="{ 'ms-auto': props.multiBotView }"
+      />
+      <UButton
+        v-if="!props.multiBotView"
+        color="neutral"
+        variant="ghost"
+        size="xs"
+        icon="mdi:refresh"
+        title="Refresh"
+        aria-label="Refresh profit breakdown"
+        @click="refreshSummary"
+      />
     </div>
 
+    <EmptyState
+      v-if="!hasTrades"
+      class="flex-1"
+      icon="i-mdi-chart-bar"
+      title="No closed trades yet"
+      :description="`Profit per ${periodNoun} shows here once the bot closes trades.`"
+    />
     <div
-      v-if="
+      v-else-if="
         !props.multiBotView ||
         botStore.selectedBotCount <= 1 ||
         settingsStore.timeProfitPreference !== 'rel_profit'
       "
+      class="min-h-60 flex-1 px-1"
     >
       <TimePeriodChart
         v-if="selectedStats"
@@ -135,10 +168,14 @@ watch(
         :profit-col="settingsStore.timeProfitPreference"
       />
     </div>
-    <div v-else class="flex items-center justify-center h-full w-full p-2">
-      Time period chart is only available when a single bot is selected and showing absolute profit.
-    </div>
-    <div v-if="!props.multiBotView">
+    <EmptyState
+      v-else
+      class="flex-1"
+      icon="i-mdi-percent"
+      title="Relative profit needs a single bot"
+      description="Select one bot, or switch to absolute profit, to see this chart."
+    />
+    <div v-if="!props.multiBotView && hasTrades">
       <UTable
         :data="selectedStats.data"
         :columns="tableColumns"

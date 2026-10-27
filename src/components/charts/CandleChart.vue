@@ -272,7 +272,8 @@ function updateChart(initial = false) {
         type: 'time',
         axisLine: { onZero: false },
         axisTick: { show: true },
-        axisLabel: { show: true },
+        // Narrow screens: drop labels that would overlap instead of printing them on top of each other
+        axisLabel: { show: true, hideOverlap: true },
         axisPointer: {
           label: { show: false },
         },
@@ -729,8 +730,15 @@ onMounted(() => {
   initializeChartOptions();
 });
 
-watch([() => props.useUTC, () => props.theme, () => props.plotConfig], () =>
-  initializeChartOptions(),
+watch([() => props.useUTC, () => props.plotConfig], () => initializeChartOptions());
+
+// The chart is re-created for a new theme (see :key) - set its options once the new one is mounted
+watch(
+  () => props.theme,
+  async () => {
+    await nextTick();
+    initializeChartOptions();
+  },
 );
 
 watch([() => props.dataset, () => props.heikinAshi, () => props.showMarkArea], () => updateChart());
@@ -743,7 +751,14 @@ watch(
 
 <template>
   <div class="h-full w-full">
-    <ECharts v-if="hasData" ref="candleChart" :theme="theme" autoresize manual-update />
+    <ECharts
+      v-if="hasData"
+      :key="theme"
+      ref="candleChart"
+      :theme="theme"
+      autoresize
+      manual-update
+    />
   </div>
 </template>
 

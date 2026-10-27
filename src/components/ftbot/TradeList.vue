@@ -201,7 +201,16 @@ const rowSelection = computed({
 </script>
 
 <template>
-  <div class="h-full overflow-auto w-full">
+  <div class="flex h-full w-full flex-col overflow-auto">
+    <div v-if="showFilter && trades.length > 0" class="flex justify-end px-2 pt-2">
+      <UInput
+        v-model="filterText"
+        icon="mdi:magnify"
+        placeholder="Filter by pair or reason"
+        aria-label="Filter trades"
+        class="w-full sm:w-64"
+      />
+    </div>
     <UTable
       ref="tradesTable"
       v-model:pagination="pagination"
@@ -280,10 +289,10 @@ const rowSelection = computed({
       <template #botName-cell="{ row }">{{ row.original.botName }}</template>
     </UTable>
 
-    <div v-if="showFilter" class="flex justify-end gap-2 p-2">
-      <UInput v-model="filterText" placeholder="Filter" class="w-64" />
-    </div>
-    <div v-if="!activeTrades" class="flex justify-end border-t border-default pt-2">
+    <div
+      v-if="!activeTrades && filteredTrades.length > perPage"
+      class="mt-auto flex justify-end border-t border-default p-2"
+    >
       <UPagination
         :page="(tradesTable?.tableApi?.getState().pagination.pageIndex || 0) + 1"
         :items-per-page="tradesTable?.tableApi?.getState().pagination.pageSize"

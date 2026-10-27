@@ -114,3 +114,7 @@ html {
     background-color: unset !important;
 }
 
+/* Dropdowns, popovers and tooltips must sit above the dashboard panels (grid items stack with z-index) */
+[data-reka-popper-content-wrapper] {
+    z-index: 60 !important;
+}

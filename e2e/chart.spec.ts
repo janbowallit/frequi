@@ -16,27 +16,29 @@ test.describe('Chart', () => {
 
     // await page.waitForResponse('**/pair_candles');
 
-    await page.getByRole('button', { name: 'Refresh chart' }).click();
+    await page.getByRole('button', { name: 'Reload chart data' }).click();
     // await page.click('input[title="AutoRefresh"]');
 
-    await page.waitForSelector('span:has-text("NoActionStrategyFut | 1m")');
-    const heikinAshiCheck = page
-      .locator('div')
-      .filter({ hasText: /^Heikin Ashi$/ })
-      .nth(1);
-    await heikinAshiCheck.click();
+    await expect(
+      page.getByRole('toolbar', { name: 'Chart controls' }).getByText('NoActionStrategyFut'),
+    ).toBeVisible();
+    // Candle options live in the Display popover
+    await page.getByRole('button', { name: 'Chart display options' }).click();
+    const heikinAshiSwitch = page.getByRole('switch', { name: 'Heikin Ashi candles' });
+    await heikinAshiSwitch.click();
+    await expect(heikinAshiSwitch).toBeChecked();
+    // Default plotconfig exists
+    await expect(page.locator('#plotConfigSelect').nth(0)).toHaveText('default');
+    // Disable Heikin Ashi
+    await heikinAshiSwitch.click();
+    await expect(heikinAshiSwitch).not.toBeChecked();
+    await page.keyboard.press('Escape');
 
     // Reload triggers a new request
     await Promise.all([
-      page.getByRole('button', { name: 'Refresh chart' }).click(),
-
+      page.getByRole('button', { name: 'Reload chart data' }).click(),
       page.waitForResponse('**/pair_candles'),
     ]);
-    // Disable Heikin Ashi
-    await heikinAshiCheck.click();
-    // Default plotconfig exists
-
-    await expect(page.locator('form').locator('#plotConfigSelect').nth(0)).toHaveText('default');
   });
 
   test('Plot configurator', async ({ page }) => {
@@ -48,9 +50,12 @@ test.describe('Chart', () => {
     ]);
 
     // Wait for the chart to load
-    await page.waitForSelector('span:has-text("NoActionStrategyFut | 1m")');
+    await expect(
+      page.getByRole('toolbar', { name: 'Chart controls' }).getByText('NoActionStrategyFut'),
+    ).toBeVisible();
 
-    await page.getByRole('button', { name: 'Plot configurator' }).click();
+    await page.getByRole('button', { name: 'Chart display options' }).click();
+    await page.getByRole('button', { name: 'Edit indicators' }).click();
     await page.getByRole('button', { name: 'From template' }).click();
     // Apply bollinger bands
 

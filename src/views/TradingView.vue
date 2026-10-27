@@ -232,11 +232,7 @@ const tradingTabItems = computed<TabsItem[]>(() => {
         </DraggableContainer>
       </GridItem>
       <GridItem
-        v-if="
-          botStore.activeBot.detailTradeId &&
-          botStore.activeBot.tradeDetail &&
-          gridLayoutTradeDetail.h !== 0
-        "
+        v-if="gridLayoutTradeDetail.h !== 0"
         v-bind="gridItemProps"
         :i="gridLayoutTradeDetail.i"
         :x="gridLayoutTradeDetail.x"
@@ -248,8 +244,17 @@ const tradingTabItems = computed<TabsItem[]>(() => {
       >
         <DraggableContainer header="Trade Detail">
           <TradeDetail
+            v-if="botStore.activeBot.detailTradeId && botStore.activeBot.tradeDetail"
             :trade="botStore.activeBot.tradeDetail"
             :stake-currency="botStore.activeBot.stakeCurrency"
+          />
+          <!-- Keep the panel so the layout has no hole when nothing is selected -->
+          <EmptyState
+            v-else
+            class="h-full"
+            icon="i-mdi-cursor-default-click-outline"
+            title="No trade selected"
+            description="Click a trade in Open or Closed Trades to see its details here."
           />
         </DraggableContainer>
       </GridItem>
