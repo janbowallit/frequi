@@ -64,6 +64,16 @@ onMounted(() => {
     assignFirstPair();
   }
   plotStore.plotConfigChanged();
+  // Draw the strategy's own lines until the user sets up a plot config of their own
+  if (!botStore.activeBot.isWebserverMode) {
+    botStore.activeBot
+      .getStrategyPlotConfig()
+      .then((config) => {
+        plotStore.strategyPlotConfig = config ?? null;
+        refresh();
+      })
+      .catch(() => {});
+  }
 });
 
 function refresh() {

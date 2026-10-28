@@ -22,6 +22,13 @@ function migratePlotConfigs() {
 }
 migratePlotConfigs();
 
+function isEmptyPlotConfig(config: PlotConfig) {
+  return (
+    Object.keys(config.main_plot ?? {}).length === 0 &&
+    Object.keys(config.subplots ?? {}).length === 0
+  );
+}
+
 export const usePlotConfigStore = defineStore('plotConfig', {
   state: () => {
     return {
@@ -29,14 +36,20 @@ export const usePlotConfigStore = defineStore('plotConfig', {
       plotConfigName: 'default',
       isEditing: false,
       editablePlotConfig: { ...EMPTY_PLOTCONFIG } as PlotConfig,
+      /** The running strategy's plot_config, used while the selected config is still empty */
+      strategyPlotConfig: null as PlotConfig | null,
     };
   },
   getters: {
     availablePlotConfigNames: (state) => Object.keys(state.customPlotConfigs),
-    plotConfig: (state) =>
-      (state.isEditing
-        ? state.editablePlotConfig
-        : state.customPlotConfigs[state.plotConfigName]) || deepClone(EMPTY_PLOTCONFIG),
+    plotConfig: (state): PlotConfig => {
+      if (state.isEditing) return state.editablePlotConfig;
+      const custom = state.customPlotConfigs[state.plotConfigName];
+      if ((!custom || isEmptyPlotConfig(custom)) && state.strategyPlotConfig) {
+        return state.strategyPlotConfig;
+      }
+      return custom || deepClone(EMPTY_PLOTCONFIG);
+    },
     usedColumns() {
       return plotConfigColumns(this.plotConfig as unknown as PlotConfig);
     },

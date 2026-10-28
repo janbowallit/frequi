@@ -2,6 +2,9 @@
 const botStore = useBotStore();
 
 const multiBot = computed(() => botStore.botCount > 1);
+const hasReference = computed(
+  () => !!STRATEGY_REFERENCE[botStore.activeBot.botState?.strategy ?? ''],
+);
 const hasClosedTrades = computed(() => botStore.allClosedTradesSelectedBots.length > 0);
 
 onMounted(async () => {
@@ -23,6 +26,15 @@ onMounted(async () => {
       <NextEntryPanel compact />
     </PanelSection>
 
+    <PanelSection
+      v-if="hasReference"
+      :title="`Live vs backtest${multiBot ? `: ${botStore.activeBot.uiBotName}` : ''}`"
+      info="Is the live bot trading the way its backtest did? Numbers settle after 10 to 20 closed trades."
+      body-class=""
+    >
+      <BacktestCheck />
+    </PanelSection>
+
     <div class="grid gap-4 lg:grid-cols-3">
       <PanelSection
         :title="`Profit over time${multiBot ? ' (all bots)' : ''}`"
@@ -38,6 +50,15 @@ onMounted(async () => {
         <BotBalance />
       </section>
     </div>
+
+    <PanelSection
+      v-if="botStore.activeBot.openTradeCount > 0"
+      :title="`Exit plan${multiBot ? `: ${botStore.activeBot.uiBotName}` : ''}`"
+      info="The prices where each open trade will be sold."
+      body-class=""
+    >
+      <ExitPlanPanel />
+    </PanelSection>
 
     <PanelSection
       title="Open trades"

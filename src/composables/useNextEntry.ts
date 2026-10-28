@@ -9,6 +9,7 @@ import type { PairHistory } from '@/types';
  *   entry_gap__<name>     % price move still needed (optional)
  *   entry_target__<name>  price level to reach (optional)
  *   entry_at__<name>      epoch ms of the next re-check, when not every candle (optional)
+ *   exit_target__<name>   price the next candle has to close beyond to exit (for the exit plan)
  *
  * Shared: the status strip and the Next entry panel read the same data (one fetch per minute).
  */
@@ -24,9 +25,18 @@ export interface EntryCondition {
   at: number | null;
 }
 
+/** A price level that sells an open trade when a candle closes beyond it (`exit_target__<name>`) */
+export interface ExitLevel {
+  key: string;
+  price: number;
+}
+
 export interface PairReadiness {
   pair: string;
   conditions: EntryCondition[];
+  exits: ExitLevel[];
+  /** The latest candle already carries an exit signal */
+  exitSignal: boolean;
   signal: boolean;
   inTrade: boolean;
   candleTs: number;
@@ -36,6 +46,7 @@ export interface PairReadiness {
 export type EntryTone = 'ready' | 'waiting' | 'blocked';
 
 const PREFIX = 'entry_check__';
+const EXIT_PREFIX = 'exit_target__';
 const REFRESH_MS = 60_000;
 const ACRONYMS = new Set(['btc', 'eth', 'ema', 'sma', 'rsi', 'macd', 'adx', 'atr', 'bb', 'vwap']);
 
@@ -135,9 +146,15 @@ function useNextEntryState() {
           at: num(row[`entry_at__${key}`]),
         };
       });
+    const exits = analysis.columns
+      .filter((col) => col.startsWith(EXIT_PREFIX))
+      .map((col) => ({ key: col.slice(EXIT_PREFIX.length), price: num(row[col]) }))
+      .filter((e): e is ExitLevel => e.price !== null);
     return {
       pair,
       conditions,
+      exits,
+      exitSignal: row.exit_long === 1,
       signal: row.enter_long === 1 && row.exit_long !== 1,
       inTrade: bot.value?.openTrades.some((t) => t.pair === pair) ?? false,
       candleTs: row.__date_ts as number,
@@ -222,6 +239,7 @@ function useNextEntryState() {
     }),
   );
   const candidates = computed(() => pairs.value.filter((r) => !r.inTrade));
+  const byPair = computed(() => new Map(results.value.map((r) => [r.pair, r])));
 
   const latestCandleTs = computed(() => Math.max(0, ...results.value.map((r) => r.candleTs || 0)));
   /** The bot checks entries again when the next candle closes */
@@ -331,6 +349,8 @@ function useNextEntryState() {
     marketKeys,
     marketConditions,
     pairs,
+    byPair,
+    timeframeMs,
     latestCandleTs,
     earliest,
     verdict,

@@ -13,6 +13,7 @@ declare global {
   const ROUND_CLOSER: typeof import('./utils/roundTimeframe').ROUND_CLOSER
   const ROUND_DOWN: typeof import('./utils/roundTimeframe').ROUND_DOWN
   const ROUND_UP: typeof import('./utils/roundTimeframe').ROUND_UP
+  const STRATEGY_REFERENCE: typeof import('./utils/strategyReference').STRATEGY_REFERENCE
   const TradeLayout: typeof import('./stores/layout').TradeLayout
   const acceptHMRUpdate: typeof import('pinia').acceptHMRUpdate
   const asyncComputed: typeof import('@vueuse/core').asyncComputed
@@ -261,6 +262,7 @@ declare global {
   const useEventBus: typeof import('@vueuse/core').useEventBus
   const useEventListener: typeof import('@vueuse/core').useEventListener
   const useEventSource: typeof import('@vueuse/core').useEventSource
+  const useExitPlan: typeof import('./composables/useExitPlan').useExitPlan
   const useEyeDropper: typeof import('@vueuse/core').useEyeDropper
   const useFavicon: typeof import('@vueuse/core').useFavicon
   const useFetch: typeof import('@vueuse/core').useFetch
@@ -417,7 +419,10 @@ declare global {
   export type { Component, Slot, Slots, ComponentPublicInstance, ComputedRef, DirectiveBinding, ExtractDefaultPropTypes, ExtractPropTypes, ExtractPublicPropTypes, InjectionKey, PropType, Ref, ShallowRef, MaybeRef, MaybeRefOrGetter, VNode, WritableComputedRef } from 'vue'
   import('vue')
   // @ts-ignore
-  export type { EntryCondition, PairReadiness, EntryTone } from './composables/useNextEntry'
+  export type { ExitLine, TradeExitPlan } from './composables/useExitPlan'
+  import('./composables/useExitPlan')
+  // @ts-ignore
+  export type { EntryCondition, ExitLevel, PairReadiness, EntryTone } from './composables/useNextEntry'
   import('./composables/useNextEntry')
   // @ts-ignore
   export type { ColorPreferences } from './stores/colors'
@@ -434,6 +439,9 @@ declare global {
   // @ts-ignore
   export type { SupportedSeriesTypes } from './utils/charts/candleChartSeries'
   import('./utils/charts/candleChartSeries')
+  // @ts-ignore
+  export type { StrategyReference } from './utils/strategyReference'
+  import('./utils/strategyReference')
 }
 
 // for vue template auto import
@@ -447,6 +455,7 @@ declare module 'vue' {
     readonly ROUND_CLOSER: UnwrapRef<typeof import('./utils/roundTimeframe')['ROUND_CLOSER']>
     readonly ROUND_DOWN: UnwrapRef<typeof import('./utils/roundTimeframe')['ROUND_DOWN']>
     readonly ROUND_UP: UnwrapRef<typeof import('./utils/roundTimeframe')['ROUND_UP']>
+    readonly STRATEGY_REFERENCE: UnwrapRef<typeof import('./utils/strategyReference')['STRATEGY_REFERENCE']>
     readonly acceptHMRUpdate: UnwrapRef<typeof import('pinia')['acceptHMRUpdate']>
     readonly asyncComputed: UnwrapRef<typeof import('@vueuse/core')['asyncComputed']>
     readonly autoResetRef: UnwrapRef<typeof import('@vueuse/core')['autoResetRef']>
@@ -689,6 +698,7 @@ declare module 'vue' {
     readonly useEventBus: UnwrapRef<typeof import('@vueuse/core')['useEventBus']>
     readonly useEventListener: UnwrapRef<typeof import('@vueuse/core')['useEventListener']>
     readonly useEventSource: UnwrapRef<typeof import('@vueuse/core')['useEventSource']>
+    readonly useExitPlan: UnwrapRef<typeof import('./composables/useExitPlan')['useExitPlan']>
     readonly useEyeDropper: UnwrapRef<typeof import('@vueuse/core')['useEyeDropper']>
     readonly useFavicon: UnwrapRef<typeof import('@vueuse/core')['useFavicon']>
     readonly useFetch: UnwrapRef<typeof import('@vueuse/core')['useFetch']>

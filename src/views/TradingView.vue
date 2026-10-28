@@ -27,6 +27,7 @@ const tradingTabItems = computed<TabsItem[]>(() => [
     label: 'Open trades',
     badge: botStore.activeBot.openTradeCount || undefined,
   },
+  { slot: 'exit-plan', value: 'exit-plan', label: 'Exit plan' },
   { slot: 'closed-trades', value: 'closed-trades', label: 'Closed trades' },
   { slot: 'next-entry', value: 'next-entry', label: 'Next entry' },
   { slot: 'signals', value: 'signals', label: 'Why no trade?' },
@@ -106,6 +107,9 @@ const tradingTabItems = computed<TabsItem[]>(() => [
             :active-trades="true"
             empty-text="No open trades"
           />
+        </template>
+        <template #exit-plan>
+          <ExitPlanPanel />
         </template>
         <template #closed-trades>
           <TradeList

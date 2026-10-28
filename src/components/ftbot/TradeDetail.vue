@@ -3,12 +3,14 @@ import type { Trade } from '@/types';
 
 const colorStore = useColorStore();
 
-defineProps<{
+const props = defineProps<{
   trade: Trade;
   stakeCurrency: string;
 }>();
 
 const { showTradeCustomData } = useTradeCustomData();
+const { plans } = useExitPlan();
+const exitPlan = computed(() => plans.value.find((p) => p.trade.trade_id === props.trade.trade_id));
 </script>
 
 <template>
@@ -53,6 +55,11 @@ const { showTradeCustomData } = useTradeCustomData();
           {{ trade.exit_reason }}
         </ValuePair>
       </dl>
+    </section>
+
+    <section v-if="exitPlan" class="flex flex-col gap-2" aria-labelledby="trade-exit-plan">
+      <h3 id="trade-exit-plan" class="text-sm font-semibold text-highlighted">Exit plan</h3>
+      <ExitPlanItem :plan="exitPlan" :show-header="false" />
     </section>
 
     <section class="flex flex-col gap-1" aria-labelledby="trade-position">
