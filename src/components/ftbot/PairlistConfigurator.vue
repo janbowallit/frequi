@@ -78,91 +78,112 @@ if (pairlistStore.whitelist.length > 0) {
 </script>
 
 <template>
-  <div class="grid grid-cols-1 lg:grid-cols-[auto_1fr_auto] px-3 mb-3 gap-3 w-full">
-    <ul
-      ref="availablePairlistsEl"
-      class="divide-y border-x border-neutral-500 rounded-sm border-y divide-solid divide-neutral-500 min-w-72"
+  <div
+    class="grid w-full grid-cols-1 items-start gap-4 text-left xl:grid-cols-[20rem_minmax(0,1fr)_22rem]"
+  >
+    <!-- 1. What can be added -->
+    <PanelSection
+      title="Available filters"
+      info="Drag a filter into your pairlist, or use the arrow. The first one must generate pairs."
+      body-class="max-h-[70vh] overflow-auto"
     >
-      <!-- Available pairlists-->
-      <li
-        v-for="pairlist in availablePairlists"
-        :key="pairlist.name"
-        :class="{
-          'no-drag text-gray-500 hover:cursor-default':
-            pairlistStore.config.pairlists.length === 0 && !pairlist.is_pairlist_generator,
-        }"
-        class="flex text-start items-center py-2 px-3 hover:cursor-grab [.dragging]:bg-neutral-100 dark:[.dragging]:bg-neutral-900 [.dragging]:border [.dragging]:border-neutral-500"
-      >
-        <div class="flex grow items-start flex-col">
-          <span class="font-bold">{{ pairlist.name }}</span>
-          <span class="text-sm text-muted">{{ pairlist.description }}</span>
-        </div>
-        <UButton
-          color="neutral"
-          variant="ghost"
-          :disabled="pairlistStore.config.pairlists.length === 0 && !pairlist.is_pairlist_generator"
-          icon="mdi:arrow-right-bold-box-outline"
-          @click="pairlistStore.addToConfig(pairlist, pairlistStore.config.pairlists.length)"
-        />
-      </li>
-    </ul>
-    <div class="flex flex-col">
-      <PairlistConfigActions />
-      <div class="border rounded-sm border-neutral-500 p-2 mb-2">
-        <div class="flex items-center gap-2 my-2">
-          <span class="col-auto">Stake currency: </span>
-          <UInput v-model="pairlistStore.stakeCurrency" />
-        </div>
+      <ul ref="availablePairlistsEl" class="flex flex-col divide-y divide-default">
+        <li
+          v-for="pairlist in availablePairlists"
+          :key="pairlist.name"
+          :class="{
+            'no-drag opacity-50 hover:cursor-default':
+              pairlistStore.config.pairlists.length === 0 && !pairlist.is_pairlist_generator,
+          }"
+          class="flex items-start gap-2 px-4 py-2.5 hover:cursor-grab [.dragging]:bg-elevated"
+        >
+          <div class="flex min-w-0 grow flex-col">
+            <span class="font-medium text-highlighted">{{ pairlist.name }}</span>
+            <span class="text-xs text-muted">{{ pairlist.description }}</span>
+          </div>
+          <UButton
+            color="neutral"
+            variant="ghost"
+            size="sm"
+            :disabled="
+              pairlistStore.config.pairlists.length === 0 && !pairlist.is_pairlist_generator
+            "
+            icon="mdi:arrow-right"
+            :aria-label="`Add ${pairlist.name}`"
+            :title="`Add ${pairlist.name}`"
+            @click="pairlistStore.addToConfig(pairlist, pairlistStore.config.pairlists.length)"
+          />
+        </li>
+      </ul>
+    </PanelSection>
 
-        <div class="mb-2 border rounded-sm border-neutral-500 p-2 text-start">
-          <BaseCheckbox v-model="pairlistStore.customExchange" class="mb-2">
-            Custom Exchange
-          </BaseCheckbox>
-          <Transition name="fade">
+    <!-- 2. The pairlist being built -->
+    <div class="flex min-w-0 flex-col gap-4">
+      <PanelSection title="Your pairlist" body-class="flex flex-col gap-4 p-4">
+        <PairlistConfigActions />
+        <div class="grid gap-3 sm:grid-cols-2">
+          <UFormField label="Stake currency">
+            <UInput v-model="pairlistStore.stakeCurrency" class="w-full" />
+          </UFormField>
+          <div class="flex flex-col gap-2 sm:pt-6">
+            <BaseCheckbox v-model="pairlistStore.customExchange">Use another exchange</BaseCheckbox>
             <ExchangeSelect
               v-if="pairlistStore.customExchange"
               v-model="pairlistStore.selectedExchange"
             />
-          </Transition>
+          </div>
         </div>
-      </div>
-      <PairlistConfigBlacklist />
-      <UAlert
-        v-if="pairlistStore.config.pairlists.length > 0 && !pairlistStore.firstPairlistIsGenerator"
-        class="my-2"
-        color="warning"
-        title="Invalid configuration"
-        description="The first entry in the pairlist must be a Generating pairlist, like StaticPairList or
-          VolumePairList."
-      />
-      <div
-        ref="pairlistConfigsEl"
-        class="flex flex-col grow relative border rounded-sm border-neutral-500 p-1 gap-2 min-h-32"
-        :class="{ empty: configEmpty }"
-      >
-        <PairlistConfigItem
-          v-for="(pairlist, i) in pairlistStore.config.pairlists"
-          :key="pairlist.id"
-          v-model="pairlistStore.config.pairlists[i]!"
-          :index="i"
-          @remove="pairlistStore.removeFromConfig"
+        <PairlistConfigBlacklist />
+        <UAlert
+          v-if="
+            pairlistStore.config.pairlists.length > 0 && !pairlistStore.firstPairlistIsGenerator
+          "
+          color="warning"
+          icon="mdi:alert-outline"
+          title="The first step must generate pairs"
+          description="Start with a generating pairlist such as StaticPairList or VolumePairList."
         />
-      </div>
+        <div class="flex flex-col gap-1.5">
+          <h3 class="text-sm font-medium text-muted">Steps, applied top to bottom</h3>
+          <div
+            ref="pairlistConfigsEl"
+            class="relative flex min-h-32 flex-col gap-2 rounded-md border border-dashed border-default p-2"
+            :class="{ empty: configEmpty }"
+          >
+            <PairlistConfigItem
+              v-for="(pairlist, i) in pairlistStore.config.pairlists"
+              :key="pairlist.id"
+              v-model="pairlistStore.config.pairlists[i]!"
+              :index="i"
+              @remove="pairlistStore.removeFromConfig"
+            />
+          </div>
+        </div>
+      </PanelSection>
     </div>
-    <div class="flex flex-col w-full min-w-72">
-      <USegmentedControl
-        v-model="selectedView"
-        class="mb-2"
-        label-key="value"
-        value-key="value"
-        size="md"
-        :items="[
-          { value: 'Config' },
-          { value: 'Results', disabled: pairlistStore.whitelist.length === 0 },
-        ]"
-        disabled-key="disabled"
-      >
-      </USegmentedControl>
+
+    <!-- 3. Output -->
+    <PanelSection title="Output" body-class="flex flex-col gap-3 p-4">
+      <template #actions>
+        <USegmentedControl
+          v-model="selectedView"
+          label-key="label"
+          value-key="value"
+          size="xs"
+          :items="[
+            { label: 'Config', value: 'Config' },
+            { label: 'Pairs', value: 'Results', disabled: pairlistStore.whitelist.length === 0 },
+          ]"
+          disabled-key="disabled"
+        />
+      </template>
+      <p class="text-xs text-muted">
+        {{
+          selectedView === 'Config'
+            ? 'Copy this into the pairlists section of your config.'
+            : `${pairlistStore.whitelist.length} pairs from the last evaluation.`
+        }}
+      </p>
       <div class="relative overflow-auto">
         <CopyableTextfield
           v-if="selectedView === 'Config'"
@@ -176,18 +197,19 @@ if (pairlistStore.whitelist.length > 0) {
           :content="pairlistStore.whitelist"
         />
       </div>
-    </div>
+    </PanelSection>
   </div>
 </template>
 
 <style lang="scss" scoped>
-.empty:after {
-  content: 'Drag pairlist here';
+.empty::after {
+  content: 'Drag a filter here to start your pairlist';
   position: absolute;
-  align-self: center;
-  font-size: 1.1rem;
-  text-transform: uppercase;
-  line-height: 0;
-  top: 50%;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ui-text-muted);
+  font-size: 0.875rem;
 }
 </style>

@@ -426,9 +426,6 @@ declare global {
   export type { BotSubStore, SubStores } from './stores/ftbotwrapper'
   import('./stores/ftbotwrapper')
   // @ts-ignore
-  export type { TradeLayout, DashboardLayout } from './stores/layout'
-  import('./stores/layout')
-  // @ts-ignore
   export type { OpenTradeVizOptions } from './stores/settings'
   import('./stores/settings')
   // @ts-ignore
@@ -445,13 +442,11 @@ declare module 'vue' {
   interface GlobalComponents {}
   interface ComponentCustomProperties {
     readonly ColorPreferences: UnwrapRef<typeof import('./stores/colors')['ColorPreferences']>
-    readonly DashboardLayout: UnwrapRef<typeof import('./stores/layout')['DashboardLayout']>
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
     readonly OpenTradeVizOptions: UnwrapRef<typeof import('./stores/settings')['OpenTradeVizOptions']>
     readonly ROUND_CLOSER: UnwrapRef<typeof import('./utils/roundTimeframe')['ROUND_CLOSER']>
     readonly ROUND_DOWN: UnwrapRef<typeof import('./utils/roundTimeframe')['ROUND_DOWN']>
     readonly ROUND_UP: UnwrapRef<typeof import('./utils/roundTimeframe')['ROUND_UP']>
-    readonly TradeLayout: UnwrapRef<typeof import('./stores/layout')['TradeLayout']>
     readonly acceptHMRUpdate: UnwrapRef<typeof import('pinia')['acceptHMRUpdate']>
     readonly asyncComputed: UnwrapRef<typeof import('@vueuse/core')['asyncComputed']>
     readonly autoResetRef: UnwrapRef<typeof import('@vueuse/core')['autoResetRef']>
@@ -499,7 +494,6 @@ declare module 'vue' {
     readonly extendLocale: UnwrapRef<typeof import('../node_modules/.pnpm/@nuxt+ui@4.7.1_@internationalized+date@3.12.1_@internationalized+number@3.6.5_@tiptap+e_d252990ae8514e56e05fa998899efb73/node_modules/@nuxt/ui/dist/runtime/composables/defineLocale')['extendLocale']>
     readonly extendRef: UnwrapRef<typeof import('@vueuse/core')['extendRef']>
     readonly extractShortcuts: UnwrapRef<typeof import('../node_modules/.pnpm/@nuxt+ui@4.7.1_@internationalized+date@3.12.1_@internationalized+number@3.6.5_@tiptap+e_d252990ae8514e56e05fa998899efb73/node_modules/@nuxt/ui/dist/runtime/composables/defineShortcuts')['extractShortcuts']>
-    readonly findGridLayout: UnwrapRef<typeof import('./stores/layout')['findGridLayout']>
     readonly fmtEntryPrice: UnwrapRef<typeof import('./composables/useNextEntry')['fmtEntryPrice']>
     readonly fmtGap: UnwrapRef<typeof import('./composables/useNextEntry')['fmtGap']>
     readonly formatDecimal: UnwrapRef<typeof import('./utils/formatters/numberformat')['formatDecimal']>
@@ -709,7 +703,6 @@ declare module 'vue' {
     readonly useFullscreen: UnwrapRef<typeof import('@vueuse/core')['useFullscreen']>
     readonly useGamepad: UnwrapRef<typeof import('@vueuse/core')['useGamepad']>
     readonly useGeolocation: UnwrapRef<typeof import('@vueuse/core')['useGeolocation']>
-    readonly useGridReady: UnwrapRef<typeof import('./composables/useGridReady')['useGridReady']>
     readonly useId: UnwrapRef<typeof import('vue')['useId']>
     readonly useIdle: UnwrapRef<typeof import('@vueuse/core')['useIdle']>
     readonly useImage: UnwrapRef<typeof import('@vueuse/core')['useImage']>
@@ -720,7 +713,6 @@ declare module 'vue' {
     readonly useKbd: UnwrapRef<typeof import('../node_modules/.pnpm/@nuxt+ui@4.7.1_@internationalized+date@3.12.1_@internationalized+number@3.6.5_@tiptap+e_d252990ae8514e56e05fa998899efb73/node_modules/@nuxt/ui/dist/runtime/composables/useKbd')['useKbd']>
     readonly useKeyModifier: UnwrapRef<typeof import('@vueuse/core')['useKeyModifier']>
     readonly useLastChanged: UnwrapRef<typeof import('@vueuse/core')['useLastChanged']>
-    readonly useLayoutStore: UnwrapRef<typeof import('./stores/layout')['useLayoutStore']>
     readonly useLink: UnwrapRef<typeof import('vue-router')['useLink']>
     readonly useLocalStorage: UnwrapRef<typeof import('@vueuse/core')['useLocalStorage']>
     readonly useLoginDialog: UnwrapRef<typeof import('./composables/useLoginDialog')['useLoginDialog']>

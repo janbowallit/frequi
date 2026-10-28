@@ -40,7 +40,9 @@ const tradingTabItems = computed<TabsItem[]>(() => [
 </script>
 
 <template>
-  <div class="flex min-h-full flex-col text-left lg:grid lg:h-full lg:grid-cols-[18.5rem_minmax(0,1fr)]">
+  <div
+    class="flex min-h-full flex-col text-left lg:grid lg:h-full lg:grid-cols-[18.5rem_minmax(0,1fr)]"
+  >
     <!-- Rail: controls and pairs -->
     <aside
       aria-label="Bot"
@@ -53,8 +55,8 @@ const tradingTabItems = computed<TabsItem[]>(() => [
         <h2 class="px-4 pt-3 text-sm font-semibold text-highlighted">Pairs</h2>
         <div class="min-h-0 flex-1 overflow-auto">
           <PairSummary
-          :pairlist="botStore.activeBot.whitelist"
-          :current-locks="botStore.activeBot.activeLocks"
+            :pairlist="botStore.activeBot.whitelist"
+            :current-locks="botStore.activeBot.activeLocks"
             :trades="botStore.activeBot.openTrades"
           />
         </div>

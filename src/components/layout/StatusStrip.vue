@@ -113,7 +113,8 @@ const maxTrades = computed(() => bot.value?.botState?.max_open_trades ?? 0);
             class="ms-1 font-medium"
             :class="openProfit >= 0 ? 'text-(--color-profit)' : 'text-(--color-loss)'"
           >
-            {{ openProfit > 0 ? '+' : '' }}{{ formatPriceCurrency(openProfit, stakeCurrency, decimals) }}
+            {{ openProfit > 0 ? '+' : ''
+            }}{{ formatPriceCurrency(openProfit, stakeCurrency, decimals) }}
           </span>
         </RouterLink>
         <span

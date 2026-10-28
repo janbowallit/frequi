@@ -384,7 +384,11 @@ function editBotLogin(botId: string) {
                   </UButton>
                 </section>
 
-                <section v-if="botStore.hasBots" class="flex flex-col gap-2" aria-labelledby="mobile-bot">
+                <section
+                  v-if="botStore.hasBots"
+                  class="flex flex-col gap-2"
+                  aria-labelledby="mobile-bot"
+                >
                   <h2 id="mobile-bot" class="px-2.5 text-sm font-medium text-muted">Bot</h2>
                   <div
                     class="flex items-center justify-between gap-2 rounded-md border border-default p-3"

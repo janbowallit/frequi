@@ -34,39 +34,46 @@ const filteredList = computed(() =>
 const columns: TableColumn<BacktestHistoryEntry>[] = [
   { accessorKey: 'strategy', header: 'Strategy' },
   { accessorKey: 'timeframe', header: 'Details' },
-  { accessorKey: 'backtest_start_time', header: 'Backtest Time' },
+  { accessorKey: 'backtest_start_time', header: 'Run at' },
   { accessorKey: 'filename', header: 'Filename' },
-  { id: 'actions', header: 'Actions' },
+  { id: 'actions', header: '' },
 ];
 </script>
 
 <template>
-  <div>
-    <UButton
-      class="float-end"
-      title="Refresh"
-      aria-label="Refresh"
-      variant="outline"
-      color="neutral"
-      icon="mdi:refresh"
-      @click="botStore.activeBot.getBacktestHistory"
-    />
-    <p>
-      Load Historic results from disk. You can click on multiple results to load all of them into
-      freqUI.
+  <div class="flex flex-col gap-3 text-left">
+    <p class="text-sm text-muted">
+      Results saved on the bot's disk. Click a row to load it; you can load several to compare.
     </p>
-    <div v-if="botStore.activeBot.backtestHistoryList.length > 0" class="flex align-center">
+    <div class="flex items-center gap-2">
       <UInput
-        id="trade-filter"
+        v-if="botStore.activeBot.backtestHistoryList.length > 0"
         v-model="filterText"
-        type="text"
-        placeholder="Filter results"
-        title="Filter results"
+        type="search"
+        icon="mdi:magnify"
+        placeholder="Filter by strategy or file"
+        aria-label="Filter results"
+        class="flex-1"
+      />
+      <UButton
+        title="Refresh"
+        aria-label="Refresh"
+        variant="outline"
+        color="neutral"
+        icon="mdi:refresh"
+        class="ms-auto"
+        @click="botStore.activeBot.getBacktestHistory"
       />
     </div>
+    <EmptyState
+      v-if="botStore.activeBot.backtestHistoryList.length === 0"
+      title="No saved results"
+      description="Results appear here after a backtest finishes."
+      icon="mdi:history"
+    />
     <UTable
       v-if="botStore.activeBot.backtestHistoryList.length > 0"
-      class="mt-2 h-[80dvh]"
+      class="max-h-[70dvh]"
       :data="filteredList"
       :columns="columns"
       :virtualize="{ estimateSize: 38, overscan: 12 }"

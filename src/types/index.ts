@@ -10,7 +10,6 @@ export * from './daily';
 export * from './downloadData';
 export * from './exchange';
 export * from './features';
-export * from './gridLayout';
 export * from './locks';
 export * from './pairlists';
 export * from './plot';

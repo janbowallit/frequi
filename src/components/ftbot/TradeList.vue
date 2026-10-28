@@ -236,7 +236,6 @@ const rowSelection = computed({
       }"
       @select="onRowSelect"
     >
-
       <template #trade_id-cell="{ row }">
         {{ row.original.trade_id }}
         {{

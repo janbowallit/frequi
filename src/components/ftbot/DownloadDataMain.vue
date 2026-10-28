@@ -95,142 +95,115 @@ async function startDownload() {
 </script>
 
 <template>
-  <div class="px-1 mx-auto w-full max-w-4xl lg:max-w-7xl">
-    <BackgroundJobTracking class="mb-4" />
-    <DraggableContainer header="Downloading Data" class="mx-1 p-4">
-      <div class="flex mb-3 gap-3 flex-col">
-        <div class="flex flex-col gap-3">
-          <div class="flex flex-col lg:flex-row gap-3">
-            <!-- Pairs section - keeping template buttons next to input -->
-            <div class="flex-fill">
-              <div class="flex flex-col gap-2">
-                <div class="flex justify-between">
-                  <h4 class="text-start font-bold text-lg">Select Pairs</h4>
-                  <h5 class="text-start font-bold text-lg">Pairs from template</h5>
-                </div>
-                <div class="flex gap-2">
-                  <BaseStringList v-model="pairs" placeholder="Pair" class="grow" />
-                  <div class="flex flex-col gap-1">
-                    <div class="flex flex-col gap-1">
-                      <UButton
-                        v-for="pt in pairTemplates"
-                        :key="pt.idx"
-                        color="neutral"
-                        :title="pt.pairs.reduce((acc, p) => `${acc}${p}\n`, '')"
-                        @click="addPairs(pt.pairs)"
-                      >
-                        {{ pt.description }}
-                      </UButton>
-                    </div>
-                    <USeparator />
-                    <UButton
-                      :disabled="pairlistStore.whitelist.length === 0"
-                      title="Add all pairs from Pairlist Config - requires the pairlist config to have ran first."
-                      color="neutral"
-                      @click="replacePairs(pairlistStore.whitelist)"
-                    >
-                      Use Pairs from Pairlist Config
-                    </UButton>
-                  </div>
-                </div>
-              </div>
-            </div>
+  <div class="flex w-full flex-col gap-4 text-left">
+    <BackgroundJobTracking />
 
-            <!-- Timeframes section -->
-            <div class="flex-fill px-3">
-              <div class="flex flex-col gap-2">
-                <h4 class="text-start font-bold text-lg">Select timeframes</h4>
-                <BaseStringList v-model="timeframes" placeholder="Timeframe" />
-              </div>
-            </div>
-          </div>
-
-          <!-- Time selection section -->
-          <div class="px-3 border dark:border-neutral-700 border-neutral-300 p-2 rounded-sm">
-            <div class="flex flex-col gap-2">
-              <div class="flex justify-between items-center">
-                <h4 class="text-start mb-0 font-bold text-lg">Time Selection</h4>
-                <BaseCheckbox v-model="timeSelection.useCustomTimerange" class="mb-0" switch>
-                  Use custom timerange
-                </BaseCheckbox>
-              </div>
-
-              <div v-if="timeSelection.useCustomTimerange">
-                <TimeRangeSelect v-model="timeSelection.timerange" />
-              </div>
-              <div v-else class="flex items-center gap-2">
-                <label>Days to download:</label>
-                <UInputNumber
-                  v-model="timeSelection.days"
-                  aria-label="Days to download"
-                  :min="1"
-                  :step="1"
-                />
-              </div>
-            </div>
-          </div>
-          <!-- Advanced options section -->
-          <BaseCollapsible title="Advanced options" v-model:open="isAdvancedOpen">
-            <UAlert
-              color="info"
-              class="my-2 py-2"
-              description="Advanced options (Erase data, Download trades, and Custom Exchange settings) will only
-              be applied when this section is expanded."
-            />
-            <div
-              class="mb-2 border dark:border-neutral-700 border-neutral-300 rounded-md p-2 text-start"
-            >
-              <BaseCheckbox v-model="advancedOptions.erase" class="mb-2"
-                >Erase existing data</BaseCheckbox
-              >
-              <BaseCheckbox
-                v-model="advancedOptions.prepend_data"
-                class="mb-2"
-                v-if="botStore.activeBot.botFeatures.downloadDataPrepend"
-                >Prepend data when downloading</BaseCheckbox
-              >
-              <BaseCheckbox v-model="advancedOptions.downloadTrades" class="mb-2">
-                Download Trades instead of OHLCV data
-              </BaseCheckbox>
-              <div class="grid grid-cols md:grid-cols-2 items-center gap-2">
-                <USelectMenu
-                  multiple
-                  v-if="botStore.activeBot.botFeatures.downloadDataCandleTypes"
-                  v-model="advancedOptions.candleTypes"
-                  :items="candleTypes"
-                  placeholder="Select Candle Types"
-                  value-key="value"
-                />
-                <small
-                  >When no candle-type is selected, freqtrade will download the necessary candle
-                  types for regular operation automatically.</small
-                >
-              </div>
-            </div>
-            <div
-              class="mb-2 border dark:border-neutral-700 border-neutral-300 rounded-md p-2 text-start"
-            >
-              <UCollapsible v-model:open="exchange.customExchange">
-                <BaseCheckbox v-model="exchange.customExchange" class="mb-2">
-                  Custom Exchange
-                </BaseCheckbox>
-                <template #content>
-                  <ExchangeSelect
-                    v-show="exchange.customExchange"
-                    v-model="exchange.selectedExchange"
-                  />
-                </template>
-              </UCollapsible>
-            </div>
-          </BaseCollapsible>
-
-          <div class="px-3">
-            <UButton variant="solid" icon="mdi:download" @click="startDownload"
-              >Start Download</UButton
-            >
-          </div>
+    <form class="panel flex flex-col divide-y divide-default" @submit.prevent="startDownload">
+      <!-- Pairs -->
+      <section class="flex flex-col gap-3 p-5" aria-labelledby="dl-pairs">
+        <div>
+          <h2 id="dl-pairs" class="text-base font-semibold text-highlighted">Pairs</h2>
+          <p class="text-sm text-muted">Type pairs one per row, or add a set.</p>
         </div>
+        <div class="flex flex-wrap gap-2">
+          <UButton
+            v-for="pt in pairTemplates"
+            :key="pt.idx"
+            color="neutral"
+            variant="outline"
+            size="sm"
+            icon="mdi:plus"
+            :title="pt.pairs.join('\n')"
+            :label="pt.description"
+            @click="addPairs(pt.pairs)"
+          />
+          <UButton
+            color="neutral"
+            variant="outline"
+            size="sm"
+            icon="mdi:format-list-numbered"
+            label="Pairs from the pairlist builder"
+            :disabled="pairlistStore.whitelist.length === 0"
+            title="Replace the list with the result of the last pairlist evaluation"
+            @click="replacePairs(pairlistStore.whitelist)"
+          />
+        </div>
+        <BaseStringList v-model="pairs" placeholder="e.g. BTC/USDT" />
+      </section>
+
+      <!-- Timeframes -->
+      <section class="flex flex-col gap-3 p-5" aria-labelledby="dl-timeframes">
+        <h2 id="dl-timeframes" class="text-base font-semibold text-highlighted">Timeframes</h2>
+        <BaseStringList v-model="timeframes" placeholder="e.g. 1h" />
+      </section>
+
+      <!-- Time range -->
+      <section class="flex flex-col gap-3 p-5" aria-labelledby="dl-range">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <h2 id="dl-range" class="text-base font-semibold text-highlighted">Time range</h2>
+          <BaseCheckbox v-model="timeSelection.useCustomTimerange">Pick exact dates</BaseCheckbox>
+        </div>
+        <TimeRangeSelect
+          v-if="timeSelection.useCustomTimerange"
+          v-model="timeSelection.timerange"
+        />
+        <UFormField v-else label="Days back from today">
+          <UInputNumber
+            v-model="timeSelection.days"
+            aria-label="Days to download"
+            :min="1"
+            :step="1"
+            class="w-40"
+          />
+        </UFormField>
+      </section>
+
+      <!-- Advanced -->
+      <section class="p-5">
+        <BaseCollapsible v-model:open="isAdvancedOpen" title="Advanced options">
+          <div class="flex flex-col gap-3 pt-3">
+            <p class="text-sm text-muted">These options apply only while this section is open.</p>
+            <BaseCheckbox v-model="advancedOptions.erase">Erase existing data first</BaseCheckbox>
+            <BaseCheckbox
+              v-if="botStore.activeBot.botFeatures.downloadDataPrepend"
+              v-model="advancedOptions.prepend_data"
+            >
+              Add older data in front of what's there
+            </BaseCheckbox>
+            <BaseCheckbox v-model="advancedOptions.downloadTrades">
+              Download trades instead of candles
+            </BaseCheckbox>
+            <UFormField
+              v-if="botStore.activeBot.botFeatures.downloadDataCandleTypes"
+              label="Candle types"
+              help="Leave empty to download what normal operation needs."
+            >
+              <USelectMenu
+                v-model="advancedOptions.candleTypes"
+                multiple
+                :items="candleTypes"
+                placeholder="Automatic"
+                value-key="value"
+                class="w-full sm:w-80"
+              />
+            </UFormField>
+            <UCollapsible v-model:open="exchange.customExchange" class="flex flex-col gap-2">
+              <BaseCheckbox v-model="exchange.customExchange">Use another exchange</BaseCheckbox>
+              <template #content>
+                <ExchangeSelect v-model="exchange.selectedExchange" />
+              </template>
+            </UCollapsible>
+          </div>
+        </BaseCollapsible>
+      </section>
+
+      <div class="flex items-center justify-end gap-3 p-4">
+        <span class="text-sm text-muted tabular-nums">
+          {{ pairs.filter(Boolean).length }} pairs, {{ timeframes.filter(Boolean).length }}
+          timeframes
+        </span>
+        <UButton type="submit" variant="solid" icon="mdi:download" label="Download candles" />
       </div>
-    </DraggableContainer>
+    </form>
   </div>
 </template>

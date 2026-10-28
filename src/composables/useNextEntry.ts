@@ -176,9 +176,7 @@ function useNextEntryState() {
   );
   const candidates = computed(() => pairs.value.filter((r) => !r.inTrade));
 
-  const latestCandleTs = computed(() =>
-    Math.max(0, ...results.value.map((r) => r.candleTs || 0)),
-  );
+  const latestCandleTs = computed(() => Math.max(0, ...results.value.map((r) => r.candleTs || 0)));
   /** The bot checks entries again when the next candle closes */
   const nextCandleClose = computed(() =>
     latestCandleTs.value ? latestCandleTs.value + 2 * timeframeMs.value : null,
@@ -236,7 +234,11 @@ function useNextEntryState() {
     }
     const closest = candidates.value[0];
     if (!closest) {
-      return { title: 'No free pair', detail: 'Every pair already has an open trade.', tone: 'blocked' };
+      return {
+        title: 'No free pair',
+        detail: 'Every pair already has an open trade.',
+        tone: 'blocked',
+      };
     }
     const missing = unmetConditions(closest);
     return {

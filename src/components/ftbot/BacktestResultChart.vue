@@ -106,13 +106,13 @@ onMounted(() => {
         />
       </Transition>
     </div>
-    <DraggableContainer header="Single trades" class="row mt-2 w-full">
+    <PanelSection title="Single trades" class="mt-3 w-full">
       <TradeList
         class="row trade-history mt-2 w-full"
         :trades="backtestResult.trades"
         :show-filter="true"
       />
-    </DraggableContainer>
+    </PanelSection>
   </div>
 </template>
 

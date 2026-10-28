@@ -101,63 +101,52 @@ watch(
 </script>
 
 <template>
-  <div class="flex flex-col h-full">
-    <!-- <div v-if="isWebserverMode" class="me-auto ms-3"> -->
-    <!-- Currently only available in Webserver mode -->
-    <!-- <b-form-checkbox v-model="historicView">HistoricData</b-form-checkbox> -->
-    <!-- </div> -->
-    <div v-if="botStore.activeBot.isWebserverMode" class="md:mx-3 mt-2 px-1">
-      <UCard :ui="{ body: 'p-3 sm:p-3' }">
-        <div class="flex items-center gap-2 mb-1">
-          <span class="text-xl font-bold">Settings</span>
-          <InfoBox
-            hint="These settings only apply to the chart view and do not affect the bot's actual configuration or behavior."
-          />
-        </div>
-        <div
-          class="mb-2 border dark:border-neutral-700 border-neutral-300 rounded-md p-2 text-start"
+  <div class="flex h-full flex-col gap-3 p-0 text-left md:p-3">
+    <!-- Webserver mode: pick what to plot (only affects this chart, not the bot) -->
+    <section
+      v-if="botStore.activeBot.isWebserverMode"
+      aria-labelledby="chart-source"
+      class="panel flex flex-col gap-3 p-4"
+    >
+      <div class="flex items-center gap-2">
+        <h2 id="chart-source" class="text-sm font-semibold text-highlighted">Chart data</h2>
+        <InfoBox
+          hint="These choices only change this chart. The bot's configuration stays as it is."
+        />
+      </div>
+      <div class="grid gap-3 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,2fr)]">
+        <UFormField label="Strategy">
+          <StrategySelect v-model="chartStore.strategy" />
+        </UFormField>
+        <UFormField label="Timeframe">
+          <TimeframeSelect v-model="chartStore.selectedTimeframe" />
+        </UFormField>
+        <TimeRangeSelect v-model="chartStore.timerange" />
+      </div>
+      <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+        <BaseCheckbox
+          v-if="botStore.activeBot.botFeatures.chartLiveData"
+          v-model="chartStore.useLiveData"
+          title="Use live data from the exchange. Only use if you don't have data downloaded locally."
         >
-          <UCollapsible v-model:open="exchange.customExchange">
-            <div class="flex flex-row gap-5 items-center">
-              <BaseCheckbox v-model="exchange.customExchange">Custom Exchange</BaseCheckbox>
-              <span v-show="!exchange.customExchange" class="text-sm">
-                Current Exchange:
-                {{ botStore.activeBot.botState.exchange }}
-                {{ botStore.activeBot.botState.trading_mode }}
-              </span>
-            </div>
-            <template #content>
-              <ExchangeSelect v-model="exchange.selectedExchange" class="mt-2" />
-            </template>
-          </UCollapsible>
-          <Transition name="fade"> </Transition>
-        </div>
-        <div class="grid grid-cols-3 md:grid-cols-5 mx-1 gap-1 md:gap-2">
-          <div class="text-start md:me-1 col-span-2">
-            <span>Strategy</span>
-            <StrategySelect v-model="chartStore.strategy" class="mt-1 mb-1"></StrategySelect>
-            <BaseCheckbox
-              v-if="botStore.activeBot.botFeatures.chartLiveData"
-              v-model="chartStore.useLiveData"
-              class="align-self-center"
-              title="Use live data from the exchange. Only use if you don't have data downloaded locally."
-            >
-              Use Live Data
-            </BaseCheckbox>
+          Use live exchange data
+        </BaseCheckbox>
+        <UCollapsible v-model:open="exchange.customExchange" class="flex flex-col gap-2">
+          <div class="flex flex-wrap items-center gap-3">
+            <BaseCheckbox v-model="exchange.customExchange">Use another exchange</BaseCheckbox>
+            <span v-show="!exchange.customExchange" class="text-muted">
+              Now: {{ botStore.activeBot.botState.exchange }}
+              {{ botStore.activeBot.botState.trading_mode }}
+            </span>
           </div>
-          <div class="flex flex-col text-start">
-            <span>Timeframe</span>
-            <TimeframeSelect v-model="chartStore.selectedTimeframe" class="mt-1" />
-          </div>
-          <TimeRangeSelect
-            v-model="chartStore.timerange"
-            class="col-span-3 md:col-span-2"
-          ></TimeRangeSelect>
-        </div>
-      </UCard>
-    </div>
+          <template #content>
+            <ExchangeSelect v-model="exchange.selectedExchange" />
+          </template>
+        </UCollapsible>
+      </div>
+    </section>
 
-    <div class="md:mx-2 mt-2 pb-1 h-full">
+    <section aria-label="Chart" class="min-h-0 flex-1 overflow-hidden bg-default md:panel">
       <CandleChartContainer
         :available-pairs="availablePairs"
         :historic-view="botStore.activeBot.isWebserverMode"
@@ -166,8 +155,7 @@ watch(
         :timerange="botStore.activeBot.isWebserverMode ? chartStore.timerange : undefined"
         :strategy="botStore.activeBot.isWebserverMode ? chartStore.strategy : undefined"
         @refresh-data="refreshOHLCV"
-      >
-      </CandleChartContainer>
-    </div>
+      />
+    </section>
   </div>
 </template>

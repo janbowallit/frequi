@@ -146,7 +146,8 @@ export default defineConfig({
         icons: uiIcons,
         colors: {
           primary: 'brass',
-          neutral: 'graphite',
+          // Custom scale from tailwind.css - works at runtime, but the type only lists Tailwind's grays
+          neutral: 'graphite' as 'slate',
         },
         alert: {
           defaultVariants: {

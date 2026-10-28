@@ -75,7 +75,7 @@ onMounted(() => {
     <!-- Whitelist -->
     <section aria-labelledby="whitelist-heading" class="flex flex-col gap-2 p-3">
       <div class="flex items-baseline justify-between gap-2">
-        <h4 id="whitelist-heading" class="text-xs font-semibold uppercase tracking-wide text-muted">
+        <h4 id="whitelist-heading" class="text-sm font-medium text-muted">
           Whitelist
           <span class="ms-1 font-normal normal-case tabular-nums">
             ({{ botStore.activeBot.whitelist.length }})
@@ -104,10 +104,7 @@ onMounted(() => {
     <!-- Blacklist -->
     <section aria-labelledby="blacklist-heading" class="flex flex-col gap-2 p-3">
       <div class="flex min-h-8 items-center gap-2">
-        <h4
-          id="blacklist-heading"
-          class="me-auto text-xs font-semibold uppercase tracking-wide text-muted"
-        >
+        <h4 id="blacklist-heading" class="me-auto text-sm font-medium text-muted">
           Blacklist
           <span class="ms-1 font-normal normal-case tabular-nums">
             ({{ botStore.activeBot.blacklist.length }})

@@ -427,12 +427,7 @@ const statusColor: Record<CheckStatus, string> = {
 
       <!-- Signal history -->
       <section aria-labelledby="signal-history-heading" class="flex flex-col gap-2">
-        <h3
-          id="signal-history-heading"
-          class="text-xs font-semibold uppercase tracking-wide text-muted"
-        >
-          Signal history
-        </h3>
+        <h3 id="signal-history-heading" class="text-sm font-medium text-muted">Signal history</h3>
         <div
           class="flex h-6 items-stretch gap-px"
           role="img"

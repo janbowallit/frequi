@@ -15,16 +15,27 @@ withDefaults(
 </script>
 
 <template>
-  <div class="flex flex-col me-2 text-start">
-    <div class="font-bold">
-      {{ backtestResult.metadata.strategyName }} - {{ backtestResult.strategy.timeframe }}
-    </div>
-    <div class="text-sm font-normal">
-      TradeCount: {{ backtestResult.strategy.total_trades }} - Profit:
-      {{ formatPercent(backtestResult.strategy.profit_total) }}
-    </div>
-    <div v-if="canUseModify" class="text-sm font-normal" style="white-space: pre-wrap">
+  <div class="flex min-w-0 flex-col text-start">
+    <p class="truncate font-medium text-highlighted">
+      {{ backtestResult.metadata.strategyName }}
+      <span class="font-normal text-muted">{{ backtestResult.strategy.timeframe }}</span>
+    </p>
+    <p class="text-xs text-muted tabular-nums">
+      {{ backtestResult.strategy.total_trades }} trades,
+      <span
+        :class="
+          backtestResult.strategy.profit_total >= 0
+            ? 'text-(--color-profit)'
+            : 'text-(--color-loss)'
+        "
+        >{{ formatPercent(backtestResult.strategy.profit_total) }}</span
+      >
+    </p>
+    <p
+      v-if="canUseModify && backtestResult.metadata.notes"
+      class="text-xs whitespace-pre-wrap text-muted"
+    >
       {{ backtestResult.metadata.notes }}
-    </div>
+    </p>
   </div>
 </template>

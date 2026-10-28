@@ -119,7 +119,7 @@ function scrollToBottom() {
 
 <template>
   <section
-    class="relative flex h-full flex-col overflow-hidden rounded-xl border border-default bg-default text-left"
+    class="panel relative flex h-full flex-col overflow-hidden text-left"
     aria-label="Bot logs"
   >
     <div class="flex flex-wrap items-center gap-2 border-b border-default px-3 py-2">
@@ -209,7 +209,9 @@ function scrollToBottom() {
           >
         </span>
         <span class="min-w-0 break-words whitespace-pre-wrap">
-          <span class="me-2 text-muted">{{ log[2] }}</span>
+          <span class="me-2 text-muted" :title="log[2]">{{
+            log[2].replace(/^freqtrade\./, '')
+          }}</span>
           <span class="text-default">{{ log[4] }}</span>
         </span>
       </div>

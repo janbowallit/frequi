@@ -103,8 +103,8 @@ onMounted(() => {
 
 <template>
   <div>
-    <div class="flex gap-2">
-      <UFormField label="Start Date">
+    <div class="grid grid-cols-2 gap-3">
+      <UFormField label="Start date">
         <UInput id="dateFrom" v-model="dateFromText" placeholder="yyyy-mm-dd" class="flex-1">
           <template #trailing>
             <UButton
@@ -129,8 +129,8 @@ onMounted(() => {
           </template>
         </UInput>
       </UFormField>
-      <UFormField label="End Date">
-        <UInput id="dateTo" v-model="dateToText" placeholder="yyyy-mm-dd" class="flex-1">
+      <UFormField label="End date">
+        <UInput id="dateTo" v-model="dateToText" placeholder="Today" class="flex-1">
           <template #trailing>
             <UButton
               v-if="dateToText"
@@ -156,8 +156,8 @@ onMounted(() => {
       </UFormField>
     </div>
 
-    <div class="mt-1 text-start">
-      Timerange: <b>{{ timeRange }}</b>
-    </div>
+    <p class="mt-1.5 text-start text-xs text-muted">
+      Time range <span class="font-medium text-default tabular-nums">{{ timeRange }}</span>
+    </p>
   </div>
 </template>

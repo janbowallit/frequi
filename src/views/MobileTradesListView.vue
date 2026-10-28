@@ -9,7 +9,7 @@ const botStore = useBotStore();
   <div class="mx-auto flex w-full max-w-3xl flex-col gap-3 p-3">
     <template v-if="!botStore.activeBot.detailTradeId">
       <PageHeader
-        :title="history ? 'Trade history' : 'Open trades'"
+        :title="history ? 'Closed trades' : 'Open trades'"
         :description="
           history
             ? `${botStore.activeBot.closedTrades.length} closed trades`
@@ -17,7 +17,7 @@ const botStore = useBotStore();
         "
         :icon="history ? 'mdi:history' : 'mdi:swap-horizontal-bold'"
       />
-      <div class="overflow-hidden rounded-xl border border-default bg-default">
+      <div class="panel overflow-hidden">
         <CustomTradeList
           v-if="!history"
           :trades="botStore.activeBot.openTrades"
@@ -47,7 +47,7 @@ const botStore = useBotStore();
         label="Back to trades"
         icon="mdi:arrow-left"
       />
-      <div class="overflow-hidden rounded-xl border border-default bg-default">
+      <div class="panel overflow-hidden">
         <TradeDetail
           :trade="botStore.activeBot.tradeDetail"
           :stake-currency="botStore.activeBot.stakeCurrency"

@@ -5,7 +5,6 @@ import { addCollection } from '@iconify/vue';
 import mdiIcons from 'virtual:mdi-icons';
 
 import App from './App.vue';
-import { VueDraggableGrid } from './plugins/vue-grid-layout';
 import router from './router';
 import './styles/tailwind.css';
 
@@ -21,7 +20,6 @@ myApp.use(pinia);
 myApp.use(ui);
 
 myApp.use(router);
-myApp.use(VueDraggableGrid);
 
 // Vue.config.productionTip = false;
 myApp.mount('#app');

@@ -65,10 +65,7 @@ function stopEditBot(botId: string) {
 <template>
   <div v-if="botStore.botCount > 0" class="w-full">
     <h3 v-if="!small && !embedded" class="mb-2 text-lg font-semibold">Available bots</h3>
-    <ul
-      ref="sortContainer"
-      class="flex flex-col divide-y divide-default overflow-hidden rounded-xl border border-default bg-default"
-    >
+    <ul ref="sortContainer" class="panel flex flex-col divide-y divide-default overflow-hidden">
       <li
         v-for="bot in botListComp"
         :key="bot.botId"

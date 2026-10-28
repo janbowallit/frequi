@@ -116,23 +116,21 @@ const tableColumns = computed(() => {
 });
 </script>
 <template>
-  <DraggableContainer>
-    <template #header>
-      <div class="flex flex-row w-full justify-between items-center text-">
-        {{ title }}
-        <div>
-          Shown metrics:
-          <USelectMenu
-            multiple
-            id="backtestMetrics"
-            v-model="settingsStore.backtestAdditionalMetrics"
-            :items="availableBacktestMetrics"
-            label-key="header"
-            value-key="field"
-          />
-        </div>
-      </div>
+  <PanelSection :title="title">
+    <template #actions>
+      <USelectMenu
+        v-model="settingsStore.backtestAdditionalMetrics"
+        multiple
+        :items="availableBacktestMetrics"
+        label-key="header"
+        value-key="field"
+        placeholder="Columns"
+        aria-label="Columns to show"
+        size="sm"
+        class="w-48"
+        icon="mdi:table-column"
+      />
     </template>
     <UTable :data="tableItems" :columns="tableColumns" />
-  </DraggableContainer>
+  </PanelSection>
 </template>

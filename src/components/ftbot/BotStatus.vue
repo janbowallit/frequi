@@ -37,12 +37,7 @@ const setupItems = computed<{ label: string; value: string }[]>(() => {
 <template>
   <div v-if="botStore.activeBot.botState" class="flex flex-col gap-4 p-3 text-left">
     <section aria-labelledby="bot-setup-heading">
-      <h3
-        id="bot-setup-heading"
-        class="mb-2 text-xs font-semibold uppercase tracking-wide text-muted"
-      >
-        Setup
-      </h3>
+      <h3 id="bot-setup-heading" class="mb-2 text-sm font-medium text-muted">Setup</h3>
       <dl class="divide-y divide-default rounded-lg border border-default text-sm">
         <div
           v-for="item in setupItems"
@@ -62,12 +57,7 @@ const setupItems = computed<{ label: string; value: string }[]>(() => {
     </BaseCollapsible>
 
     <section v-if="botStore.activeBot.profitAll" aria-labelledby="bot-perf-heading">
-      <h3
-        id="bot-perf-heading"
-        class="mb-2 text-xs font-semibold uppercase tracking-wide text-muted"
-      >
-        Performance
-      </h3>
+      <h3 id="bot-perf-heading" class="mb-2 text-sm font-medium text-muted">Performance</h3>
       <BotProfit
         :profit-all="botStore.activeBot.profitAll"
         :stake-currency="botStore.activeBot.botState.stake_currency ?? 'USDT'"

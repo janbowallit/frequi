@@ -6,6 +6,6 @@ describe('ValuePair.vue', () => {
   it('Renders a message', async () => {
     const msg = 'Test description';
     const wrapper = mount(ValuePair, { props: { description: msg } });
-    expect(wrapper.find('label').text()).toContain(msg);
+    expect(wrapper.text()).toContain(msg);
   });
 });

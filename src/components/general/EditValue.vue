@@ -77,38 +77,59 @@ function saveNewName() {
       <slot v-if="mode === EditState.None"> </slot>
       <UInput v-else v-model="localName" class="w-full"> </UInput>
     </div>
-    <div class="mt-auto flex gap-1 ms-1" :class="alignVertical ? 'flex-col' : 'flex-row'">
+    <div class="mt-auto ms-1 flex gap-0.5" :class="alignVertical ? 'flex-col' : 'flex-row'">
       <template v-if="allowEdit && mode === EditState.None">
         <UButton
           color="neutral"
-          :title="`Edit this ${editableName}.`"
+          variant="ghost"
+          :title="`Rename this ${editableName}`"
+          :aria-label="`Rename this ${editableName}`"
           icon="mdi:pencil"
           @click="mode = EditState.Editing"
         />
         <UButton
           v-if="allowDuplicate"
           color="neutral"
-          :title="`Duplicate ${editableName}.`"
+          variant="ghost"
+          :title="`Duplicate this ${editableName}`"
+          :aria-label="`Duplicate this ${editableName}`"
           icon="mdi:content-copy"
           @click="duplicate"
         />
         <UButton
           color="neutral"
-          :title="`Delete this ${editableName}.`"
+          variant="ghost"
+          :title="`Delete this ${editableName}`"
+          :aria-label="`Delete this ${editableName}`"
           icon="mdi:delete"
           @click="$emit('delete', modelValue)"
         />
       </template>
       <UButton
         v-if="allowAdd && mode === EditState.None"
-        :title="`Add new ${editableName}.`"
-        icon="mdi:plus-box-outline"
-        variant="solid"
+        :title="`New ${editableName}`"
+        :aria-label="`New ${editableName}`"
+        icon="mdi:plus"
+        color="neutral"
+        variant="ghost"
         @click="addNewClick"
       />
       <template v-if="mode !== EditState.None">
-        <UButton :title="`Add new ${editableName}`" icon="mdi:check" @click="saveNewName" />
-        <UButton title="Abort" color="neutral" icon="mdi:close" @click="abort" />
+        <UButton
+          title="Save"
+          aria-label="Save"
+          icon="mdi:check"
+          variant="solid"
+          @click="saveNewName"
+        />
+        <UButton
+          title="Cancel"
+          aria-label="Cancel"
+          color="neutral"
+          variant="ghost"
+          icon="mdi:close"
+          @click="abort"
+        />
       </template>
     </div>
   </form>

@@ -204,7 +204,7 @@ const singlePairSelection = computed({
             />
             <template #content>
               <div class="flex w-72 flex-col gap-3 p-3 text-start">
-                <p class="text-xs font-semibold uppercase tracking-wide text-muted">Candles</p>
+                <p class="text-sm font-medium text-muted">Candles</p>
                 <USwitch v-model="settingsStore.showMarkArea" label="Show chart areas" />
                 <USwitch
                   v-model="settingsStore.useHeikinAshiCandles"
@@ -212,7 +212,7 @@ const singlePairSelection = computed({
                   description="Smoothed candles - easier to read trends"
                 />
                 <USeparator />
-                <p class="text-xs font-semibold uppercase tracking-wide text-muted">Indicators</p>
+                <p class="text-sm font-medium text-muted">Indicators</p>
                 <PlotConfigSelect class="w-full" />
                 <UButton
                   color="neutral"

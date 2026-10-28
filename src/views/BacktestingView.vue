@@ -26,9 +26,9 @@ const timeframe = computed((): string => {
   return botStore.activeBot.selectedBacktestResult?.timeframe ?? '';
 });
 
-const showLeftBar = ref(false);
+const showSavedResults = ref(false);
 
-const btFormMode = ref<BtRunModes>(BtRunModes.run);
+const btFormMode = ref<BtRunModes>(BtRunModes.results);
 const pollInterval = ref<number | null>(null);
 
 function selectBacktestResult() {
@@ -69,81 +69,52 @@ watch(
   },
 );
 
-const backtestTabs = computed(() => {
-  const tabs: { slot: string; value: string; label: string; icon: string; disabled?: boolean }[] =
-    [];
-  if (botStore.activeBot.botFeatures.backtestHistory) {
-    tabs.push({
-      slot: 'historic-results',
-      value: BtRunModes.historicresults,
-      label: 'Load Results',
-      icon: 'i-mdi-cloud-download',
-      disabled: !botStore.activeBot.canRunBacktest,
-    });
-  }
-  tabs.push({
-    slot: 'run',
-    value: BtRunModes.run,
-    label: 'Run backtest',
-    icon: 'i-mdi-run-fast',
-    disabled: !botStore.activeBot.canRunBacktest,
-  });
-  tabs.push({
-    slot: 'results',
-    value: BtRunModes.results,
-    label: 'Analyze result',
-    icon: 'i-mdi-table-eye',
-    disabled: !hasBacktestResult.value,
-  });
-  if (hasMultiBacktestResult.value) {
-    tabs.push({
-      slot: 'compare-results',
-      value: BtRunModes.compareresults,
-      label: 'Compare results',
-      icon: 'i-mdi-compare-horizontal',
-      disabled: !hasMultiBacktestResult.value,
-    });
-  }
-  tabs.push({
-    slot: 'visualize-summary',
-    value: BtRunModes.visualizesummary,
-    label: 'Visualize summary',
-    icon: 'i-mdi-chart-bell-curve-cumulative',
-    disabled: !hasBacktestResult.value,
-  });
-  tabs.push({
-    slot: 'visualize',
-    value: BtRunModes.visualize,
-    label: 'Visualize result',
-    icon: 'i-mdi-chart-timeline-variant-shimmer',
-    disabled: !hasBacktestResult.value,
-  });
-  return tabs;
-});
+// Results of the selected backtest, in tabs
+const resultTabs = computed(() => [
+  { slot: 'results', value: BtRunModes.results, label: 'Summary' },
+  { slot: 'visualize-summary', value: BtRunModes.visualizesummary, label: 'Charts' },
+  { slot: 'visualize', value: BtRunModes.visualize, label: 'Trades on candles' },
+  ...(hasMultiBacktestResult.value
+    ? [{ slot: 'compare-results', value: BtRunModes.compareresults, label: 'Compare' }]
+    : []),
+]);
 </script>
 
 <template>
-  <div class="flex flex-row pt-1 me-1 relative" style="height: calc(100vh - 60px)">
-    <div
-      v-if="btFormMode !== 'visualize'"
-      class="flex md:flex-row h-full w-16 transition-all duration-200 shrink-0 me-1 border-r border-neutral-200 dark:border-neutral-900"
-      :class="{
-        'w-78!': showLeftBar,
-      }"
+  <div class="mx-auto flex w-full max-w-[1600px] flex-col gap-4 p-3 text-left md:p-6">
+    <PageHeader
+      title="Backtest"
+      description="See how a strategy would have traded on past candles."
     >
-      <!-- Left bar -->
-      <div class="flex flex-col fixed">
+      <template #actions>
+        <UBadge
+          v-if="botStore.activeBot.backtestRunning"
+          color="primary"
+          variant="subtle"
+          icon="mdi:loading"
+          :ui="{ leadingIcon: 'animate-spin' }"
+          :label="`${botStore.activeBot.backtestStep} ${formatPercent(botStore.activeBot.backtestProgress, 0)}`"
+        />
         <UButton
-          class="self-start"
-          aria-label="Close"
+          v-if="botStore.activeBot.canRunBacktest && botStore.activeBot.botFeatures.backtestHistory"
           color="neutral"
           variant="outline"
-          :icon="showLeftBar ? 'mdi:chevron-left' : 'mdi:chevron-right'"
-          @click="showLeftBar = !showLeftBar"
+          icon="mdi:folder-open-outline"
+          label="Load saved results"
+          @click="showSavedResults = true"
         />
-        <Transition name="fade">
+      </template>
+    </PageHeader>
+
+    <WebserverOnlyNotice v-if="!botStore.activeBot.canRunBacktest" feature="Backtesting" />
+
+    <div v-else class="grid items-start gap-4 lg:grid-cols-[22rem_minmax(0,1fr)]">
+      <div class="flex flex-col gap-4">
+        <PanelSection title="New backtest" body-class="p-4">
+          <BacktestRun />
+        </PanelSection>
+        <PanelSection v-if="hasBacktestResult" title="Results" body-class="p-2">
           <BacktestResultSelect
-            v-if="showLeftBar"
             :backtest-history="botStore.activeBot.backtestHistory"
             :selected-backtest-result-key="botStore.activeBot.selectedBacktestResultKey"
             :can-use-modify="botStore.activeBot.botFeatures.backtestSetNotes"
@@ -151,94 +122,66 @@ const backtestTabs = computed(() => {
             @remove-result="botStore.activeBot.removeBacktestResultFromMemory"
             @update-result="botStore.activeBot.saveBacktestResultMetadata"
           />
-        </Transition>
+        </PanelSection>
       </div>
-      <!-- End Left bar -->
-    </div>
-    <div class="flex flex-col w-full">
-      <h2 class="ms-5 text-3xl font-bold">Backtesting</h2>
-      <p v-if="!botStore.activeBot.canRunBacktest">
-        Bot must be in webserver mode to enable Backtesting.
-      </p>
-      <div class="w-full">
-        <UTabs v-model="btFormMode" :items="backtestTabs">
-          <template #historic-results>
-            <BacktestHistoryLoad />
-          </template>
-          <template #run>
-            <BacktestRun />
-          </template>
+
+      <section class="panel min-w-0 overflow-hidden" aria-label="Backtest result">
+        <EmptyState
+          v-if="!hasBacktestResult || !botStore.activeBot.selectedBacktestResult"
+          class="py-24"
+          icon="mdi:chart-box-outline"
+          title="No result yet"
+          description="Run a backtest, or load a saved result, to see trades and profit here."
+        />
+        <UTabs
+          v-else
+          v-model="btFormMode"
+          :items="resultTabs"
+          variant="link"
+          :ui="{
+            root: 'gap-0',
+            list: 'overflow-x-auto border-b border-default px-2',
+            trigger: 'shrink-0 grow-0 px-3 py-3 text-sm',
+            label: 'overflow-visible',
+            content: 'min-w-0 p-3',
+          }"
+        >
           <template #results>
-            <BacktestResultAnalysis
-              v-if="hasBacktestResult && botStore.activeBot.selectedBacktestResult"
-              :backtest-result="botStore.activeBot.selectedBacktestResult"
-              class="flex-fill"
-            />
+            <BacktestResultAnalysis :backtest-result="botStore.activeBot.selectedBacktestResult" />
           </template>
           <template #compare-results>
             <BacktestResultComparison
               v-if="hasMultiBacktestResult"
               :backtest-results="botStore.activeBot.backtestHistory"
-              class="flex-fill"
             />
           </template>
           <template #visualize-summary>
-            <BacktestGraphs
-              v-if="hasBacktestResult && botStore.activeBot.selectedBacktestResult"
-              :trades="botStore.activeBot.selectedBacktestResult.trades"
-              class="flex-fill"
-            />
+            <BacktestGraphs :trades="botStore.activeBot.selectedBacktestResult.trades" />
           </template>
           <template #visualize>
-            <BacktestResultChart
-              v-if="botStore.activeBot.selectedBacktestResult"
-              :timeframe="timeframe"
-              :strategy="btStore.strategy"
-              :timerange="btStore.timerange"
-              :backtest-result="botStore.activeBot.selectedBacktestResult"
-              :freqai-model="btStore.freqAI.enabled ? btStore.freqAI.model : undefined"
-            />
+            <div class="h-[75vh]">
+              <BacktestResultChart
+                :timeframe="timeframe"
+                :strategy="btStore.strategy"
+                :timerange="btStore.timerange"
+                :backtest-result="botStore.activeBot.selectedBacktestResult"
+                :freqai-model="btStore.freqAI.enabled ? btStore.freqAI.model : undefined"
+              />
+            </div>
           </template>
         </UTabs>
-
-        <small v-show="botStore.activeBot.backtestRunning" class="text-end bt-running-label"
-          >Backtest running: {{ botStore.activeBot.backtestStep }}
-          {{ formatPercent(botStore.activeBot.backtestProgress, 2) }}</small
-        >
-      </div>
+      </section>
     </div>
+
+    <USlideover
+      v-model:open="showSavedResults"
+      title="Saved results"
+      :ui="{ content: 'sm:max-w-4xl' }"
+      :close="{ color: 'neutral', variant: 'ghost' }"
+    >
+      <template #body>
+        <BacktestHistoryLoad />
+      </template>
+    </USlideover>
   </div>
 </template>
-
-<style lang="css" scoped>
-.bt-running-label {
-  position: absolute;
-  right: 2em;
-  margin-top: 1em;
-}
-
-.flex-samesize-items {
-  flex: 1 1 0;
-  @media md {
-    flex: unset;
-  }
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: all 0.2s;
-}
-
-.fade-enter,
-.fade-leave-to {
-  opacity: 0;
-}
-
-.bt-config {
-  @media (min-width: 992px) {
-    margin-left: auto;
-    margin-right: auto;
-    max-width: 75vw;
-  }
-}
-</style>
