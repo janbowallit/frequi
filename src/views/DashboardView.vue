@@ -34,6 +34,10 @@ function layoutUpdatedEvent(newLayout) {
   }
 }
 
+const gridLayoutNextEntry = computed((): GridItemData => {
+  return findGridLayout(gridLayoutData.value, DashboardLayout.nextEntry);
+});
+
 const gridLayoutDaily = computed((): GridItemData => {
   return findGridLayout(gridLayoutData.value, DashboardLayout.dailyChart);
 });
@@ -101,6 +105,24 @@ onMounted(async () => {
       @layout-ready="onLayoutReady"
     >
       <template #default="{ gridItemProps }">
+        <GridItem
+          v-bind="gridItemProps"
+          :i="gridLayoutNextEntry.i"
+          :x="gridLayoutNextEntry.x"
+          :y="gridLayoutNextEntry.y"
+          :w="gridLayoutNextEntry.w"
+          :h="gridLayoutNextEntry.h"
+          :min-w="3"
+          :min-h="4"
+          drag-allow-from=".drag-header"
+        >
+          <DraggableContainer
+            :header="`Next entry${botStore.botCount > 1 ? ` · ${botStore.activeBot.uiBotName}` : ''}`"
+            info-text="How close each pair of the selected bot is to its strategy's entry conditions, and the earliest time the next trade can start."
+          >
+            <NextEntryPanel />
+          </DraggableContainer>
+        </GridItem>
         <GridItem
           v-bind="gridItemProps"
           :i="gridLayoutDaily.i"

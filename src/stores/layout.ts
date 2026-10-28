@@ -17,6 +17,7 @@ export enum DashboardLayout {
   profitDistributionChart = 5,
   tradesLogChart = 6,
   walletHistoryChart = 7,
+  nextEntry = 8,
 }
 
 // Define default layouts
@@ -38,25 +39,27 @@ const DEFAULT_TRADING_LAYOUT_SM: GridItemData[] = [
 ];
 
 const DEFAULT_DASHBOARD_LAYOUT: GridItemData[] = [
-  { i: DashboardLayout.botComparison, x: 0, y: 0, w: 8, h: 6 } /* Bot Comparison */,
-  { i: DashboardLayout.dailyChart, x: 8, y: 0, w: 4, h: 6 },
-  { i: DashboardLayout.allOpenTrades, x: 0, y: 6, w: 8, h: 6 },
-  { i: DashboardLayout.cumChartChart, x: 8, y: 6, w: 4, h: 6 },
-  { i: DashboardLayout.allClosedTrades, x: 0, y: 12, w: 8, h: 6 },
-  { i: DashboardLayout.walletHistoryChart, x: 8, y: 12, w: 4, h: 6 },
-  { i: DashboardLayout.tradesLogChart, x: 0, y: 18, w: 8, h: 6 },
-  { i: DashboardLayout.profitDistributionChart, x: 8, y: 18, w: 4, h: 6 },
+  { i: DashboardLayout.nextEntry, x: 0, y: 0, w: 12, h: 9 },
+  { i: DashboardLayout.botComparison, x: 0, y: 9, w: 8, h: 6 } /* Bot Comparison */,
+  { i: DashboardLayout.dailyChart, x: 8, y: 9, w: 4, h: 6 },
+  { i: DashboardLayout.allOpenTrades, x: 0, y: 15, w: 8, h: 6 },
+  { i: DashboardLayout.cumChartChart, x: 8, y: 15, w: 4, h: 6 },
+  { i: DashboardLayout.allClosedTrades, x: 0, y: 21, w: 8, h: 6 },
+  { i: DashboardLayout.walletHistoryChart, x: 8, y: 21, w: 4, h: 6 },
+  { i: DashboardLayout.tradesLogChart, x: 0, y: 27, w: 8, h: 6 },
+  { i: DashboardLayout.profitDistributionChart, x: 8, y: 27, w: 4, h: 6 },
 ];
 
 const DEFAULT_DASHBOARD_LAYOUT_SM: GridItemData[] = [
-  { i: DashboardLayout.botComparison, x: 0, y: 0, w: 12, h: 6 } /* Bot Comparison */,
-  { i: DashboardLayout.allOpenTrades, x: 0, y: 6, w: 12, h: 8 },
-  { i: DashboardLayout.dailyChart, x: 0, y: 14, w: 12, h: 6 },
-  { i: DashboardLayout.cumChartChart, x: 0, y: 20, w: 12, h: 6 },
-  { i: DashboardLayout.walletHistoryChart, x: 0, y: 26, w: 12, h: 6 },
-  { i: DashboardLayout.profitDistributionChart, x: 0, y: 32, w: 12, h: 6 },
-  { i: DashboardLayout.tradesLogChart, x: 0, y: 38, w: 12, h: 6 },
-  { i: DashboardLayout.allClosedTrades, x: 0, y: 44, w: 12, h: 8 },
+  { i: DashboardLayout.nextEntry, x: 0, y: 0, w: 12, h: 10 },
+  { i: DashboardLayout.botComparison, x: 0, y: 10, w: 12, h: 6 } /* Bot Comparison */,
+  { i: DashboardLayout.allOpenTrades, x: 0, y: 16, w: 12, h: 8 },
+  { i: DashboardLayout.dailyChart, x: 0, y: 24, w: 12, h: 6 },
+  { i: DashboardLayout.cumChartChart, x: 0, y: 30, w: 12, h: 6 },
+  { i: DashboardLayout.walletHistoryChart, x: 0, y: 36, w: 12, h: 6 },
+  { i: DashboardLayout.profitDistributionChart, x: 0, y: 42, w: 12, h: 6 },
+  { i: DashboardLayout.tradesLogChart, x: 0, y: 48, w: 12, h: 6 },
+  { i: DashboardLayout.allClosedTrades, x: 0, y: 54, w: 12, h: 8 },
 ];
 
 const STORE_LAYOUTS = 'ftLayoutSettings';
@@ -98,6 +101,17 @@ export function findGridLayout(gridLayout: GridItemData[], name: number): GridIt
   return layout;
 }
 
+/** Saved dashboards from before the Next entry panel get it on top, everything else moves down */
+function addNextEntryPanel(layout: unknown) {
+  if (!Array.isArray(layout) || layout.length === 0 || typeof layout[0]?.i !== 'number') return;
+  if (layout.some((item: GridItemData) => item.i === DashboardLayout.nextEntry)) return;
+  const panel = DEFAULT_DASHBOARD_LAYOUT.find((item) => item.i === DashboardLayout.nextEntry)!;
+  layout.forEach((item: GridItemData) => {
+    item.y += panel.h;
+  });
+  layout.unshift({ ...panel });
+}
+
 export const useLayoutStore = defineStore('layoutStore', {
   state: () => {
     return {
@@ -121,6 +135,7 @@ export const useLayoutStore = defineStore('layoutStore', {
   persist: {
     key: STORE_LAYOUTS,
     afterHydrate: (context) => {
+      addNextEntryPanel(context.store.dashboardLayout);
       if (
         context.store.dashboardLayout === null ||
         typeof context.store.dashboardLayout === 'string' ||

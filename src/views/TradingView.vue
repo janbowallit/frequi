@@ -69,6 +69,12 @@ const tradingTabItems = computed<TabsItem[]>(() => {
       icon: 'i-mdi-view-list',
     },
     {
+      slot: 'next-entry',
+      value: 'next-entry',
+      label: 'Next entry',
+      icon: 'i-mdi-timer-sand',
+    },
+    {
       slot: 'signals',
       value: 'signals',
       label: 'Signals',
@@ -166,6 +172,9 @@ const tradingTabItems = computed<TabsItem[]>(() => {
                 :current-locks="botStore.activeBot.activeLocks"
                 :trades="botStore.activeBot.openTrades"
               />
+            </template>
+            <template #next-entry>
+              <NextEntryPanel />
             </template>
             <template #signals>
               <SignalInspector />
