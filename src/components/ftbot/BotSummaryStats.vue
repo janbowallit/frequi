@@ -6,7 +6,6 @@ interface StatCard {
   label: string;
   value: string;
   detail: string;
-  icon: string;
   /** Sign of the value - colors it as profit / loss */
   sign?: number;
 }
@@ -71,9 +70,8 @@ const cards = computed<StatCard[]>(() => {
       value: signed(s.closedProfit),
       detail:
         s.closedRatio !== undefined && s.closedTrades > 0
-          ? `${formatPercent(s.closedRatio, 2)} · ${s.closedTrades} closed trades`
+          ? `${formatPercent(s.closedRatio, 2)} over ${s.closedTrades} closed trades`
           : `${s.closedTrades} closed trades`,
-      icon: 'mdi:cash-check',
       sign: Math.sign(s.closedProfit),
     },
     {
@@ -82,53 +80,41 @@ const cards = computed<StatCard[]>(() => {
       detail: s.maxOpenTrades
         ? `${s.openTrades} of ${s.maxOpenTrades} trade slots in use`
         : `${s.openTrades} open trades`,
-      icon: 'mdi:chart-timeline-variant',
       sign: s.openTrades ? Math.sign(s.openProfit) : 0,
     },
     {
       label: 'Balance',
       value: money(s.balance),
-      detail: s.isDryRun ? 'Dry run - simulated funds' : s.isLive ? 'Live' : 'Dry run and live',
-      icon: 'mdi:wallet-outline',
+      detail: s.isDryRun ? 'Dry run, simulated funds' : s.isLive ? 'Live' : 'Dry run and live',
     },
     {
       label: 'Win rate',
       value: decided ? formatPercent(s.wins / decided, 0) : '–',
-      detail: decided ? `${s.wins} won · ${s.losses} lost` : 'No closed trades yet',
-      icon: 'mdi:trophy-outline',
+      detail: decided ? `${s.wins} won, ${s.losses} lost` : 'No closed trades yet',
     },
   ];
 });
 </script>
 
 <template>
-  <section aria-label="Summary" class="grid grid-cols-2 gap-2 text-left lg:grid-cols-4">
-    <div
-      v-for="card in cards"
-      :key="card.label"
-      class="flex min-w-0 items-start gap-3 rounded-xl border border-default bg-default p-3 shadow-sm shadow-black/5 sm:p-4 dark:shadow-black/30"
-    >
-      <span
-        class="hidden size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary sm:flex"
-        aria-hidden="true"
+  <section
+    aria-label="Summary"
+    class="panel grid grid-cols-2 text-left lg:grid-cols-4 [&>*]:border-default max-lg:[&>*:nth-child(-n+2)]:border-b max-lg:[&>*:nth-child(odd)]:border-e lg:[&>*:not(:last-child)]:border-e"
+  >
+    <div v-for="card in cards" :key="card.label" class="min-w-0 px-4 py-3 lg:px-5 lg:py-4">
+      <p class="text-sm text-muted">{{ card.label }}</p>
+      <p
+        class="mt-0.5 truncate text-xl font-semibold tracking-tight tabular-nums lg:text-[1.75rem] lg:leading-9"
+        :class="{
+          'text-highlighted': !card.sign,
+          'text-(--color-profit)': card.sign === 1,
+          'text-(--color-loss)': card.sign === -1,
+        }"
+        :title="card.value"
       >
-        <UIcon :name="card.icon" class="size-5" />
-      </span>
-      <div class="min-w-0">
-        <p class="text-sm text-muted">{{ card.label }}</p>
-        <p
-          class="truncate text-lg font-semibold tabular-nums sm:text-xl"
-          :class="{
-            'text-highlighted': !card.sign,
-            'text-(--color-profit)': card.sign === 1,
-            'text-(--color-loss)': card.sign === -1,
-          }"
-          :title="card.value"
-        >
-          {{ card.value }}
-        </p>
-        <p class="truncate text-sm text-muted" :title="card.detail">{{ card.detail }}</p>
-      </div>
+        {{ card.value }}
+      </p>
+      <p class="truncate text-xs text-muted" :title="card.detail">{{ card.detail }}</p>
     </div>
   </section>
 </template>

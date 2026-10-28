@@ -145,9 +145,8 @@ export default defineConfig({
       ui: {
         icons: uiIcons,
         colors: {
-          primary: 'brand',
-          // slate, gray or mist
-          neutral: 'slate',
+          primary: 'brass',
+          neutral: 'graphite',
         },
         alert: {
           defaultVariants: {
@@ -161,11 +160,11 @@ export default defineConfig({
         },
         table: {
           slots: {
-            thead: 'bg-elevated/60',
-            th: 'px-3 py-2.5 text-[12px] font-semibold uppercase tracking-wide text-muted text-left whitespace-nowrap',
+            thead: 'bg-muted',
+            th: 'px-3 py-2 text-[13px] font-medium text-muted text-left whitespace-nowrap',
             td: 'px-3 py-2 text-default text-md text-left tabular-nums',
-            tr: 'transition-colors duration-150 hover:bg-elevated/40',
-            empty: 'py-10 text-center text-muted',
+            tr: 'hover:bg-elevated/50',
+            empty: 'py-2 text-center text-muted',
           },
         },
         tabs: {

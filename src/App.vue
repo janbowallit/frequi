@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const settingsStore = useSettingsStore();
+const botStore = useBotStore();
 const colorStore = useColorStore();
 const route = useRoute();
 // Pages like login use the full screen - app navigation is useless before signing in.
@@ -29,23 +30,12 @@ watch(
 
 <template>
   <UApp>
-    <div id="app" class="flex flex-col h-dvh" :style="colorStore.cssVars">
+    <div id="app" class="flex flex-col h-dvh">
       <NavBar v-if="showAppChrome" />
+      <StatusStrip v-if="showAppChrome && botStore.hasBots" />
       <BodyLayout class="grow overflow-auto" />
       <NavFooter v-if="showAppChrome" />
+      <TradeDetailSlideover v-if="botStore.hasBots" />
     </div>
   </UApp>
 </template>
-
-<style scoped>
-#app {
-  font-family: var(--app-font);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-}
-
-/* * {
-  outline: 1px solid #f00 !important;
-} */
-</style>

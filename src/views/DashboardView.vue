@@ -1,266 +1,92 @@
 <script setup lang="ts">
-import type { GridItemData } from '@/types';
-
 const botStore = useBotStore();
 
-const layoutStore = useLayoutStore();
-const currentBreakpoint = ref('');
-// The grid positions its items only after measuring its width - hide it until then
-const { isReady: gridReady, onLayoutReady } = useGridReady();
-
-function breakpointChanged(newBreakpoint: string) {
-  // console.log('breakpoint:', newBreakpoint);
-  currentBreakpoint.value = newBreakpoint;
-}
-const isResizableLayout = computed(() =>
-  ['', 'sm', 'md', 'lg', 'xl'].includes(currentBreakpoint.value),
-);
-const isLayoutLocked = computed(() => {
-  return layoutStore.layoutLocked || !isResizableLayout.value;
-});
-
-const gridLayoutData = computed((): GridItemData[] => {
-  if (isResizableLayout.value) {
-    return layoutStore.dashboardLayout;
-  }
-  return [...layoutStore.getDashboardLayoutSm];
-});
-
-function layoutUpdatedEvent(newLayout) {
-  if (isResizableLayout.value) {
-    console.log('newlayout', newLayout);
-    console.log('saving dashboard');
-    layoutStore.dashboardLayout = newLayout;
-  }
-}
-
-const gridLayoutNextEntry = computed((): GridItemData => {
-  return findGridLayout(gridLayoutData.value, DashboardLayout.nextEntry);
-});
-
-const gridLayoutDaily = computed((): GridItemData => {
-  return findGridLayout(gridLayoutData.value, DashboardLayout.dailyChart);
-});
-
-const gridLayoutBotComparison = computed((): GridItemData => {
-  return findGridLayout(gridLayoutData.value, DashboardLayout.botComparison);
-});
-
-const gridLayoutAllOpenTrades = computed((): GridItemData => {
-  return findGridLayout(gridLayoutData.value, DashboardLayout.allOpenTrades);
-});
-const gridLayoutAllClosedTrades = computed((): GridItemData => {
-  return findGridLayout(gridLayoutData.value, DashboardLayout.allClosedTrades);
-});
-
-const gridLayoutCumChart = computed((): GridItemData => {
-  return findGridLayout(gridLayoutData.value, DashboardLayout.cumChartChart);
-});
-
-const gridLayoutWalletHistory = computed((): GridItemData => {
-  return findGridLayout(gridLayoutData.value, DashboardLayout.walletHistoryChart);
-});
-
-const gridLayoutProfitDistribution = computed((): GridItemData => {
-  return findGridLayout(gridLayoutData.value, DashboardLayout.profitDistributionChart);
-});
-const gridLayoutTradesLogChart = computed((): GridItemData => {
-  return findGridLayout(gridLayoutData.value, DashboardLayout.tradesLogChart);
-});
-
-const responsiveGridLayouts = computed(() => {
-  return {
-    sm: layoutStore.getDashboardLayoutSm,
-  };
-});
+const multiBot = computed(() => botStore.botCount > 1);
+const hasClosedTrades = computed(() => botStore.allClosedTradesSelectedBots.length > 0);
 
 onMounted(async () => {
   botStore.allGetDaily({ timescale: 30 });
-  // botStore.activeBot.getTrades();
   botStore.activeBot.getOpenTrades();
   botStore.activeBot.getProfit();
 });
 </script>
 
 <template>
-  <div class="flex w-full flex-col">
-    <BotSummaryStats class="px-4 pt-4" />
-    <GridLayout
-      class="h-full w-full"
-      :class="{ 'grid-settling invisible': !gridReady }"
-      style="padding: 8px"
-      :row-height="50"
-      :layout="gridLayoutData"
-      :vertical-compact="false"
-      :margin="[8, 8]"
-      :responsive-layouts="responsiveGridLayouts"
-      :is-resizable="!isLayoutLocked"
-      :is-draggable="!isLayoutLocked"
-      :responsive="true"
-      :prevent-collision="true"
-      :cols="{ lg: 12, md: 12, sm: 12, xs: 12, xxs: 12 }"
-      :col-num="12"
-      @layout-updated="layoutUpdatedEvent"
-      @update:breakpoint="breakpointChanged"
-      @layout-ready="onLayoutReady"
+  <div class="mx-auto flex w-full max-w-[1400px] flex-col gap-4 p-3 text-left sm:p-4 lg:p-6">
+    <BotSummaryStats />
+
+    <PanelSection
+      :title="`Next entry${multiBot ? `: ${botStore.activeBot.uiBotName}` : ''}`"
+      info="How close each pair is to the strategy's entry conditions."
+      body-class=""
     >
-      <template #default="{ gridItemProps }">
-        <GridItem
-          v-bind="gridItemProps"
-          :i="gridLayoutNextEntry.i"
-          :x="gridLayoutNextEntry.x"
-          :y="gridLayoutNextEntry.y"
-          :w="gridLayoutNextEntry.w"
-          :h="gridLayoutNextEntry.h"
-          :min-w="3"
-          :min-h="4"
-          drag-allow-from=".drag-header"
-        >
-          <DraggableContainer
-            :header="`Next entry${botStore.botCount > 1 ? ` · ${botStore.activeBot.uiBotName}` : ''}`"
-            info-text="How close each pair of the selected bot is to its strategy's entry conditions, and the earliest time the next trade can start."
-          >
-            <NextEntryPanel />
-          </DraggableContainer>
-        </GridItem>
-        <GridItem
-          v-bind="gridItemProps"
-          :i="gridLayoutDaily.i"
-          :x="gridLayoutDaily.x"
-          :y="gridLayoutDaily.y"
-          :w="gridLayoutDaily.w"
-          :h="gridLayoutDaily.h"
-          :min-w="3"
-          :min-h="4"
-          drag-allow-from=".drag-header"
-        >
-          <DraggableContainer
-            :header="`Profit over time${botStore.botCount > 1 ? ' (combined)' : ''}`"
-          >
-            <PeriodBreakdown multi-bot-view />
-          </DraggableContainer>
-        </GridItem>
-        <GridItem
-          v-bind="gridItemProps"
-          :i="gridLayoutBotComparison.i"
-          :x="gridLayoutBotComparison.x"
-          :y="gridLayoutBotComparison.y"
-          :w="gridLayoutBotComparison.w"
-          :h="gridLayoutBotComparison.h"
-          :min-w="3"
-          :min-h="4"
-          drag-allow-from=".drag-header"
-        >
-          <DraggableContainer header="Bot comparison">
-            <BotComparisonList />
-          </DraggableContainer>
-        </GridItem>
-        <GridItem
-          v-bind="gridItemProps"
-          :i="gridLayoutAllOpenTrades.i"
-          :x="gridLayoutAllOpenTrades.x"
-          :y="gridLayoutAllOpenTrades.y"
-          :w="gridLayoutAllOpenTrades.w"
-          :h="gridLayoutAllOpenTrades.h"
-          :min-w="3"
-          :min-h="4"
-          drag-allow-from=".drag-header"
-        >
-          <DraggableContainer
-            header="Open trades"
-            info-text="Open trades of all selected bots. Click on a trade to go to the trade page for that trade/bot."
-          >
-            <TradeList active-trades :trades="botStore.allOpenTradesSelectedBots" multi-bot-view />
-          </DraggableContainer>
-        </GridItem>
-        <GridItem
-          v-bind="gridItemProps"
-          :i="gridLayoutCumChart.i"
-          :x="gridLayoutCumChart.x"
-          :y="gridLayoutCumChart.y"
-          :w="gridLayoutCumChart.w"
-          :h="gridLayoutCumChart.h"
-          :min-w="3"
-          :min-h="4"
-          drag-allow-from=".drag-header"
-        >
-          <DraggableContainer header="Cumulative profit">
-            <CumProfitChart
-              :trades="botStore.allTradesSelectedBots"
-              :open-trades="botStore.allOpenTradesSelectedBots"
-              :show-title="false"
-            />
-          </DraggableContainer>
-        </GridItem>
-        <GridItem
-          v-bind="gridItemProps"
-          :i="gridLayoutWalletHistory.i"
-          :x="gridLayoutWalletHistory.x"
-          :y="gridLayoutWalletHistory.y"
-          :w="gridLayoutWalletHistory.w"
-          :h="gridLayoutWalletHistory.h"
-          :min-w="3"
-          :min-h="4"
-          drag-allow-from=".drag-header"
-        >
-          <DraggableContainer header="Wallet history">
-            <WalletHistoryChart :wallet-data="botStore.allBalanceHistory" :show-title="false" />
-          </DraggableContainer>
-        </GridItem>
-        <GridItem
-          v-bind="gridItemProps"
-          :i="gridLayoutAllClosedTrades.i"
-          :x="gridLayoutAllClosedTrades.x"
-          :y="gridLayoutAllClosedTrades.y"
-          :w="gridLayoutAllClosedTrades.w"
-          :h="gridLayoutAllClosedTrades.h"
-          :min-w="3"
-          :min-h="4"
-          drag-allow-from=".drag-header"
-        >
-          <DraggableContainer
-            header="Closed trades"
-            info-text="Closed trades for all selected bots. Click on a trade to go to the trade page for that trade/bot."
-          >
-            <TradeList
-              :active-trades="false"
-              show-filter
-              :trades="botStore.allClosedTradesSelectedBots"
-              multi-bot-view
-            />
-          </DraggableContainer>
-        </GridItem>
-        <GridItem
-          v-bind="gridItemProps"
-          :i="gridLayoutProfitDistribution.i"
-          :x="gridLayoutProfitDistribution.x"
-          :y="gridLayoutProfitDistribution.y"
-          :w="gridLayoutProfitDistribution.w"
-          :h="gridLayoutProfitDistribution.h"
-          :min-w="3"
-          :min-h="4"
-          drag-allow-from=".drag-header"
-        >
-          <DraggableContainer header="Profit distribution">
-            <ProfitDistributionChart :trades="botStore.allTradesSelectedBots" :show-title="false" />
-          </DraggableContainer>
-        </GridItem>
-        <GridItem
-          v-bind="gridItemProps"
-          :i="gridLayoutTradesLogChart.i"
-          :x="gridLayoutTradesLogChart.x"
-          :y="gridLayoutTradesLogChart.y"
-          :w="gridLayoutTradesLogChart.w"
-          :h="gridLayoutTradesLogChart.h"
-          :min-w="3"
-          :min-h="4"
-          drag-allow-from=".drag-header"
-        >
-          <DraggableContainer header="Trades log">
-            <TradesLogChart :trades="botStore.allTradesSelectedBots" :show-title="false" />
-          </DraggableContainer>
-        </GridItem>
-      </template>
-    </GridLayout>
+      <NextEntryPanel compact />
+    </PanelSection>
+
+    <div class="grid gap-4 lg:grid-cols-3">
+      <PanelSection
+        :title="`Profit over time${multiBot ? ' (all bots)' : ''}`"
+        class="h-96 lg:col-span-2"
+        body-class="overflow-hidden"
+      >
+        <PeriodBreakdown multi-bot-view />
+      </PanelSection>
+      <PanelSection v-if="multiBot" title="Bot comparison" class="h-96">
+        <BotComparisonList />
+      </PanelSection>
+      <section v-else class="panel h-96 overflow-auto">
+        <BotBalance />
+      </section>
+    </div>
+
+    <PanelSection
+      title="Open trades"
+      :info="multiBot ? 'Open trades of every selected bot.' : undefined"
+      body-class=""
+    >
+      <TradeList
+        active-trades
+        :trades="botStore.allOpenTradesSelectedBots"
+        :multi-bot-view="multiBot"
+        empty-text="No open trades"
+      />
+    </PanelSection>
+
+    <PanelSection title="Closed trades" body-class="">
+      <TradeList
+        :active-trades="false"
+        show-filter
+        :trades="botStore.allClosedTradesSelectedBots"
+        :multi-bot-view="multiBot"
+        empty-text="No closed trades yet."
+      />
+    </PanelSection>
+
+    <div v-if="hasClosedTrades" class="grid gap-4 lg:grid-cols-2">
+      <PanelSection title="Cumulative profit" class="h-80" body-class="overflow-hidden">
+        <CumProfitChart
+          :trades="botStore.allTradesSelectedBots"
+          :open-trades="botStore.allOpenTradesSelectedBots"
+          :show-title="false"
+        />
+      </PanelSection>
+      <PanelSection title="Profit distribution" class="h-80" body-class="overflow-hidden">
+        <ProfitDistributionChart :trades="botStore.allTradesSelectedBots" :show-title="false" />
+      </PanelSection>
+      <PanelSection title="Wallet history" class="h-80" body-class="overflow-hidden">
+        <WalletHistoryChart :wallet-data="botStore.allBalanceHistory" :show-title="false" />
+      </PanelSection>
+      <PanelSection title="Trades log" class="h-80" body-class="overflow-hidden">
+        <TradesLogChart :trades="botStore.allTradesSelectedBots" :show-title="false" />
+      </PanelSection>
+    </div>
+    <p
+      v-else
+      class="flex items-center gap-2 rounded-(--app-panel-radius) border border-dashed border-default px-4 py-3 text-sm text-muted"
+    >
+      <UIcon name="mdi:chart-areaspline" class="size-4 shrink-0" aria-hidden="true" />
+      Cumulative profit, profit distribution, wallet history and the trades log appear after the
+      first closed trade.
+    </p>
   </div>
 </template>

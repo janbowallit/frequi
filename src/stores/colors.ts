@@ -5,31 +5,36 @@ export enum ColorPreferences {
   RED_UP = 'redUp',
 }
 
+// Candle colors work on both themes; profit / loss follow the theme (see tailwind.css)
+const CANDLE_GREEN = '#2fb383';
+const CANDLE_RED = '#e5604f';
+const MONEY_COLORS = {
+  dark: { profit: '#3cc48f', loss: '#f0685a' },
+  light: { profit: '#138a5e', loss: '#c8402f' },
+};
+
 export const useColorStore = defineStore('colorStore', {
-  // other options...
   state: () => {
     return {
       colorPreference: ColorPreferences.GREEN_UP,
-      colorUp: '#26A69A',
-      colorDown: '#EF5350',
-      colorProfit: '#12bb7b',
-      colorLoss: '#ef5350',
+      colorUp: CANDLE_GREEN,
+      colorDown: CANDLE_RED,
     };
   },
   getters: {
-    cssVars(state) {
-      return {
-        '--color-profit': state.colorProfit,
-        '--color-loss': state.colorLoss,
-      };
+    colorProfit(): string {
+      return MONEY_COLORS[useSettingsStore().currentTheme === 'light' ? 'light' : 'dark'].profit;
+    },
+    colorLoss(): string {
+      return MONEY_COLORS[useSettingsStore().currentTheme === 'light' ? 'light' : 'dark'].loss;
     },
   },
   actions: {
     updateProfitLossColor() {
       const [colorUp, colorDown] =
         this.colorPreference === ColorPreferences.GREEN_UP
-          ? ['#26A69A', '#ef5350']
-          : ['#ef5350', '#26A69A'];
+          ? [CANDLE_GREEN, CANDLE_RED]
+          : [CANDLE_RED, CANDLE_GREEN];
       this.colorUp = colorUp;
       this.colorDown = colorDown;
     },

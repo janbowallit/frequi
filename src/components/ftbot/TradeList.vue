@@ -44,26 +44,26 @@ const tableFields = ref([
   { field: 'pair', header: 'Pair' },
   { field: 'amount', header: 'Amount' },
   props.activeTrades
-    ? { field: 'stake_amount', header: 'Stake amount' }
-    : { field: 'max_stake_amount', header: 'Total stake amount' },
+    ? { field: 'stake_amount', header: 'Stake' }
+    : { field: 'max_stake_amount', header: 'Stake' },
   {
     field: 'open_rate',
-    header: 'Open rate',
+    header: 'Entry price',
   },
   {
     field: props.activeTrades ? 'current_rate' : 'close_rate',
-    header: props.activeTrades ? 'Current rate' : 'Close rate',
+    header: props.activeTrades ? 'Current price' : 'Exit price',
   },
   {
     field: 'profit',
-    header: props.activeTrades ? 'Current profit %' : 'Profit %',
+    header: 'Profit',
   },
-  { field: 'open_timestamp', header: 'Open date' },
+  { field: 'open_timestamp', header: 'Opened' },
   ...(props.activeTrades
     ? [{ field: 'actions', header: '' }]
     : [
-        { field: 'close_timestamp', header: 'Close date' },
-        { field: 'exit_reason', header: 'Close Reason' },
+        { field: 'close_timestamp', header: 'Closed' },
+        { field: 'exit_reason', header: 'Exit reason' },
       ]),
 ]);
 
@@ -202,7 +202,7 @@ const rowSelection = computed({
 
 <template>
   <div class="flex h-full w-full flex-col overflow-auto">
-    <div v-if="showFilter && trades.length > 0" class="flex justify-end px-2 pt-2">
+    <div v-if="showFilter && trades.length > 0" class="flex justify-end px-3 pt-3">
       <UInput
         v-model="filterText"
         icon="mdi:magnify"
@@ -211,30 +211,32 @@ const rowSelection = computed({
         class="w-full sm:w-64"
       />
     </div>
+    <EmptyState
+      v-if="filteredTrades.length === 0"
+      :title="filterText ? 'No matching trades' : emptyText"
+      :icon="activeTrades ? 'mdi:swap-horizontal' : 'mdi:history'"
+      :description="
+        filterText
+          ? 'Try a different pair or exit reason.'
+          : activeTrades
+            ? 'The bot opens a trade when every entry condition holds.'
+            : 'Closed trades appear here.'
+      "
+    />
     <UTable
+      v-else
       ref="tradesTable"
       v-model:pagination="pagination"
       :pagination-options="{ getPaginationRowModel: getPaginationRowModel() }"
       :data="filteredTrades"
       :columns="tableColumns"
-      class="text-center"
       v-model:row-selection="rowSelection"
       :ui="{
-        tr: 'data-[selected=true]:bg-primary/30 dark:data-[selected=true]:bg-primary-700',
+        tr: 'cursor-pointer data-[selected=true]:bg-primary/12',
       }"
       @select="onRowSelect"
     >
-      <template #empty>
-        <EmptyState
-          :title="emptyText"
-          :icon="activeTrades ? 'mdi:swap-horizontal' : 'mdi:history'"
-          :description="
-            activeTrades
-              ? 'The bot opens a trade when the strategy signals an entry.'
-              : 'Closed trades will appear here.'
-          "
-        />
-      </template>
+
       <template #trade_id-cell="{ row }">
         {{ row.original.trade_id }}
         {{

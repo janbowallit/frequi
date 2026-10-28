@@ -12,7 +12,7 @@ withDefaults(
     showDetails: false,
   },
 );
-const classLabel = 'w-6/12 text-neutral-700 dark:text-neutral-400 text-sm';
+const classLabel = '';
 </script>
 
 <template>

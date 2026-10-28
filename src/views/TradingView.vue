@@ -1,56 +1,8 @@
 <script setup lang="ts">
-import type { GridItemData } from '@/types';
 import type { TabsItem } from '@nuxt/ui';
+import { breakpointsTailwind } from '@vueuse/core';
 
 const botStore = useBotStore();
-const layoutStore = useLayoutStore();
-const settingsStore = useSettingsStore();
-const currentBreakpoint = ref('');
-// The grid positions its items only after measuring its width - hide it until then
-const { isReady: gridReady, onLayoutReady } = useGridReady();
-
-const breakpointChanged = (newBreakpoint: string) => {
-  // console.log('breakpoint:', newBreakpoint);
-  currentBreakpoint.value = newBreakpoint;
-};
-const isResizableLayout = computed(() =>
-  ['', 'sm', 'md', 'lg', 'xl'].includes(currentBreakpoint.value),
-);
-const isLayoutLocked = computed(() => {
-  return layoutStore.layoutLocked || !isResizableLayout.value;
-});
-const gridLayoutData = computed((): GridItemData[] => {
-  if (isResizableLayout.value) {
-    return layoutStore.tradingLayout;
-  }
-  return [...layoutStore.getTradingLayoutSm];
-});
-
-const gridLayoutMultiPane = computed(() => {
-  return findGridLayout(gridLayoutData.value, TradeLayout.multiPane);
-});
-
-const gridLayoutOpenTrades = computed(() => {
-  return findGridLayout(gridLayoutData.value, TradeLayout.openTrades);
-});
-
-const gridLayoutTradeHistory = computed(() => {
-  return findGridLayout(gridLayoutData.value, TradeLayout.tradeHistory);
-});
-
-const gridLayoutTradeDetail = computed(() => {
-  return findGridLayout(gridLayoutData.value, TradeLayout.tradeDetail);
-});
-
-const gridLayoutChartView = computed(() => {
-  return findGridLayout(gridLayoutData.value, TradeLayout.chartView);
-});
-
-const responsiveGridLayouts = computed(() => {
-  return {
-    sm: layoutStore.getTradingLayoutSm,
-  };
-});
 
 function refreshOHLCV(pair: string, columns: string[]) {
   botStore.activeBot.getPairCandles({
@@ -60,245 +12,134 @@ function refreshOHLCV(pair: string, columns: string[]) {
   });
 }
 
-const tradingTabItems = computed<TabsItem[]>(() => {
-  return [
-    {
-      slot: 'pairs',
-      value: 'pairs',
-      label: 'Pairs',
-      icon: 'i-mdi-view-list',
-    },
-    {
-      slot: 'next-entry',
-      value: 'next-entry',
-      label: 'Next entry',
-      icon: 'i-mdi-timer-sand',
-    },
-    {
-      slot: 'signals',
-      value: 'signals',
-      label: 'Signals',
-      icon: 'i-mdi-radar',
-    },
-    {
-      slot: 'general',
-      value: 'general',
-      label: 'Status',
-      icon: 'i-mdi-information-outline',
-    },
-    {
-      slot: 'performance',
-      value: 'performance',
-      label: 'Performance',
-      icon: 'i-mdi-chart-line',
-    },
-    {
-      slot: 'balance',
-      value: 'balance',
-      label: 'Balance',
-      icon: 'i-mdi-bank',
-    },
-    {
-      slot: 'time-breakdown',
-      value: 'time-breakdown',
-      label: 'Time Breakdown',
-      icon: 'i-mdi-folder-clock',
-    },
-    {
-      slot: 'pairlist',
-      value: 'pairlist',
-      label: 'Pairlist',
-      icon: 'i-mdi-format-list-group',
-    },
-    {
-      slot: 'pair-locks',
-      value: 'pair-locks',
-      label: 'Pair Locks',
-      icon: 'i-mdi-lock-alert',
-    },
-  ];
+const activeTab = useStorage('ftTradeTab', 'open-trades');
+// On a phone the pair list moves into a tab so the chart comes right after the controls
+const isDesktop = useBreakpoints(breakpointsTailwind).greaterOrEqual('lg');
+watch(isDesktop, (desktop) => {
+  if (desktop && activeTab.value === 'pairs') activeTab.value = 'open-trades';
 });
+
+const tradingTabItems = computed<TabsItem[]>(() => [
+  ...(isDesktop.value ? [] : [{ slot: 'pairs', value: 'pairs', label: 'Pairs' }]),
+  {
+    slot: 'open-trades',
+    value: 'open-trades',
+    label: 'Open trades',
+    badge: botStore.activeBot.openTradeCount || undefined,
+  },
+  { slot: 'closed-trades', value: 'closed-trades', label: 'Closed trades' },
+  { slot: 'next-entry', value: 'next-entry', label: 'Next entry' },
+  { slot: 'signals', value: 'signals', label: 'Why no trade?' },
+  { slot: 'performance', value: 'performance', label: 'Performance' },
+  { slot: 'time-breakdown', value: 'time-breakdown', label: 'Profit by period' },
+  { slot: 'balance', value: 'balance', label: 'Balance' },
+  { slot: 'pairlist', value: 'pairlist', label: 'Pairlist' },
+  { slot: 'pair-locks', value: 'pair-locks', label: 'Locks' },
+  { slot: 'general', value: 'general', label: 'Bot status' },
+]);
 </script>
 
 <template>
-  <GridLayout
-    class="h-full w-full"
-    :class="{ 'grid-settling invisible': !gridReady }"
-    style="padding: 8px"
-    :row-height="50"
-    :layout="gridLayoutData"
-    :vertical-compact="false"
-    :margin="[8, 8]"
-    :responsive-layouts="responsiveGridLayouts"
-    :is-resizable="!isLayoutLocked"
-    :is-draggable="!isLayoutLocked"
-    :responsive="true"
-    :cols="{ lg: 12, md: 12, sm: 12, xs: 12, xxs: 12 }"
-    :col-num="12"
-    @update:breakpoint="breakpointChanged"
-    @layout-ready="onLayoutReady"
-  >
-    <template #default="{ gridItemProps }">
-      <GridItem
-        v-if="gridLayoutMultiPane.h !== 0"
-        v-bind="gridItemProps"
-        :i="gridLayoutMultiPane.i"
-        :x="gridLayoutMultiPane.x"
-        :y="gridLayoutMultiPane.y"
-        :w="gridLayoutMultiPane.w"
-        :h="gridLayoutMultiPane.h"
-        drag-allow-from=".drag-header"
+  <div class="flex min-h-full flex-col text-left lg:grid lg:h-full lg:grid-cols-[18.5rem_minmax(0,1fr)]">
+    <!-- Rail: controls and pairs -->
+    <aside
+      aria-label="Bot"
+      class="flex flex-col border-b border-default bg-default lg:min-h-0 lg:border-e lg:border-b-0"
+    >
+      <div class="border-default p-4 lg:border-b">
+        <BotControls />
+      </div>
+      <template v-if="isDesktop">
+        <h2 class="px-4 pt-3 text-sm font-semibold text-highlighted">Pairs</h2>
+        <div class="min-h-0 flex-1 overflow-auto">
+          <PairSummary
+          :pairlist="botStore.activeBot.whitelist"
+          :current-locks="botStore.activeBot.activeLocks"
+            :trades="botStore.activeBot.openTrades"
+          />
+        </div>
+      </template>
+    </aside>
+
+    <!-- Main: chart, then everything else in tabs -->
+    <div class="flex min-w-0 flex-col lg:min-h-0 lg:overflow-auto">
+      <section
+        aria-label="Chart"
+        class="h-[45vh] min-h-80 shrink-0 border-b border-default bg-default lg:h-[58vh] lg:min-h-96"
       >
-        <DraggableContainer header="Bot">
-          <div class="border-b border-default p-3">
-            <BotControls />
-          </div>
-          <UTabs
-            color="primary"
-            :items="tradingTabItems"
-            variant="link"
-            default-value="pairs"
-            :ui="{
-              list: 'flex-wrap gap-1 border-b border-default p-2',
-              indicator: 'hidden',
-              trigger:
-                'grow-0 rounded-md px-2.5 py-1.5 data-[state=active]:bg-primary/10 data-[state=active]:text-primary',
-              label: settingsStore.multiPaneButtonsShowText ? '' : 'sr-only',
-            }"
-          >
-            <template #leading="{ item }">
-              <!-- With labels hidden, hovering an icon names the tab -->
-              <UTooltip
-                :text="item.label"
-                :disabled="settingsStore.multiPaneButtonsShowText"
-                :content="{ side: 'top' }"
-              >
-                <UIcon :name="item.icon!" class="size-5 shrink-0" />
-              </UTooltip>
-            </template>
-            <template #pairs>
-              <PairSummary
-                :pairlist="botStore.activeBot.whitelist"
-                :current-locks="botStore.activeBot.activeLocks"
-                :trades="botStore.activeBot.openTrades"
-              />
-            </template>
-            <template #next-entry>
-              <NextEntryPanel />
-            </template>
-            <template #signals>
-              <SignalInspector />
-            </template>
-            <template #general>
-              <BotStatus />
-            </template>
-            <template #performance>
-              <BotPerformance />
-            </template>
-            <template #balance>
-              <BotBalance />
-            </template>
-            <template #time-breakdown>
-              <PeriodBreakdown />
-            </template>
-            <template #pairlist>
-              <PairListLive />
-            </template>
-            <template #pair-locks>
-              <PairLockList />
-            </template>
-          </UTabs>
-        </DraggableContainer>
-      </GridItem>
-      <GridItem
-        v-if="gridLayoutOpenTrades.h !== 0"
-        v-bind="gridItemProps"
-        :i="gridLayoutOpenTrades.i"
-        :x="gridLayoutOpenTrades.x"
-        :y="gridLayoutOpenTrades.y"
-        :w="gridLayoutOpenTrades.w"
-        :h="gridLayoutOpenTrades.h"
-        drag-allow-from=".drag-header"
+        <CandleChartContainer
+          :available-pairs="botStore.activeBot.whitelist"
+          :historic-view="!!false"
+          :timeframe="botStore.activeBot.timeframe"
+          :trades="botStore.activeBot.allTrades"
+          @refresh-data="refreshOHLCV"
+        />
+      </section>
+
+      <UTabs
+        v-model="activeTab"
+        :items="tradingTabItems"
+        variant="link"
+        color="primary"
+        class="gap-0"
+        :ui="{
+          root: 'gap-0',
+          list: 'sticky top-0 z-10 overflow-x-auto border-b border-default bg-default px-2',
+          trigger: 'shrink-0 grow-0 px-3 py-3 text-sm',
+          label: 'overflow-visible',
+          content: 'min-w-0',
+        }"
       >
-        <DraggableContainer header="Open trades">
+        <template #pairs>
+          <PairSummary
+            :pairlist="botStore.activeBot.whitelist"
+            :current-locks="botStore.activeBot.activeLocks"
+            :trades="botStore.activeBot.openTrades"
+          />
+        </template>
+        <template #open-trades>
           <TradeList
-            class="open-trades"
             :trades="botStore.activeBot.openTrades"
             title="Open trades"
             :active-trades="true"
             empty-text="No open trades"
           />
-        </DraggableContainer>
-      </GridItem>
-      <GridItem
-        v-if="gridLayoutTradeHistory.h !== 0"
-        v-bind="gridItemProps"
-        :i="gridLayoutTradeHistory.i"
-        :x="gridLayoutTradeHistory.x"
-        :y="gridLayoutTradeHistory.y"
-        :w="gridLayoutTradeHistory.w"
-        :h="gridLayoutTradeHistory.h"
-        drag-allow-from=".drag-header"
-      >
-        <DraggableContainer header="Closed trades">
+        </template>
+        <template #closed-trades>
           <TradeList
-            class="trade-history"
             :trades="botStore.activeBot.closedTrades"
-            title="Trade history"
+            title="Closed trades"
             :show-filter="true"
-            empty-text="No closed trades so far."
+            empty-text="No closed trades yet"
           />
-        </DraggableContainer>
-      </GridItem>
-      <GridItem
-        v-if="gridLayoutTradeDetail.h !== 0"
-        v-bind="gridItemProps"
-        :i="gridLayoutTradeDetail.i"
-        :x="gridLayoutTradeDetail.x"
-        :y="gridLayoutTradeDetail.y"
-        :w="gridLayoutTradeDetail.w"
-        :h="gridLayoutTradeDetail.h"
-        :min-h="4"
-        drag-allow-from=".drag-header"
-      >
-        <DraggableContainer header="Trade detail">
-          <TradeDetail
-            v-if="botStore.activeBot.detailTradeId && botStore.activeBot.tradeDetail"
-            :trade="botStore.activeBot.tradeDetail"
-            :stake-currency="botStore.activeBot.stakeCurrency"
-          />
-          <!-- Keep the panel so the layout has no hole when nothing is selected -->
-          <EmptyState
-            v-else
-            class="h-full"
-            icon="i-mdi-cursor-default-click-outline"
-            title="No trade selected"
-            description="Select a trade in open or closed trades to see its details here."
-          />
-        </DraggableContainer>
-      </GridItem>
-      <GridItem
-        v-if="gridLayoutTradeDetail.h !== 0"
-        v-bind="gridItemProps"
-        :i="gridLayoutChartView.i"
-        :x="gridLayoutChartView.x"
-        :y="gridLayoutChartView.y"
-        :w="gridLayoutChartView.w"
-        :h="gridLayoutChartView.h"
-        :min-h="6"
-        drag-allow-from=".drag-header"
-      >
-        <DraggableContainer header="Chart">
-          <CandleChartContainer
-            :available-pairs="botStore.activeBot.whitelist"
-            :historic-view="!!false"
-            :timeframe="botStore.activeBot.timeframe"
-            :trades="botStore.activeBot.allTrades"
-            @refresh-data="refreshOHLCV"
-          >
-          </CandleChartContainer>
-        </DraggableContainer>
-      </GridItem>
-    </template>
-  </GridLayout>
+        </template>
+        <template #next-entry>
+          <NextEntryPanel />
+        </template>
+        <template #signals>
+          <SignalInspector />
+        </template>
+        <template #performance>
+          <BotPerformance />
+        </template>
+        <template #time-breakdown>
+          <div class="h-96">
+            <PeriodBreakdown />
+          </div>
+        </template>
+        <template #balance>
+          <BotBalance />
+        </template>
+        <template #pairlist>
+          <PairListLive />
+        </template>
+        <template #pair-locks>
+          <PairLockList />
+        </template>
+        <template #general>
+          <BotStatus />
+        </template>
+      </UTabs>
+    </div>
+  </div>
 </template>

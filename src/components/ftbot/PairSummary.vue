@@ -28,6 +28,21 @@ const props = withDefaults(
     startingBalance: 0,
   },
 );
+
+// Live mode: show how many entry conditions each pair meets (shared with the Next entry panel)
+const nextEntry = props.backtestMode ? undefined : useNextEntry();
+const readiness = computed(() => {
+  const map = new Map<string, { met: number; total: number; signal: boolean }>();
+  for (const r of nextEntry?.pairs.value ?? []) {
+    if (r.conditions.length === 0) continue;
+    map.set(r.pair, {
+      met: r.conditions.filter((c) => c.met).length,
+      total: r.conditions.length,
+      signal: r.signal,
+    });
+  }
+  return map;
+});
 const botStore = useBotStore();
 
 const filterText = ref('');
@@ -104,7 +119,7 @@ const combinedPairList = computed(() => {
 </script>
 
 <template>
-  <div class="flex flex-col gap-2 p-2">
+  <div class="flex flex-col gap-2 p-3">
     <UInput
       id="trade-filter"
       v-model="filterText"
@@ -124,7 +139,7 @@ const combinedPairList = computed(() => {
       <li v-for="comb in combinedPairList" :key="comb.pair">
         <button
           type="button"
-          class="flex w-full items-center justify-between gap-2 rounded-md border-s-2 px-2.5 py-2 text-left text-sm transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          class="flex w-full items-center justify-between gap-2 rounded-md border-s-2 px-2.5 py-2 text-left text-sm"
           :class="
             comb.pair === botStore.activeBot.selectedPair
               ? 'border-primary bg-primary/10 font-semibold text-highlighted'
@@ -142,6 +157,26 @@ const combinedPairList = computed(() => {
           </span>
 
           <TradeProfit v-if="comb.trade && !backtestMode" :trade="comb.trade" />
+          <UBadge
+            v-else-if="readiness.get(comb.pair)?.signal"
+            color="success"
+            variant="solid"
+            size="sm"
+            label="Signal"
+          />
+          <span
+            v-else-if="readiness.get(comb.pair)"
+            class="flex h-1.5 w-12 shrink-0 gap-0.5"
+            role="img"
+            :aria-label="`${readiness.get(comb.pair)!.met} of ${readiness.get(comb.pair)!.total} entry conditions met`"
+          >
+            <span
+              v-for="i in readiness.get(comb.pair)!.total"
+              :key="i"
+              class="flex-1 rounded-full"
+              :class="i <= readiness.get(comb.pair)!.met ? 'bg-(--color-profit)' : 'bg-accented'"
+            />
+          </span>
           <ProfitPill
             v-if="backtestMode && comb.tradeCount > 0"
             :profit-ratio="comb.profit"

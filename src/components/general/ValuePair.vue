@@ -1,4 +1,5 @@
 <script setup lang="ts">
+/** One label / value row: label on the left, value right-aligned so numbers line up. */
 withDefaults(
   defineProps<{
     description: string;
@@ -8,20 +9,20 @@ withDefaults(
   }>(),
   {
     help: '',
-    classLabel: 'w-4/12 font-bold mb-0',
-    classValue: 'w-8/12',
+    classLabel: '',
+    classValue: '',
   },
 );
 </script>
 
 <template>
-  <div class="flex w-full">
-    <div class="flex justify-between me-2 items-center" :class="classLabel">
-      <label>{{ description }}</label>
-      <InfoBox v-if="help" :hint="help" />
-    </div>
-    <div :class="classValue">
+  <div class="flex min-w-0 items-baseline justify-between gap-4 py-1.5 text-sm">
+    <span class="flex shrink-0 items-center gap-1 text-muted" :class="classLabel">
+      {{ description }}
+      <InfoBox v-if="help" :hint="help" class="self-center" />
+    </span>
+    <span class="min-w-0 text-right text-highlighted tabular-nums" :class="classValue">
       <slot></slot>
-    </div>
+    </span>
   </div>
 </template>

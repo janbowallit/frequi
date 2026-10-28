@@ -9,12 +9,12 @@ import type { AuthStorageWithBotId } from '@/types';
 const botStore = useBotStore();
 
 const settingsStore = useSettingsStore();
-const layoutStore = useLayoutStore();
 const route = useRoute();
 const router = useRouter();
 const favicon = ref<Favico | undefined>(undefined);
 const pingInterval = ref<number>();
 const loginDialog = useLoginDialog();
+const mobileMenuOpen = ref(false);
 
 const breakpoints = useBreakpoints(breakpointsTailwind);
 
@@ -41,18 +41,6 @@ const setOpenTradesAsPill = (tradeCount: number) => {
   } else {
     favicon.value.reset();
     console.log('reset');
-  }
-};
-const resetDynamicLayout = (): void => {
-  console.log(`resetLayout called for ${route?.fullPath}`);
-  switch (route?.fullPath) {
-    case '/trade':
-      layoutStore.resetTradingLayout();
-      break;
-    case '/dashboard':
-      layoutStore.resetDashboardLayout();
-      break;
-    default:
   }
 };
 const setTitle = () => {
@@ -110,19 +98,22 @@ const botStatus = computed<{ label: string; dot: string }>(() => {
 });
 const isDryRun = computed(() => activeBot.value?.botState?.dry_run ?? false);
 
+const isWebserver = computed(() => botStore.activeBotorUndefined?.isWebserverMode ?? false);
+const needsWebserver = 'Needs the bot in webserver mode';
+
 // Navigation items array
 const navItems = ref([
   {
     label: 'Trade',
     to: '/trade',
     visible: computed(() => !botStore.canRunBacktest),
-    icon: 'i-mdi-currency-usd',
+    icon: 'i-mdi-swap-horizontal',
   },
   {
     label: 'Dashboard',
     to: '/dashboard',
     visible: computed(() => !botStore.canRunBacktest),
-    icon: 'i-mdi-view-dashboard',
+    icon: 'i-mdi-view-dashboard-outline',
   },
   {
     label: 'Chart',
@@ -132,44 +123,50 @@ const navItems = ref([
   {
     label: 'Logs',
     to: '/logs',
-    icon: 'i-mdi-format-list-bulleted',
+    icon: 'i-mdi-text-box-outline',
   },
-  {
-    label: 'Settings',
-    to: '/settings',
-    mobileOnly: true,
-    icon: 'i-mdi-cog',
-  },
+]);
+
+// Rarely used pages live under one menu
+const toolItems = computed(() => [
   {
     label: 'Backtest',
     to: '/backtest',
-    visible: computed(() => botStore.canRunBacktest),
-    icon: 'i-mdi-currency-usd',
+    icon: 'i-mdi-history',
+    description: 'Test a strategy on past candles',
+    disabled: !botStore.canRunBacktest,
   },
   {
-    label: 'Download Data',
-    to: '/download_data',
-    visible: computed(
-      () => botStore.isWebserverMode && botStore.activeBot.botFeatures.downloadDataView,
-    ),
-    icon: 'i-mdi-download',
-  },
-  {
-    label: 'Pairlist Config',
+    label: 'Pairlist builder',
     to: '/pairlist_config',
-    icon: 'i-mdi-format-list-numbered-rtl',
-    visible: computed(
-      () =>
-        (botStore.activeBot?.isWebserverMode ?? false) &&
-        botStore.activeBot.botFeatures.pairlistConfig,
-    ),
+    icon: 'i-mdi-format-list-numbered',
+    description: 'Combine filters into a pairlist',
+    disabled: !(isWebserver.value && botStore.activeBot.botFeatures.pairlistConfig),
+  },
+  {
+    label: 'Download candles',
+    to: '/download_data',
+    icon: 'i-mdi-download-outline',
+    description: 'Fetch history for backtesting',
+    disabled: !(isWebserver.value && botStore.activeBot.botFeatures.downloadDataView),
   },
 ]);
+
+const toolMenuItems = computed<DropdownMenuItem[][]>(() => [
+  toolItems.value.map((item) => ({
+    label: item.label,
+    icon: item.icon,
+    to: item.disabled ? undefined : item.to,
+    description: item.disabled ? needsWebserver : item.description,
+    disabled: item.disabled,
+  })),
+]);
+const isToolRoute = computed(() => toolItems.value.some((t) => route.path === t.to));
 
 const menuItems = computed<DropdownMenuItem[][]>(() => [
   [
     {
-      label: `V: ${settingsStore.uiVersion}`,
+      label: `Version ${settingsStore.uiVersion}`,
       disabled: true,
     },
   ],
@@ -179,24 +176,12 @@ const menuItems = computed<DropdownMenuItem[][]>(() => [
       icon: 'i-mdi-cog',
       onSelect: () => router.push('/settings'),
     },
-    {
-      label: layoutStore.layoutLocked ? 'Unlock Layout' : 'Lock Layout',
-      icon: layoutStore.layoutLocked ? 'i-mdi-lock' : 'i-mdi-lock-open',
-      onSelect: () => {
-        layoutStore.layoutLocked = !layoutStore.layoutLocked;
-      },
-    },
-    {
-      label: 'Reset Layout',
-      icon: 'i-mdi-lock-reset',
-      onSelect: resetDynamicLayout,
-    },
   ],
   ...(botStore.hasBots && botStore.botCount === 1
     ? [
         [
           {
-            label: 'Logout',
+            label: 'Sign out',
             icon: 'i-mdi-logout',
             onSelect: clickLogout,
           },
@@ -221,43 +206,49 @@ function editBotLogin(botId: string) {
 </script>
 
 <template>
-  <header
-    class="sticky top-0 z-40 border-b border-default bg-default/85 backdrop-blur supports-[backdrop-filter]:bg-default/70"
-  >
+  <header class="relative z-40 border-b border-default bg-default">
     <div class="flex h-14 items-center gap-2 px-3 lg:px-4">
       <RouterLink
         exact
         to="/"
         aria-label="FreqUI home"
-        class="flex shrink-0 items-center gap-2 rounded-md pe-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        class="flex shrink-0 items-center gap-2 rounded-md pe-1"
       >
         <AppIcon class="h-8 w-8" />
         <AppText class="hidden text-lg lg:inline" />
       </RouterLink>
 
       <!-- Desktop navigation -->
-      <nav v-if="!isMobile" aria-label="Main" class="ms-3 flex items-center gap-1">
+      <nav v-if="!isMobile" aria-label="Main" class="ms-4 flex h-full items-center gap-1">
         <UButton
-          v-for="(item, index) in navItems.filter(
-            (item) => (item.visible ?? true) && !item.mobileOnly,
-          )"
+          v-for="(item, index) in navItems.filter((item) => item.visible ?? true)"
           :key="index"
           :to="item.to"
           :icon="item.icon"
           :label="item.label"
           color="neutral"
           variant="ghost"
-          size="md"
-          class="text-muted hover:text-highlighted"
-          active-class="bg-elevated text-highlighted"
+          class="nav-link text-muted hover:text-highlighted"
+          active-class="nav-link-active text-highlighted"
         />
+        <UDropdownMenu :items="toolMenuItems" :content="{ align: 'start' }">
+          <UButton
+            label="Tools"
+            icon="i-mdi-toolbox-outline"
+            trailing-icon="mdi:chevron-down"
+            color="neutral"
+            variant="ghost"
+            class="nav-link text-muted hover:text-highlighted"
+            :class="{ 'nav-link-active text-highlighted': isToolRoute }"
+          />
+        </UDropdownMenu>
       </nav>
 
       <div class="ms-auto flex min-w-0 items-center gap-2">
         <template v-if="!isMobile">
           <UTooltip
             v-if="!settingsStore.confirmDialog"
-            text="Confirm dialogs are off - force exits run immediately."
+            text="Confirmations are off: force exits run immediately."
           >
             <UBadge
               color="warning"
@@ -268,18 +259,12 @@ function editBotLogin(botId: string) {
             />
           </UTooltip>
 
-          <!-- Active bot status -->
+          <!-- Active bot -->
           <div
             v-if="botStore.hasBots"
-            class="flex h-9 items-center gap-2 rounded-full border border-default bg-elevated/40 ps-3 pe-1"
+            class="flex h-9 items-center gap-2 rounded-md border border-default ps-3 pe-1"
           >
-            <span class="relative flex size-2.5 shrink-0" aria-hidden="true">
-              <span
-                v-if="botStatus.label === 'Online'"
-                class="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60 motion-reduce:hidden"
-              />
-              <span class="relative inline-flex size-2.5 rounded-full" :class="botStatus.dot" />
-            </span>
+            <span class="size-2 shrink-0 rounded-full" :class="botStatus.dot" aria-hidden="true" />
             <span class="max-w-40 truncate text-sm font-medium text-highlighted">
               {{ activeBot?.botName || 'No bot selected' }}
             </span>
@@ -290,24 +275,22 @@ function editBotLogin(botId: string) {
               color="error"
               variant="soft"
               size="xs"
-              label="Log in again"
+              label="Sign in again"
               @click="editBotLogin(botStore.selectedBot)"
             />
             <BotSelect />
             <ReloadControl />
           </div>
-        </template>
 
-        <ThemeSelect v-if="!isMobile" />
+          <ThemeSelect />
 
-        <template v-if="!isMobile">
-          <UDropdownMenu v-if="botStore.hasBots" :items="menuItems" size="lg">
+          <UDropdownMenu v-if="botStore.hasBots" :items="menuItems" :content="{ align: 'end' }">
             <UButton
               color="neutral"
               variant="ghost"
               icon="mdi:account-circle-outline"
               trailing-icon="mdi:chevron-down"
-              aria-label="Account and layout menu"
+              aria-label="Account and settings"
             />
           </UDropdownMenu>
           <UButton
@@ -315,7 +298,7 @@ function editBotLogin(botId: string) {
             color="primary"
             variant="solid"
             icon="mdi:login"
-            label="Login"
+            label="Sign in"
             @click="loginDialog({})"
           />
         </template>
@@ -330,7 +313,11 @@ function editBotLogin(botId: string) {
             <span class="size-2 shrink-0 rounded-full" :class="botStatus.dot" aria-hidden="true" />
             <span class="truncate">{{ activeBot?.botName }}</span>
           </span>
-          <USlideover title="Menu" :close="{ color: 'neutral', variant: 'ghost' }">
+          <USlideover
+            v-model:open="mobileMenuOpen"
+            title="Menu"
+            :close="{ color: 'neutral', variant: 'ghost' }"
+          >
             <UButton
               color="neutral"
               variant="ghost"
@@ -345,7 +332,7 @@ function editBotLogin(botId: string) {
               </div>
             </template>
             <template #body="{ close }">
-              <div class="flex h-full flex-col gap-6">
+              <div class="flex h-full flex-col gap-6 text-left">
                 <nav aria-label="Main" class="flex flex-col gap-1">
                   <UButton
                     v-for="(item, index) in navItems.filter((item) => item.visible ?? true)"
@@ -360,17 +347,52 @@ function editBotLogin(botId: string) {
                     active-class="bg-elevated text-highlighted"
                     @click="close()"
                   />
+                  <UButton
+                    to="/settings"
+                    icon="i-mdi-cog-outline"
+                    label="Settings"
+                    color="neutral"
+                    variant="ghost"
+                    size="xl"
+                    class="justify-start text-muted"
+                    active-class="bg-elevated text-highlighted"
+                    @click="close()"
+                  />
                 </nav>
 
-                <section v-if="botStore.hasBots" class="flex flex-col gap-3" aria-label="Bot">
-                  <h2 class="text-xs font-semibold uppercase tracking-wide text-muted">Bot</h2>
+                <section class="flex flex-col gap-1" aria-labelledby="mobile-tools">
+                  <h2 id="mobile-tools" class="px-2.5 text-sm font-medium text-muted">Tools</h2>
+                  <UButton
+                    v-for="item in toolItems"
+                    :key="item.to"
+                    :to="item.disabled ? undefined : item.to"
+                    :disabled="item.disabled"
+                    :icon="item.icon"
+                    color="neutral"
+                    variant="ghost"
+                    size="lg"
+                    class="justify-start text-muted"
+                    active-class="bg-elevated text-highlighted"
+                    @click="close()"
+                  >
+                    <span class="flex flex-col items-start">
+                      <span>{{ item.label }}</span>
+                      <span class="text-xs text-dimmed">
+                        {{ item.disabled ? needsWebserver : item.description }}
+                      </span>
+                    </span>
+                  </UButton>
+                </section>
+
+                <section v-if="botStore.hasBots" class="flex flex-col gap-2" aria-labelledby="mobile-bot">
+                  <h2 id="mobile-bot" class="px-2.5 text-sm font-medium text-muted">Bot</h2>
                   <div
-                    class="flex items-center justify-between gap-2 rounded-lg border border-default p-3"
+                    class="flex items-center justify-between gap-2 rounded-md border border-default p-3"
                   >
                     <span class="flex min-w-0 items-center gap-2">
                       <span class="size-2.5 shrink-0 rounded-full" :class="botStatus.dot" />
                       <span class="truncate font-medium">{{ activeBot?.botName }}</span>
-                      <span class="text-sm text-muted">· {{ botStatus.label }}</span>
+                      <span class="text-sm text-muted">{{ botStatus.label }}</span>
                     </span>
                     <UBadge v-if="isDryRun" color="neutral" variant="soft" label="Dry run" />
                   </div>
@@ -387,7 +409,7 @@ function editBotLogin(botId: string) {
                     color="neutral"
                     variant="outline"
                     icon="mdi:logout"
-                    label="Logout"
+                    label="Sign out"
                     @click="
                       close();
                       clickLogout();
@@ -402,3 +424,19 @@ function editBotLogin(botId: string) {
     </div>
   </header>
 </template>
+
+<style scoped>
+/* Active page: a brass bar sitting on the header's bottom edge */
+.nav-link {
+  position: relative;
+}
+.nav-link-active::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0.5rem;
+  bottom: calc(-0.75rem - 1px);
+  height: 2px;
+  border-radius: 2px;
+  background: var(--ui-primary);
+}
+</style>
