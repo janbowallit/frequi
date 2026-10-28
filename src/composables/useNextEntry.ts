@@ -42,10 +42,13 @@ const ACRONYMS = new Set(['btc', 'eth', 'ema', 'sma', 'rsi', 'macd', 'adx', 'atr
 /**
  * Plain-language text for the conditions BitpinBreakout publishes. Other strategies fall back
  * to the column name. `waiting` is the headline while a market condition blocks every pair.
+ * `market` marks a condition that is the same for every pair, even when one pair's copy of
+ * the gap is a candle behind.
  */
-const KNOWN: Record<string, { label: string; help: string; waiting?: string }> = {
+const KNOWN: Record<string, { label: string; help: string; waiting?: string; market?: true }> = {
   btc_trend: {
     label: 'BTC trend',
+    market: true,
     help: "BTC's daily close must be above its 50-day average. Checked once a day, at midnight UTC.",
     waiting: 'No buys until BTC turns up',
   },
@@ -168,7 +171,11 @@ function useNextEntryState() {
 
   const supported = computed(() => results.value.some((r) => r.conditions.length > 0));
 
-  /** Conditions with the same state on every pair (e.g. a BTC market filter) are shown once */
+  /**
+   * Conditions with the same state on every pair (e.g. a BTC market filter) are shown once.
+   * Known market conditions only need to agree on met/not met: a pair analysed just before the
+   * newest BTC candle arrived carries an older gap until its next candle.
+   */
   const marketKeys = computed(() => {
     const rows = results.value;
     if (rows.length < 2) return new Set<string>();
@@ -178,15 +185,27 @@ function useNextEntryState() {
         .filter((c) =>
           rows.every((r) => {
             const other = r.conditions.find((o) => o.key === c.key);
-            return other && other.met === c.met && sameValue(other.gap, c.gap);
+            if (!other || other.met !== c.met) return false;
+            return KNOWN[c.key]?.market || sameValue(other.gap, c.gap);
           }),
         )
         .map((c) => c.key),
     );
   });
 
+  /** The copy most pairs agree on, so one stale pair doesn't set the displayed gap */
+  function consensus(key: string): EntryCondition {
+    const copies = results.value
+      .map((r) => r.conditions.find((c) => c.key === key))
+      .filter((c): c is EntryCondition => c !== undefined);
+    const votes = (c: EntryCondition) => copies.filter((o) => sameValue(o.gap, c.gap)).length;
+    return copies.reduce((best, c) => (votes(c) > votes(best) ? c : best));
+  }
+
   const marketConditions = computed(() =>
-    (results.value[0]?.conditions ?? []).filter((c) => marketKeys.value.has(c.key)),
+    (results.value[0]?.conditions ?? [])
+      .filter((c) => marketKeys.value.has(c.key))
+      .map((c) => consensus(c.key)),
   );
 
   /** Missing conditions first, then the total price move still needed */
