@@ -121,7 +121,7 @@ const maxTrades = computed(() => bot.value?.botState?.max_open_trades ?? 0);
           v-if="showEarliest && earliest && status.label === 'Running'"
           class="hidden border-s border-default ps-4 tabular-nums lg:inline"
         >
-          Earliest entry
+          Earliest possible buy
           <span class="font-medium text-highlighted">{{ fmtTime(earliest) }}</span>
           ({{ untilText(earliest) }})
         </span>

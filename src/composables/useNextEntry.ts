@@ -16,6 +16,8 @@ import type { PairHistory } from '@/types';
 export interface EntryCondition {
   key: string;
   label: string;
+  /** What the check means in plain words, when the condition is a known one */
+  help: string | null;
   met: boolean;
   gap: number | null;
   target: number | null;
@@ -37,7 +39,32 @@ const PREFIX = 'entry_check__';
 const REFRESH_MS = 60_000;
 const ACRONYMS = new Set(['btc', 'eth', 'ema', 'sma', 'rsi', 'macd', 'adx', 'atr', 'bb', 'vwap']);
 
+/**
+ * Plain-language text for the conditions BitpinBreakout publishes. Other strategies fall back
+ * to the column name. `waiting` is the headline while a market condition blocks every pair.
+ */
+const KNOWN: Record<string, { label: string; help: string; waiting?: string }> = {
+  btc_trend: {
+    label: 'BTC trend',
+    help: "BTC's daily close must be above its 50-day average. Checked once a day, at midnight UTC.",
+    waiting: 'No buys until BTC turns up',
+  },
+  uptrend: {
+    label: 'Uptrend',
+    help: 'The price must be above its 200-hour average, so the coin is going up overall.',
+  },
+  breakout: {
+    label: 'Breakout',
+    help: 'The candle must close higher than every close of the last 72 hours.',
+  },
+  volume_spike: {
+    label: 'Volume spike',
+    help: 'Trading volume must be at least 2x its average of the last 48 hours.',
+  },
+};
+
 function label(key: string): string {
+  if (KNOWN[key]) return KNOWN[key].label;
   const words = key.split('_').map((w) => (ACRONYMS.has(w) ? w.toUpperCase() : w));
   const text = words.join(' ');
   return text.charAt(0).toUpperCase() + text.slice(1);
@@ -60,9 +87,9 @@ export function fmtEntryPrice(value: number): string {
 }
 
 export function needText(c: EntryCondition): string {
-  if (c.gap === null) return 'not on the latest candle';
+  if (c.gap === null) return 'not met yet';
   const target = c.target !== null ? ` (to ${fmtEntryPrice(c.target)})` : '';
-  return c.gap > 0 ? `needs ${fmtGap(c.gap)}${target}` : `at the level${target}`;
+  return c.gap > 0 ? `needs a ${fmtGap(c.gap)} rise${target}` : `at the level${target}`;
 }
 
 export function unmetConditions(r: PairReadiness) {
@@ -98,6 +125,7 @@ function useNextEntryState() {
         return {
           key,
           label: label(key),
+          help: KNOWN[key]?.help ?? null,
           met: row[col] === 1,
           gap: num(row[`entry_gap__${key}`]),
           target: num(row[`entry_target__${key}`]),
@@ -220,15 +248,22 @@ function useNextEntryState() {
     if (ready.length) {
       return {
         title: `Entry signal on ${ready.map((r) => r.pair).join(', ')}`,
-        detail: 'Every condition holds on the latest candle. The bot should open a trade now.',
+        detail: 'Every check is met on the latest candle. The bot should buy now.',
         tone: 'ready',
       };
     }
     if (blockers.value.length) {
-      const what = blockers.value.map((c) => `${c.label} ${needText(c)}`).join(', ');
+      const first = blockers.value[0]!;
+      const what = blockers.value
+        .map(
+          (c) => `${c.label} ${needText(c)}${c.at ? ` by the next check at ${fmtTime(c.at)}` : ''}`,
+        )
+        .join(', ');
       return {
-        title: `Waiting for ${blockers.value.map((c) => c.label).join(' and ')}`,
-        detail: `Blocks every pair: ${what}.`,
+        title:
+          (blockers.value.length === 1 && KNOWN[first.key]?.waiting) ||
+          `Waiting for ${blockers.value.map((c) => c.label).join(' and ')}`,
+        detail: `${what}. Until then no coin is bought, whatever its own checks say.`,
         tone: 'waiting',
       };
     }
@@ -243,7 +278,7 @@ function useNextEntryState() {
     const missing = unmetConditions(closest);
     return {
       title: `Closest: ${closest.pair}`,
-      detail: `${missing.length} condition${missing.length === 1 ? '' : 's'} left: ${missing
+      detail: `${missing.length} check${missing.length === 1 ? '' : 's'} left: ${missing
         .map((c) => `${c.label} ${needText(c)}`)
         .join(', ')}.`,
       tone: 'waiting',

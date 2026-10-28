@@ -168,7 +168,7 @@ const combinedPairList = computed(() => {
             v-else-if="readiness.get(comb.pair)"
             class="flex h-1.5 w-12 shrink-0 gap-0.5"
             role="img"
-            :aria-label="`${readiness.get(comb.pair)!.met} of ${readiness.get(comb.pair)!.total} entry conditions met`"
+            :aria-label="`${readiness.get(comb.pair)!.met} of ${readiness.get(comb.pair)!.total} buy checks met`"
           >
             <span
               v-for="i in readiness.get(comb.pair)!.total"

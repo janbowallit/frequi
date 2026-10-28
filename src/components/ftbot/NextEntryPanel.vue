@@ -43,6 +43,16 @@ function metCount(conditions: EntryCondition[]) {
   return conditions.filter((c) => c.met).length;
 }
 
+/** The per-coin checks, explained once under the list */
+const pairChecks = computed(() =>
+  (pairs.value[0]?.conditions ?? []).filter((c) => !marketKeys.value.has(c.key)),
+);
+
+function badgeLabel(c: EntryCondition) {
+  if (c.met) return c.label;
+  return c.gap === null ? `${c.label}: not yet` : `${c.label} ${fmtGap(c.gap)}`;
+}
+
 function selectPair(pair: string) {
   botStore.activeBot.selectedPair = pair;
   if (route.path !== '/trade') router.push('/trade');
@@ -92,7 +102,7 @@ function selectPair(pair: string) {
           <p class="text-sm text-muted">{{ verdict.detail }}</p>
         </div>
         <p v-if="showEarliest && earliest" class="shrink-0 text-sm text-muted @md:text-right">
-          Earliest entry
+          Earliest possible buy
           <span class="block text-base font-semibold text-highlighted tabular-nums">
             {{ fmtTime(earliest) }}
           </span>
@@ -100,31 +110,55 @@ function selectPair(pair: string) {
         </p>
       </div>
 
-      <!-- Conditions shared by every pair -->
+      <!-- Step 1: conditions shared by every pair (e.g. the BTC filter) -->
       <section
         v-if="marketConditions.length"
         aria-labelledby="next-entry-market"
         class="flex flex-col gap-2"
       >
-        <h3 id="next-entry-market" class="text-sm font-medium text-muted">
-          Market conditions, shared by every pair
-        </h3>
-        <ul class="flex flex-wrap gap-1.5">
-          <li v-for="c in marketConditions" :key="c.key">
+        <div>
+          <h3 id="next-entry-market" class="text-sm font-semibold text-highlighted">
+            1. Market gate
+          </h3>
+          <p class="text-sm text-muted">
+            Checked first. While it's closed, no coin is bought, not even one whose own checks are
+            all met.
+          </p>
+        </div>
+        <ul class="flex flex-col gap-2">
+          <li
+            v-for="c in marketConditions"
+            :key="c.key"
+            class="flex flex-col gap-1 @md:flex-row @md:items-center @md:gap-3"
+          >
             <UBadge
+              class="self-start"
               :color="c.met ? 'success' : c.gap === null ? 'neutral' : 'primary'"
               variant="subtle"
-              :icon="c.met ? 'mdi:check' : 'mdi:clock-outline'"
-              :label="c.met ? c.label : `${c.label} ${needText(c)}`"
-              :title="c.at && !c.met ? `Re-checked at ${fmtTime(c.at)}` : undefined"
+              :icon="c.met ? 'mdi:lock-open-variant-outline' : 'mdi:lock-outline'"
+              :label="c.met ? `${c.label}: open` : `${c.label} ${needText(c)}`"
             />
+            <span class="text-sm text-muted">
+              {{ c.help }}
+              <template v-if="!c.met && c.at"> Next check {{ fmtTime(c.at) }}.</template>
+            </span>
           </li>
         </ul>
       </section>
 
-      <!-- Per pair -->
+      <!-- Step 2: each coin's own checks -->
       <section aria-labelledby="next-entry-pairs" class="flex flex-col gap-1">
-        <h3 id="next-entry-pairs" class="text-sm font-medium text-muted">Pairs, closest first</h3>
+        <div>
+          <h3 id="next-entry-pairs" class="text-sm font-semibold text-highlighted">
+            {{ marketConditions.length ? '2. ' : '' }}Each coin's own checks
+          </h3>
+          <p class="text-sm text-muted">
+            A coin is bought when all of its checks are met on the same closed
+            {{ timeframe }} candle{{
+              marketConditions.length ? ' and the market gate is open' : ''
+            }}. Closest to a buy first.
+          </p>
+        </div>
         <ul class="flex flex-col divide-y divide-default">
           <li
             v-for="r in pairs"
@@ -160,8 +194,8 @@ function selectPair(pair: string) {
                 v-else
                 class="flex h-1.5 w-16 gap-0.5"
                 role="img"
-                :aria-label="`${metCount(r.conditions)} of ${r.conditions.length} conditions met`"
-                :title="`${metCount(r.conditions)} of ${r.conditions.length} conditions met`"
+                :aria-label="`${metCount(r.conditions)} of ${r.conditions.length} checks met`"
+                :title="`${metCount(r.conditions)} of ${r.conditions.length} checks met`"
               >
                 <span
                   v-for="i in r.conditions.length"
@@ -179,14 +213,25 @@ function selectPair(pair: string) {
                   variant="subtle"
                   size="sm"
                   :icon="c.met ? 'mdi:check' : undefined"
-                  :label="c.met || c.gap === null ? c.label : `${c.label} ${fmtGap(c.gap)}`"
-                  :title="c.met ? `${c.label}: met` : `${c.label}: ${needText(c)}`"
+                  :label="badgeLabel(c)"
+                  :title="c.help ?? (c.met ? `${c.label}: met` : `${c.label}: ${needText(c)}`)"
                 />
               </li>
             </ul>
           </li>
         </ul>
       </section>
+
+      <!-- What each check means -->
+      <dl
+        v-if="pairChecks.some((c) => c.help)"
+        class="grid gap-x-3 gap-y-1 rounded-md bg-elevated/50 p-3 text-sm @md:grid-cols-[8rem_1fr]"
+      >
+        <template v-for="c in pairChecks" :key="c.key">
+          <dt class="font-medium text-highlighted">{{ c.label }}</dt>
+          <dd class="text-muted">{{ c.help ?? 'Defined by the strategy.' }}</dd>
+        </template>
+      </dl>
 
       <UAlert
         v-if="failedPairs.length"
@@ -197,8 +242,8 @@ function selectPair(pair: string) {
       />
 
       <p class="max-w-prose text-xs text-muted">
-        A trade starts when every condition holds on the same closed {{ timeframe }} candle.
-        Percentages are the price move still needed. Updated every minute<template
+        A green check means met. A percentage is how much the price still has to rise. Checks run
+        when each {{ timeframe }} candle closes; this view updates every minute<template
           v-if="latestCandleTs"
           >, latest candle {{ timestampms(latestCandleTs) }}</template
         >.
