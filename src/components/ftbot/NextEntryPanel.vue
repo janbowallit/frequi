@@ -43,6 +43,17 @@ function metCount(conditions: EntryCondition[]) {
   return conditions.filter((c) => c.met).length;
 }
 
+/** The market gate is closed (some shared check unmet) */
+const gateClosed = computed(() => marketConditions.value.some((c) => !c.met));
+
+function readinessText(conditions: EntryCondition[]) {
+  const own = pairConditions(conditions);
+  const text = `${metCount(own)} of ${own.length} checks met`;
+  return gateClosed.value && metCount(own) === own.length
+    ? `${text}, waiting for the market gate`
+    : text;
+}
+
 /** The per-coin checks, explained once under the list */
 const pairChecks = computed(() =>
   (pairs.value[0]?.conditions ?? []).filter((c) => !marketKeys.value.has(c.key)),
@@ -192,16 +203,30 @@ function selectPair(pair: string) {
               />
               <span
                 v-else
-                class="flex h-1.5 w-16 gap-0.5"
+                class="flex items-center gap-1"
                 role="img"
-                :aria-label="`${metCount(r.conditions)} of ${r.conditions.length} checks met`"
-                :title="`${metCount(r.conditions)} of ${r.conditions.length} checks met`"
+                :aria-label="readinessText(r.conditions)"
+                :title="readinessText(r.conditions)"
               >
-                <span
-                  v-for="i in r.conditions.length"
-                  :key="i"
-                  class="flex-1 rounded-full"
-                  :class="i <= metCount(r.conditions) ? 'bg-(--color-profit)' : 'bg-accented'"
+                <span class="flex h-1.5 w-16 gap-0.5">
+                  <span
+                    v-for="i in pairConditions(r.conditions).length"
+                    :key="i"
+                    class="flex-1 rounded-full"
+                    :class="
+                      i <= metCount(pairConditions(r.conditions))
+                        ? 'bg-(--color-profit)'
+                        : 'bg-accented'
+                    "
+                  />
+                </span>
+                <UIcon
+                  v-if="
+                    gateClosed &&
+                    metCount(pairConditions(r.conditions)) === pairConditions(r.conditions).length
+                  "
+                  name="mdi:lock-outline"
+                  class="size-3.5 shrink-0 text-primary"
                 />
               </span>
             </div>

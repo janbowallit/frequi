@@ -190,8 +190,10 @@ function useNextEntryState() {
 
   /**
    * Conditions with the same state on every pair (e.g. a BTC market filter) are shown once.
-   * Known market conditions only need to agree on met/not met: a pair analysed just before the
-   * newest BTC candle arrived carries an older gap until its next candle.
+   * Known conditions use their `market` flag, so a per-coin check that happens to be unmet on
+   * every pair (no coin has a volume spike) stays with the coins. Known market conditions only
+   * need to agree on met/not met: a pair analysed just before the newest BTC candle arrived
+   * carries an older gap until its next candle. Unknown conditions are guessed from agreement.
    */
   const marketKeys = computed(() => {
     const rows = results.value;
@@ -199,13 +201,15 @@ function useNextEntryState() {
     const first = rows[0]!.conditions;
     return new Set(
       first
-        .filter((c) =>
-          rows.every((r) => {
+        .filter((c) => {
+          const known = KNOWN[c.key];
+          if (known && !known.market) return false;
+          return rows.every((r) => {
             const other = r.conditions.find((o) => o.key === c.key);
             if (!other || other.met !== c.met) return false;
-            return KNOWN[c.key]?.market || sameValue(other.gap, c.gap);
-          }),
-        )
+            return known?.market || sameValue(other.gap, c.gap);
+          });
+        })
         .map((c) => c.key),
     );
   });
