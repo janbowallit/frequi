@@ -19,7 +19,11 @@ type CandleTooltipRow = {
 export function useCandleChartTooltip(chartOptions: Ref<EChartsOption>) {
   function formatTooltipValue(value: unknown): string {
     if (typeof value === 'number') {
-      return value.toLocaleString(undefined, { maximumFractionDigits: 15 });
+      // Enough digits for the value's size - 81,999.12 / 1.0072 / 0.169512 - not 15 decimals
+      const abs = Math.abs(value);
+      const digits =
+        abs >= 1000 ? 2 : abs >= 1 ? 4 : abs === 0 ? 0 : 5 - Math.floor(Math.log10(abs));
+      return value.toLocaleString(undefined, { maximumFractionDigits: Math.min(digits, 15) });
     }
     if (typeof value === 'string') {
       return value;
@@ -182,8 +186,9 @@ export function useCandleChartTooltip(chartOptions: Ref<EChartsOption>) {
     const values = getTooltipDimensionValues(param);
     const marker = typeof param.marker === 'string' ? param.marker : '';
     const label = param.seriesName ?? '';
+    // Series without a value on this candle (e.g. no entry signal) only add noise
     if (values.length === 0) {
-      return [{ label, marker }];
+      return [];
     }
     if (values.length === 1) {
       return [{ label, value: values[0], marker }];

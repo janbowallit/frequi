@@ -166,6 +166,16 @@ const tradingTabItems = computed<TabsItem[]>(() => {
               label: settingsStore.multiPaneButtonsShowText ? '' : 'sr-only',
             }"
           >
+            <template #leading="{ item }">
+              <!-- With labels hidden, hovering an icon names the tab -->
+              <UTooltip
+                :text="item.label"
+                :disabled="settingsStore.multiPaneButtonsShowText"
+                :content="{ side: 'top' }"
+              >
+                <UIcon :name="item.icon!" class="size-5 shrink-0" />
+              </UTooltip>
+            </template>
             <template #pairs>
               <PairSummary
                 :pairlist="botStore.activeBot.whitelist"
@@ -210,13 +220,13 @@ const tradingTabItems = computed<TabsItem[]>(() => {
         :h="gridLayoutOpenTrades.h"
         drag-allow-from=".drag-header"
       >
-        <DraggableContainer header="Open Trades">
+        <DraggableContainer header="Open trades">
           <TradeList
             class="open-trades"
             :trades="botStore.activeBot.openTrades"
             title="Open trades"
             :active-trades="true"
-            empty-text="Currently no open trades."
+            empty-text="No open trades"
           />
         </DraggableContainer>
       </GridItem>
@@ -230,7 +240,7 @@ const tradingTabItems = computed<TabsItem[]>(() => {
         :h="gridLayoutTradeHistory.h"
         drag-allow-from=".drag-header"
       >
-        <DraggableContainer header="Closed Trades">
+        <DraggableContainer header="Closed trades">
           <TradeList
             class="trade-history"
             :trades="botStore.activeBot.closedTrades"
@@ -251,7 +261,7 @@ const tradingTabItems = computed<TabsItem[]>(() => {
         :min-h="4"
         drag-allow-from=".drag-header"
       >
-        <DraggableContainer header="Trade Detail">
+        <DraggableContainer header="Trade detail">
           <TradeDetail
             v-if="botStore.activeBot.detailTradeId && botStore.activeBot.tradeDetail"
             :trade="botStore.activeBot.tradeDetail"
@@ -263,7 +273,7 @@ const tradingTabItems = computed<TabsItem[]>(() => {
             class="h-full"
             icon="i-mdi-cursor-default-click-outline"
             title="No trade selected"
-            description="Click a trade in Open or Closed Trades to see its details here."
+            description="Select a trade in open or closed trades to see its details here."
           />
         </DraggableContainer>
       </GridItem>

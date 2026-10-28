@@ -112,8 +112,8 @@ async function handleForceEntry() {
     </div>
     <div class="grid grid-cols-3 gap-1.5">
       <UButton
-        color="success"
-        :variant="isRunning ? 'soft' : 'solid'"
+        :color="isRunning ? 'neutral' : 'success'"
+        :variant="isRunning ? 'outline' : 'solid'"
         class="justify-center"
         :disabled="!canTrade || isRunning"
         :label="isPaused ? 'Resume' : 'Start'"
@@ -168,7 +168,7 @@ async function handleForceEntry() {
         @click="handleReloadConfig()"
       />
       <UButton
-        color="error"
+        :color="botStore.activeBot.openTradeCount === 0 ? 'neutral' : 'error'"
         variant="ghost"
         size="sm"
         class="ms-auto"

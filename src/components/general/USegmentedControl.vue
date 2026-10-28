@@ -10,7 +10,7 @@ import type { GetItemKeys, GetItemValue } from '@nuxt/ui';
 
 /**
  * SegmentedControl — NuxtUI replacement for PrimeVue SelectButton.
- * Uses UFieldGroup + UButton internally.
+ * A segmented track of UButtons.
  */
 const props = withDefaults(
   defineProps<{
@@ -93,18 +93,28 @@ function select(item: T) {
 </script>
 
 <template>
-  <UFieldGroup role="group">
+  <!-- A track holding the options; the selected one is raised, like a native segmented control -->
+  <div
+    role="group"
+    class="inline-flex max-w-full items-center gap-0.5 overflow-x-auto rounded-lg bg-elevated p-0.5 ring ring-inset ring-default"
+  >
     <UButton
       v-for="item in items"
       :key="String(getValue(item))"
       :size="size"
-      :variant="isSelected(item) ? 'solid' : 'subtle'"
-      :color="isSelected(item) ? 'primary' : 'neutral'"
+      variant="ghost"
+      color="neutral"
+      class="shrink-0 justify-center rounded-md transition-colors duration-150"
+      :class="
+        isSelected(item)
+          ? 'bg-default font-semibold text-highlighted shadow-sm ring ring-default hover:bg-default'
+          : 'text-muted hover:bg-accented/50 hover:text-highlighted'
+      "
       :aria-pressed="isSelected(item)"
       :disabled="isDisabled(item)"
       @click="select(item)"
     >
       {{ getLabel(item) }}
     </UButton>
-  </UFieldGroup>
+  </div>
 </template>

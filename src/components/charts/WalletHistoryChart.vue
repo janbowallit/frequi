@@ -35,8 +35,6 @@ use([
 ]);
 
 const colorStore = useColorStore();
-// Define Column labels here to avoid typos
-const CHART_WALLET_HISTORY = 'Wallet history';
 const SERIES_COLORS = ['#1d4ed8', '#d931e5', '#059669', '#b45309', '#be123c', '#7c3aed', '#0f766e'];
 
 const props = withDefaults(
@@ -302,18 +300,14 @@ const walletHistoryOptions: ComputedRef<EChartsOption> = computed(() => {
     yAxis: [
       {
         type: 'value',
-        name: CHART_WALLET_HISTORY,
         splitLine: {
           show: false,
         },
-        nameRotate: 90,
-        nameLocation: 'middle',
         axisLabel: {
           formatter: (value) => {
             return formatPrice(value, 2);
           },
         },
-        nameGap: 35,
         // Round axis bounds - 'dataMin' printed odd edge labels like 50.26 next to 60
         scale: true,
       },

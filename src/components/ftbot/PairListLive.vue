@@ -12,10 +12,23 @@ function initBlacklist() {
   }
 }
 
+const addOpen = ref(false);
 function addBlacklistPair() {
-  if (newblacklistpair.value) {
-    botStore.activeBot.addBlacklist({ blacklist: [newblacklistpair.value] });
+  const pair = newblacklistpair.value.trim();
+  if (pair) {
+    botStore.activeBot.addBlacklist({ blacklist: [pair] });
     newblacklistpair.value = '';
+    addOpen.value = false;
+  }
+}
+
+const loading = ref(false);
+async function refreshLists() {
+  loading.value = true;
+  try {
+    await Promise.all([botStore.activeBot.getWhitelist(), botStore.activeBot.getBlacklist()]);
+  } finally {
+    loading.value = false;
   }
 }
 
@@ -29,15 +42,11 @@ function blacklistSelectClick(key: number) {
 }
 
 function deletePairs() {
-  if (blacklistSelect.value.length === 0) {
-    console.log('nothing to delete');
-    return;
-  }
+  if (blacklistSelect.value.length === 0) return;
   // const pairlist = blacklistSelect.value;
   const pairlist = botStore.activeBot.blacklist.filter(
     (value, index) => blacklistSelect.value.indexOf(index) > -1,
   );
-  console.log('Deleting pairs: ', pairlist);
   botStore.activeBot.deleteBlacklist(pairlist);
   blacklistSelect.value = [];
 }
@@ -47,123 +56,111 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>
-    <div>
-      <h3 class="text-xl">Whitelist Methods</h3>
+  <div class="flex flex-col">
+    <PanelHeader title="Pairlist">
+      <template #actions>
+        <UButton
+          color="neutral"
+          variant="ghost"
+          size="sm"
+          icon="mdi:refresh"
+          title="Refresh"
+          aria-label="Refresh pairlist"
+          :loading="loading"
+          @click="refreshLists"
+        />
+      </template>
+    </PanelHeader>
 
-      <ul v-if="botStore.activeBot.pairlistMethods.length" class="list wide">
-        <li
-          v-for="(method, key) in botStore.activeBot.pairlistMethods"
-          :key="key"
-          class="pair bg-white text-black align-middle border border-secondary"
+    <!-- Whitelist -->
+    <section aria-labelledby="whitelist-heading" class="flex flex-col gap-2 p-3">
+      <div class="flex items-baseline justify-between gap-2">
+        <h4 id="whitelist-heading" class="text-xs font-semibold uppercase tracking-wide text-muted">
+          Whitelist
+          <span class="ms-1 font-normal normal-case tabular-nums">
+            ({{ botStore.activeBot.whitelist.length }})
+          </span>
+        </h4>
+        <span
+          v-if="botStore.activeBot.pairlistMethods.length"
+          class="truncate text-xs text-muted"
+          :title="`Pairlist methods: ${botStore.activeBot.pairlistMethods.join(', ')}`"
         >
-          {{ method }}
+          {{ botStore.activeBot.pairlistMethods.join(' · ') }}
+        </span>
+      </div>
+      <ul v-if="botStore.activeBot.whitelist.length" class="flex flex-wrap gap-1.5">
+        <li v-for="pair in botStore.activeBot.whitelist" :key="pair">
+          <UBadge color="neutral" variant="outline" size="md" :label="pair" class="font-medium" />
         </li>
       </ul>
-    </div>
-    <!-- Show Whitelist -->
-    <h3 class="text-lg font-bold" :title="`${botStore.activeBot.whitelist.length} pairs`">
-      Whitelist
-    </h3>
-    <ul v-if="botStore.activeBot.whitelist.length" class="list">
-      <li
-        v-for="(pair, key) in botStore.activeBot.whitelist"
-        :key="key"
-        class="pair bg-white text-black border-secondary"
-      >
-        {{ pair }}
-      </li>
-    </ul>
-    <p v-else>List Unavailable. Please Login and make sure server is running.</p>
+      <p v-else class="text-sm text-muted">
+        Whitelist unavailable. Make sure you are logged in and the bot is running.
+      </p>
+    </section>
+
     <USeparator />
 
-    <!-- Blacklsit -->
-    <div>
-      <div class="flex flex-row justify-center mb-1">
-        <label
-          class="text-lg font-bold mb-2 w-full"
-          title="Blacklist - Select (followed by a click on '-') to remove pairs"
+    <!-- Blacklist -->
+    <section aria-labelledby="blacklist-heading" class="flex flex-col gap-2 p-3">
+      <div class="flex min-h-8 items-center gap-2">
+        <h4
+          id="blacklist-heading"
+          class="me-auto text-xs font-semibold uppercase tracking-wide text-muted"
         >
           Blacklist
-        </label>
-        <div class="flex flex-cols items-center gap-1 pe-1">
-          <UPopover>
-            <UButton color="neutral" icon="mdi:plus-box-outline" size="md" />
-            <template #content>
-              <form ref="form" @submit.prevent="addBlacklistPair" class="py-2 px-3">
-                <div class="space-y-1">
-                  <h4 class="font-bold mb-2">Add Pair to Blacklist</h4>
-                  <UFormField label="Pair" class="space-x-2" required>
-                    <UInput v-model="newblacklistpair" required autofocus></UInput>
-                  </UFormField>
-                  <UButton id="blacklist-submit" class="ms-auto mb-2" type="submit"> Add </UButton>
-                </div>
-              </form>
-            </template>
-          </UPopover>
-          <UButton
-            v-if="botStore.activeBot.botFeatures.botBlacklistModify"
-            color="neutral"
-            title="Select pairs to delete pairs from your blacklist."
-            :disabled="blacklistSelect.length === 0"
-            icon="mdi:delete"
-            @click="deletePairs"
-          />
-        </div>
+          <span class="ms-1 font-normal normal-case tabular-nums">
+            ({{ botStore.activeBot.blacklist.length }})
+          </span>
+        </h4>
+        <UButton
+          v-if="botStore.activeBot.botFeatures.botBlacklistModify && blacklistSelect.length"
+          color="error"
+          variant="soft"
+          size="xs"
+          icon="mdi:delete"
+          :label="`Remove ${blacklistSelect.length}`"
+          @click="deletePairs"
+        />
+        <UPopover v-model:open="addOpen">
+          <UButton color="neutral" variant="outline" size="xs" icon="mdi:plus" label="Add" />
+          <template #content>
+            <form class="flex w-64 flex-col gap-3 p-3" @submit.prevent="addBlacklistPair">
+              <UFormField label="Pair to blacklist" required>
+                <UInput
+                  id="blacklist-pair"
+                  v-model="newblacklistpair"
+                  placeholder="e.g. DOGE/USDT"
+                  required
+                  autofocus
+                  class="w-full"
+                />
+              </UFormField>
+              <UButton id="blacklist-submit" type="submit" label="Add to blacklist" block />
+            </form>
+          </template>
+        </UPopover>
       </div>
-    </div>
-    <ul v-if="botStore.activeBot.blacklist.length" class="list">
-      <li
-        v-for="(pair, key) in botStore.activeBot.blacklist"
-        :key="key"
-        class="pair bg-black text-white"
-        :title="pair"
-        :class="blacklistSelect.indexOf(key) > -1 ? 'active' : ''"
-        @click="blacklistSelectClick(key)"
-      >
-        <span class="check"><i-mdi-check-circle /></span>{{ pair }}
-      </li>
-    </ul>
-    <p v-else>
-      No Blacklist Available. <br />
-      If you expect to have pairs in your blacklist, please login and make sure the server is
-      running.
-    </p>
+      <template v-if="botStore.activeBot.blacklist.length">
+        <ul class="flex flex-wrap gap-1.5" aria-label="Blacklisted pairs">
+          <li v-for="(pair, key) in botStore.activeBot.blacklist" :key="pair">
+            <UButton
+              size="xs"
+              :color="blacklistSelect.includes(key) ? 'error' : 'neutral'"
+              :variant="blacklistSelect.includes(key) ? 'soft' : 'outline'"
+              :icon="blacklistSelect.includes(key) ? 'mdi:check-circle' : undefined"
+              :label="pair"
+              :aria-pressed="blacklistSelect.includes(key)"
+              :disabled="!botStore.activeBot.botFeatures.botBlacklistModify"
+              @click="blacklistSelectClick(key)"
+            />
+          </li>
+        </ul>
+        <p v-if="botStore.activeBot.botFeatures.botBlacklistModify" class="text-xs text-muted">
+          Select pairs, then remove them from the blacklist.
+        </p>
+      </template>
+      <p v-else class="text-sm text-muted">No blacklisted pairs.</p>
+    </section>
   </div>
 </template>
-
-<style scoped>
-@reference '../../styles/tailwind.css';
-
-.check {
-  /* Hidden checkbox on blacklist selection */
-  color: #41b883;
-  opacity: 0;
-  /* border-radius: 50%; */
-  z-index: 5;
-  width: 1.3em;
-  height: 1.3em;
-  top: -0.3em;
-  left: -0.3em;
-  position: absolute;
-  transition: opacity 0.2s;
-}
-
-.pair.active .check {
-  opacity: 1;
-}
-
-.list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-  grid-gap: 0.5rem;
-  padding-bottom: 1rem;
-}
-.wide {
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-}
-
-.pair {
-  @apply p-2 border rounded cursor-pointer relative border-neutral-500 text-ellipsis overflow-hidden;
-}
-</style>

@@ -112,10 +112,21 @@ watch(
 
 <template>
   <div class="flex h-full flex-col">
-    <div class="flex flex-wrap items-center gap-2 px-3 py-2">
-      <h3 v-if="!props.multiBotView" class="me-auto text-sm font-semibold text-highlighted">
-        {{ hasWeekly ? 'Profit per period' : 'Profit per day' }}
-      </h3>
+    <PanelHeader
+      v-if="!props.multiBotView"
+      :title="hasWeekly ? 'Profit per period' : 'Profit per day'"
+    >
+      <template #actions>
+        <UButton
+          color="neutral"
+          variant="ghost"
+          size="sm"
+          icon="mdi:refresh"
+          title="Refresh"
+          aria-label="Refresh profit breakdown"
+          @click="refreshSummary"
+        />
+      </template>
       <USegmentedControl
         v-if="hasWeekly"
         v-model="settingsStore.timeProfitPeriod"
@@ -132,17 +143,25 @@ watch(
         label-key="text"
         value-key="value"
         :items="absRelSelections"
-        :class="{ 'ms-auto': props.multiBotView }"
       />
-      <UButton
-        v-if="!props.multiBotView"
-        color="neutral"
-        variant="ghost"
+    </PanelHeader>
+    <div v-else class="flex flex-wrap items-center justify-between gap-2 px-3 py-2">
+      <USegmentedControl
+        v-if="hasWeekly"
+        v-model="settingsStore.timeProfitPeriod"
+        aria-label="Period"
+        :items="periodicBreakdownSelections"
         size="xs"
-        icon="mdi:refresh"
-        title="Refresh"
-        aria-label="Refresh profit breakdown"
-        @click="refreshSummary"
+        label-key="text"
+        value-key="value"
+      />
+      <USegmentedControl
+        v-model="settingsStore.timeProfitPreference"
+        aria-label="Profit unit"
+        size="xs"
+        label-key="text"
+        value-key="value"
+        :items="absRelSelections"
       />
     </div>
 

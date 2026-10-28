@@ -75,14 +75,21 @@ const tableFields = computed(() => {
   ];
 });
 
+const loading = ref(false);
 async function refreshBalance() {
-  botStore.activeBot.getBalance();
+  loading.value = true;
+  try {
+    await botStore.activeBot.getBalance();
+  } finally {
+    loading.value = false;
+  }
 }
 
 const tableColumns = computed(() => {
   return tableFields.value.map((field, index) => ({
     accessorKey: field.field,
     header: field.header,
+    meta: index === 0 ? undefined : { class: { th: 'text-right', td: 'text-right tabular-nums' } },
     cell: field.asCurrency
       ? ({ row }: { row: { original: Record<string, number | string | null> } }) =>
           formatCurrency(row.original[field.field])
@@ -91,25 +98,27 @@ const tableColumns = computed(() => {
       index === 0
         ? 'Total'
         : index === 1
-          ? () =>
-              h(
-                'span',
-                {
-                  class: 'italic',
-                  title: `Increase over initial capital of ${formatCurrency(
-                    botStore.activeBot.balance.starting_capital,
-                  )} ${botStore.activeBot.balance.stake}`,
-                },
-                formatPercent(botStore.activeBot.balance.starting_capital_ratio),
-              )
+          ? undefined
           : () =>
-              h(
-                'strong',
-                {},
-                showBotOnly.value && canUseBotBalance.value
-                  ? formatCurrency(botStore.activeBot.balance.total_bot)
-                  : formatCurrency(botStore.activeBot.balance.total),
-              ),
+              h('span', { class: 'inline-flex flex-col items-end' }, [
+                h(
+                  'strong',
+                  { class: 'tabular-nums' },
+                  showBotOnly.value && canUseBotBalance.value
+                    ? formatCurrency(botStore.activeBot.balance.total_bot)
+                    : formatCurrency(botStore.activeBot.balance.total),
+                ),
+                h(
+                  'span',
+                  {
+                    class: 'text-xs font-normal normal-case text-muted tabular-nums',
+                    title: `Change since the starting capital of ${formatCurrency(
+                      botStore.activeBot.balance.starting_capital,
+                    )} ${botStore.activeBot.balance.stake}`,
+                  },
+                  `${formatPercent(botStore.activeBot.balance.starting_capital_ratio, 2)} since start`,
+                ),
+              ]),
   }));
 });
 
@@ -119,32 +128,66 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>
-    <div class="flex flex-wrap flex-row mb-2 justify-end items-center">
-      <label class="text-xl ms-1 me-auto mb-0">{{ showBotOnly ? 'Bot' : 'Account' }} Balance</label>
-      <div class="flex flex-row gap-1">
+  <div class="flex flex-col">
+    <PanelHeader
+      :title="`${showBotOnly && canUseBotBalance ? 'Bot' : 'Account'} balance`"
+      :description="
+        showBotOnly && canUseBotBalance
+          ? 'Funds the bot manages'
+          : 'Everything in the exchange account'
+      "
+    >
+      <template #actions>
         <UButton
           v-if="canUseBotBalance"
           color="neutral"
-          :tooltip="!showBotOnly ? 'Showing Account balance' : 'Showing Bot balance'"
-          :icon="showBotOnly ? 'mdi:robot' : 'mdi:bank'"
+          variant="ghost"
+          size="sm"
+          :icon="showBotOnly ? 'mdi:bank' : 'mdi:robot'"
+          :title="showBotOnly ? 'Show account balance' : 'Show bot balance'"
+          :aria-label="showBotOnly ? 'Show account balance' : 'Show bot balance'"
           @click="showBotOnly = !showBotOnly"
         />
         <UButton
           color="neutral"
-          :tooltip="!hideSmallBalances ? 'Hide small balances' : 'Show all balances'"
-          :icon="hideSmallBalances ? 'mdi:eye-off' : 'mdi:eye'"
+          variant="ghost"
+          size="sm"
+          :icon="hideSmallBalances ? 'mdi:eye' : 'mdi:eye-off'"
+          :title="hideSmallBalances ? 'Show small balances' : 'Hide small balances'"
+          :aria-label="hideSmallBalances ? 'Show small balances' : 'Hide small balances'"
+          :aria-pressed="!hideSmallBalances"
           @click="hideSmallBalances = !hideSmallBalances"
         />
-        <UButton color="neutral" icon="mdi:refresh" @click="refreshBalance" />
-      </div>
-    </div>
-    <BalanceChart v-if="balanceCurrencies" :currencies="chartValues" />
-    <div>
-      <p v-if="botStore.activeBot.balance.note">
-        <strong>{{ botStore.activeBot.balance.note }}</strong>
+        <UButton
+          color="neutral"
+          variant="ghost"
+          size="sm"
+          icon="mdi:refresh"
+          title="Refresh"
+          aria-label="Refresh balance"
+          :loading="loading"
+          @click="refreshBalance"
+        />
+      </template>
+    </PanelHeader>
+    <EmptyState
+      v-if="balanceCurrencies.length === 0"
+      title="No balances"
+      :description="hideSmallBalances ? 'Small balances are hidden.' : undefined"
+      icon="mdi:wallet-outline"
+    />
+    <template v-else>
+      <!-- A pie of a single currency says nothing -->
+      <BalanceChart
+        v-if="balanceCurrencies.length > 1"
+        :currencies="chartValues"
+        :show-title="false"
+        class="px-2 pt-2"
+      />
+      <p v-if="botStore.activeBot.balance.note" class="px-3 text-sm text-muted">
+        {{ botStore.activeBot.balance.note }}
       </p>
-      <UTable :data="tableData" :columns="tableColumns" />
-    </div>
+      <UTable :data="tableData" :columns="tableColumns" :ui="{ th: 'px-3', td: 'px-3 py-2' }" />
+    </template>
   </div>
 </template>

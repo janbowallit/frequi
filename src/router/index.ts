@@ -38,7 +38,8 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/balance',
     name: 'Freqtrade Balance',
-    component: () => import('@/components/ftbot/BotBalance.vue'),
+    component: () => import('@/views/MobilePanelView.vue'),
+    props: { panel: 'balance' },
   },
   {
     path: '/open_trades',
@@ -52,7 +53,8 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/pairlist',
-    component: () => import('@/components/ftbot/PairListLive.vue'),
+    component: () => import('@/views/MobilePanelView.vue'),
+    props: { panel: 'pairlist' },
   },
   {
     path: '/settings',

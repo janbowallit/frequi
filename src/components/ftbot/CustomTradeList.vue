@@ -56,9 +56,12 @@ const tradeClick = (trade) => {
       :icon="activeTrades ? 'mdi:swap-horizontal' : 'mdi:history'"
     />
 
-    <div class="w-full flex justify-content-between mt-1">
+    <div
+      v-if="(!activeTrades && rows > perPage) || showFilter"
+      class="flex w-full items-center justify-between gap-2 border-t border-default p-2"
+    >
       <UPagination
-        v-if="!activeTrades"
+        v-if="!activeTrades && rows > perPage"
         v-model:page="currentPage"
         :total="rows"
         :items-per-page="perPage"
