@@ -105,7 +105,7 @@ async function startDownload() {
     >
       <!-- Pairs -->
       <section class="flex flex-col gap-3 p-5" aria-labelledby="dl-pairs">
-        <div>
+        <div class="flex flex-col gap-1">
           <h2 id="dl-pairs" class="text-base font-semibold text-highlighted">
             {{ $t('download.pairs') }}
           </h2>

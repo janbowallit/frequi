@@ -186,7 +186,10 @@ onMounted(() => {
         :show-title="false"
         class="px-2 pt-2"
       />
-      <p v-if="botStore.activeBot.balance.note" class="px-3 text-sm text-muted">
+      <p
+        v-if="botStore.activeBot.balance.note"
+        class="border-b border-default px-3 py-2 text-sm text-muted"
+      >
         {{ botStore.activeBot.balance.note }}
       </p>
       <UTable :data="tableData" :columns="tableColumns" :ui="{ th: 'px-3', td: 'px-3 py-2' }" />

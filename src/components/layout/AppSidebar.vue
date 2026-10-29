@@ -131,8 +131,12 @@ const footerItems = computed<NavigationMenuItem[]>(() => [
             :aria-label="$t('nav.noConfirmations')"
           />
         </UTooltip>
-        <span v-if="!collapsed" class="ms-auto truncate text-xs text-dimmed tabular-nums">
-          {{ settingsStore.uiVersion }}
+        <span
+          v-if="!collapsed"
+          class="ms-auto truncate ps-2 text-xs text-dimmed"
+          :title="$t('common.version', { version: settingsStore.uiVersion })"
+        >
+          v{{ settingsStore._uiVersion }}
         </span>
       </div>
     </template>

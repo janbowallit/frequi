@@ -136,7 +136,7 @@ const combinedPairList = computed(() => {
       :title="filterText ? $t('pairs.noMatch') : $t('pairs.noWhitelist')"
       icon="lucide:search-x"
     />
-    <ul v-else class="flex flex-col gap-0.5" :aria-label="$t('pairs.label')">
+    <ul v-else class="flex flex-col gap-1" :aria-label="$t('pairs.label')">
       <li v-for="comb in combinedPairList" :key="comb.pair">
         <button
           type="button"

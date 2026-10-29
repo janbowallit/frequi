@@ -229,7 +229,7 @@ const exitPlan = computed(() => plans.value.find((p) => p.trade.trade_id === pro
         <li
           v-for="(order, key) in trade.orders"
           :key="key"
-          class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 py-1.5"
+          class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 py-2"
         >
           <span class="flex items-center gap-1.5">
             <span

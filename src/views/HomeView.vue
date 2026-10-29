@@ -87,7 +87,7 @@ const quickLinks = computed(() =>
             >
               <UIcon :name="link.icon" class="size-4.5" aria-hidden="true" />
             </span>
-            <span class="flex min-w-0 flex-col gap-0.5">
+            <span class="flex min-w-0 flex-col gap-1">
               <span class="font-semibold text-highlighted">{{ link.title }}</span>
               <span class="text-sm text-muted">{{ link.description }}</span>
             </span>

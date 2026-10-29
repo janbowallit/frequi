@@ -62,7 +62,7 @@ export const useSettingsStore = defineStore('uiSettings', {
             withCredentials: true,
           });
           const { version } = result.data;
-          this._uiVersion = version ?? 'dev';
+          this._uiVersion = version?.trim() || 'dev';
         } catch (error) {
           //
         }

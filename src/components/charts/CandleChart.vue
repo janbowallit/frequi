@@ -612,7 +612,8 @@ function initializeChartOptions() {
       data: ['Candles', 'Volume', 'Entry', 'Exit'],
       formatter: chartSeriesLabel,
       right: '1%',
-      top: 0,
+      top: 4,
+      itemGap: 14,
       type: 'scroll',
       pageTextStyle: {
         color: props.theme === 'dark' ? '#dedede' : '#333',

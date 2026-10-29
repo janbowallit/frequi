@@ -436,7 +436,7 @@ const statusColor: Record<CheckStatus, string> = {
             :class="statusColor[check.status]"
             :aria-label="$t(`signals.${check.status}`)"
           />
-          <div class="min-w-0">
+          <div class="flex flex-col gap-1 min-w-0">
             <p class="text-sm font-medium text-highlighted">{{ check.label }}</p>
             <p class="text-sm text-muted">{{ check.detail }}</p>
           </div>

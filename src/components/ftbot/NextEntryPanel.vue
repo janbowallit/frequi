@@ -112,7 +112,7 @@ function selectPair(pair: string) {
           'border-accented': verdict.tone === 'blocked',
         }"
       >
-        <div class="min-w-0">
+        <div class="flex flex-col gap-1 min-w-0">
           <p class="text-base font-semibold text-highlighted">{{ verdict.title }}</p>
           <p class="text-sm text-muted">{{ verdict.detail }}</p>
         </div>
@@ -131,7 +131,7 @@ function selectPair(pair: string) {
         aria-labelledby="next-entry-market"
         class="flex flex-col gap-2"
       >
-        <div>
+        <div class="flex flex-col gap-1">
           <h3 id="next-entry-market" class="text-sm font-semibold text-highlighted">
             {{ $t('nextEntry.marketGate') }}
           </h3>
@@ -164,7 +164,7 @@ function selectPair(pair: string) {
 
       <!-- Step 2: each coin's own checks -->
       <section aria-labelledby="next-entry-pairs" class="flex flex-col gap-1">
-        <div>
+        <div class="flex flex-col gap-1">
           <h3 id="next-entry-pairs" class="text-sm font-semibold text-highlighted">
             {{
               marketConditions.length

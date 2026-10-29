@@ -39,10 +39,7 @@ const colorPreferenceOptions = computed(() => [
     </PageHeader>
 
     <div class="grid items-start gap-6 md:grid-cols-[11rem_minmax(0,1fr)]">
-      <nav
-        :aria-label="$t('settings.sections')"
-        class="sticky top-0 hidden flex-col gap-0.5 md:flex"
-      >
+      <nav :aria-label="$t('settings.sections')" class="sticky top-0 hidden flex-col gap-1 md:flex">
         <a
           v-for="section in sections"
           :key="section.id"
@@ -195,7 +192,7 @@ const colorPreferenceOptions = computed(() => [
           id="settings-notifications-section"
           aria-labelledby="settings-notifications"
         >
-          <div>
+          <div class="flex flex-col gap-1">
             <h2 id="settings-notifications" class="text-base font-semibold text-highlighted">
               {{ $t('settings.notifications') }}
             </h2>

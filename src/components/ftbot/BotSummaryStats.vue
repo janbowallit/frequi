@@ -143,7 +143,7 @@ const cards = computed<StatCard[]>(() => {
       >
         {{ card.value }}
       </p>
-      <p class="mt-0.5 truncate text-xs text-muted" :title="card.detail">{{ card.detail }}</p>
+      <p class="mt-1 truncate text-xs text-muted" :title="card.detail">{{ card.detail }}</p>
     </div>
   </section>
 </template>

@@ -11,7 +11,7 @@ defineProps<{
 <template>
   <div class="flex flex-col gap-2 border-b border-default px-3 py-2 text-start">
     <div class="flex min-h-8 items-center gap-2">
-      <div class="me-auto min-w-0">
+      <div class="flex flex-col gap-1 me-auto min-w-0">
         <h3 class="truncate text-sm font-semibold text-highlighted">
           <slot name="title">{{ title }}</slot>
         </h3>

@@ -129,14 +129,16 @@ watch(
       'h-150 border-b border-e border-default': !isSinglePairView,
     }"
   >
-    <div class="flex min-h-8 w-full items-center gap-3 px-2 py-1 text-xs text-muted">
+    <div
+      class="flex min-h-9 w-full flex-wrap items-center gap-x-4 gap-y-1 px-3 py-2 text-xs text-muted"
+    >
       <span v-if="!isSinglePairView" class="font-semibold text-highlighted">{{ pair }}</span>
       <template v-if="dataset">
         <span
           class="inline-flex items-center gap-1.5 whitespace-nowrap"
           :title="$t('chartControls.entrySignalsHelp')"
         >
-          <span class="size-2 rounded-full bg-[var(--color-profit)]" aria-hidden="true" />
+          <span class="size-2 rounded-full bg-profit" aria-hidden="true" />
           {{
             $t('chartControls.entrySignals', {
               n: dataset.enter_long_signals ?? dataset.buy_signals ?? 0,

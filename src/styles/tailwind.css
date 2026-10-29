@@ -15,6 +15,9 @@
   --font-sans: 'Inter Variable', 'Vazirmatn Variable', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 
+  /* 12px text wraps onto an 18px line (Tailwind's 16px is cramped for helper text) */
+  --text-xs--line-height: calc(1.125 / 0.75);
+
   --color-profit: #047857;
   --color-loss: #b91c1c;
 }

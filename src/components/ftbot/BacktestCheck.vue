@@ -269,7 +269,7 @@ const statusBadge = computed<
           <tr
             v-for="row in rows"
             :key="row.label"
-            class="grid grid-cols-[1fr_auto] gap-x-3 gap-y-0.5 py-2.5 @lg:table-row"
+            class="grid grid-cols-[1fr_auto] gap-x-3 gap-y-1 py-2.5 @lg:table-row"
           >
             <td class="font-medium text-highlighted @lg:py-2.5 @lg:pe-3">{{ row.label }}</td>
             <td class="row-start-2 tabular-nums @lg:py-2.5 @lg:pe-3">

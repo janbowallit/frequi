@@ -11,7 +11,7 @@ import Icons from 'unplugin-icons/vite';
 
 let commitHash: string = 'unknown';
 try {
-  commitHash = execSync('git rev-parse --short HEAD').toString();
+  commitHash = execSync('git rev-parse --short HEAD').toString().trim();
 } catch (error) {
   console.error('Failed to get commit hash. Running in this mode will not be supported.');
 }

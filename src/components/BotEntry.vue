@@ -83,7 +83,7 @@ const autoRefreshLoc = computed({
         <span :class="{ 'sr-only': noText }">{{ $t('nav.loginExpired') }}</span>
       </span>
 
-      <div class="flex items-center gap-0.5">
+      <div class="flex items-center gap-1">
         <UButton
           v-if="!noButtons && selectedBotStore.isBotLoggedIn"
           color="neutral"
