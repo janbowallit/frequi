@@ -381,10 +381,14 @@ export default {
     met: '{label}: met',
     definedByStrategy: 'Defined by the strategy.',
     loadFailed: "Couldn't load {pairs}",
-    footnote:
-      'A green check means met. A percentage is how much the price still has to rise. Checks run when each {timeframe} candle closes; this view updates every minute.',
-    footnoteLatest:
-      'A green check means met. A percentage is how much the price still has to rise. Checks run when each {timeframe} candle closes; this view updates every minute, latest candle {time}.',
+    colCoin: 'Coin',
+    colReady: 'Ready',
+    colChecks: 'Checks',
+    legendTitle: 'What the checks mean',
+    keyHint: 'A green check means met. A percentage is how much the price still has to rise.',
+    updated: 'Checks run when each {timeframe} candle closes. Updates every minute.',
+    updatedLatest:
+      'Checks run when each {timeframe} candle closes. Updates every minute, latest candle {time}.',
   },
   exitPlan: {
     exitLine: 'Exit line',
