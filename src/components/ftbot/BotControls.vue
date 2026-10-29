@@ -125,7 +125,8 @@ async function handleForceEntry() {
         <span class="text-sm text-muted">{{ stateInfo.description }}</span>
       </div>
     </div>
-    <div class="grid grid-cols-3 gap-1.5">
+    <!-- Equal widths when they fit; a long label (e.g. Persian) widens its button or wraps the row instead of being cut off -->
+    <div class="flex flex-wrap gap-1.5 [&>*]:min-w-fit [&>*]:flex-1 [&>*]:basis-0">
       <UButton
         :color="isRunning ? 'neutral' : 'success'"
         :variant="isRunning ? 'outline' : 'solid'"
