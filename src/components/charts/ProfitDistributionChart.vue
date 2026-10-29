@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '@/i18n';
 import ECharts from 'vue-echarts';
 import type { EChartsOption } from 'echarts';
 
@@ -28,7 +29,7 @@ use([
 ]);
 
 // Define Column labels here to avoid typos
-const CHART_PROFIT = 'Trade count';
+const chartProfit = () => t('charts.tradeCount');
 
 const props = withDefaults(
   defineProps<{
@@ -61,7 +62,7 @@ const data = computed(() => {
 const chartOptions = computed((): EChartsOption => {
   const chartOptionsLoc: EChartsOption = {
     title: {
-      text: 'Profit distribution',
+      text: t('charts.profitDistribution'),
       left: 'center',
       show: props.showTitle,
     },
@@ -79,21 +80,21 @@ const chartOptions = computed((): EChartsOption => {
       },
     },
     legend: {
-      data: [CHART_PROFIT],
+      data: [chartProfit()],
       right: '5%',
       top: 0,
       selectedMode: false,
     },
     xAxis: {
       type: 'category',
-      name: 'Profit %',
+      name: t('charts.profitPct'),
       nameLocation: 'middle',
       nameGap: 25,
     },
     yAxis: [
       {
         type: 'value',
-        name: CHART_PROFIT,
+        name: chartProfit(),
         splitLine: {
           show: false,
         },
@@ -111,7 +112,7 @@ const chartOptions = computed((): EChartsOption => {
     series: [
       {
         type: 'bar',
-        name: CHART_PROFIT,
+        name: chartProfit(),
         animation: true,
         encode: {
           x: 'x0',
@@ -131,8 +132,8 @@ const chartOptions = computed((): EChartsOption => {
     v-if="!trades.some((t) => !t.is_open)"
     class="h-full"
     icon="i-mdi-chart-histogram"
-    title="No closed trades yet"
-    description="The spread of wins and losses shows here once trades close."
+    :title="$t('charts.noClosed')"
+    :description="$t('charts.distributionHelp')"
   />
   <div v-else class="flex flex-col h-full relative">
     <div class="grow mb-2">
@@ -142,7 +143,7 @@ const chartOptions = computed((): EChartsOption => {
       class="z-2 absolute fixed-top flex items-center gap-10 ms-2 mt-1"
       :class="{ 'mx-auto': showTitle }"
       label-for="input-bins"
-      label="Bins"
+      :label="$t('charts.bins')"
       orientation="horizontal"
     >
       <USelect

@@ -5,6 +5,7 @@ import { useRoute } from 'vue-router';
 import type { DropdownMenuItem } from '@nuxt/ui';
 import { breakpointsTailwind } from '@vueuse/core';
 import type { AuthStorageWithBotId } from '@/types';
+import { LOCALES, t } from '@/i18n';
 
 const botStore = useBotStore();
 
@@ -90,38 +91,38 @@ watch(
 
 const activeBot = computed(() => botStore.activeBotorUndefined);
 const botStatus = computed<{ label: string; dot: string }>(() => {
-  if (!activeBot.value) return { label: 'No bot', dot: 'bg-neutral-400' };
-  if (!activeBot.value.isBotLoggedIn) return { label: 'Login expired', dot: 'bg-error' };
+  if (!activeBot.value) return { label: t('nav.noBot'), dot: 'bg-neutral-400' };
+  if (!activeBot.value.isBotLoggedIn) return { label: t('nav.loginExpired'), dot: 'bg-error' };
   return activeBot.value.isBotOnline
-    ? { label: 'Online', dot: 'bg-success' }
-    : { label: 'Offline', dot: 'bg-error' };
+    ? { label: t('common.online'), dot: 'bg-success' }
+    : { label: t('common.offline'), dot: 'bg-error' };
 });
 const isDryRun = computed(() => activeBot.value?.botState?.dry_run ?? false);
 
 const isWebserver = computed(() => botStore.activeBotorUndefined?.isWebserverMode ?? false);
-const needsWebserver = 'Needs the bot in webserver mode';
+const needsWebserver = computed(() => t('nav.needsWebserver'));
 
 // Navigation items array
-const navItems = ref([
+const navItems = computed(() => [
   {
-    label: 'Trade',
+    label: t('nav.trade'),
     to: '/trade',
-    visible: computed(() => !botStore.canRunBacktest),
+    visible: !botStore.canRunBacktest,
     icon: 'i-mdi-swap-horizontal',
   },
   {
-    label: 'Dashboard',
+    label: t('nav.dashboard'),
     to: '/dashboard',
-    visible: computed(() => !botStore.canRunBacktest),
+    visible: !botStore.canRunBacktest,
     icon: 'i-mdi-view-dashboard-outline',
   },
   {
-    label: 'Chart',
+    label: t('nav.chart'),
     to: '/graph',
     icon: 'i-mdi-chart-line',
   },
   {
-    label: 'Logs',
+    label: t('nav.logs'),
     to: '/logs',
     icon: 'i-mdi-text-box-outline',
   },
@@ -130,24 +131,24 @@ const navItems = ref([
 // Rarely used pages live under one menu
 const toolItems = computed(() => [
   {
-    label: 'Backtest',
+    label: t('nav.backtest'),
     to: '/backtest',
     icon: 'i-mdi-history',
-    description: 'Test a strategy on past candles',
+    description: t('nav.backtestHelp'),
     disabled: !botStore.canRunBacktest,
   },
   {
-    label: 'Pairlist builder',
+    label: t('nav.pairlist'),
     to: '/pairlist_config',
     icon: 'i-mdi-format-list-numbered',
-    description: 'Combine filters into a pairlist',
+    description: t('nav.pairlistHelp'),
     disabled: !(isWebserver.value && botStore.activeBot.botFeatures.pairlistConfig),
   },
   {
-    label: 'Download candles',
+    label: t('nav.download'),
     to: '/download_data',
     icon: 'i-mdi-download-outline',
-    description: 'Fetch history for backtesting',
+    description: t('nav.downloadHelp'),
     disabled: !(isWebserver.value && botStore.activeBot.botFeatures.downloadDataView),
   },
 ]);
@@ -157,7 +158,7 @@ const toolMenuItems = computed<DropdownMenuItem[][]>(() => [
     label: item.label,
     icon: item.icon,
     to: item.disabled ? undefined : item.to,
-    description: item.disabled ? needsWebserver : item.description,
+    description: item.disabled ? needsWebserver.value : item.description,
     disabled: item.disabled,
   })),
 ]);
@@ -166,22 +167,34 @@ const isToolRoute = computed(() => toolItems.value.some((t) => route.path === t.
 const menuItems = computed<DropdownMenuItem[][]>(() => [
   [
     {
-      label: `Version ${settingsStore.uiVersion}`,
+      label: t('common.version', { version: settingsStore.uiVersion }),
       disabled: true,
     },
   ],
   [
     {
-      label: 'Settings',
+      label: t('common.settings'),
       icon: 'i-mdi-cog',
       onSelect: () => router.push('/settings'),
+    },
+    {
+      label: t('language.label'),
+      icon: 'i-mdi-translate',
+      children: LOCALES.map((l) => ({
+        label: l.name,
+        type: 'checkbox' as const,
+        checked: l.code === settingsStore.locale,
+        onSelect: () => {
+          settingsStore.locale = l.code;
+        },
+      })),
     },
   ],
   ...(botStore.hasBots && botStore.botCount === 1
     ? [
         [
           {
-            label: 'Sign out',
+            label: t('common.signOut'),
             icon: 'i-mdi-logout',
             onSelect: clickLogout,
           },
@@ -193,7 +206,7 @@ const menuItems = computed<DropdownMenuItem[][]>(() => [
 function editBotLogin(botId: string) {
   const bot = botStore.botStores[botId];
   if (!bot) {
-    showAlert('Bot not found', 'warning');
+    showAlert(t('nav.botNotFound'), 'warning');
     return;
   }
   const loginInfo: AuthStorageWithBotId = {
@@ -211,7 +224,7 @@ function editBotLogin(botId: string) {
       <RouterLink
         exact
         to="/"
-        aria-label="FreqUI home"
+        :aria-label="$t('nav.home')"
         class="flex shrink-0 items-center gap-2 rounded-md pe-1"
       >
         <AppIcon class="h-8 w-8" />
@@ -219,7 +232,11 @@ function editBotLogin(botId: string) {
       </RouterLink>
 
       <!-- Desktop navigation -->
-      <nav v-if="!isMobile" aria-label="Main" class="ms-4 flex h-full items-center gap-1">
+      <nav
+        v-if="!isMobile"
+        :aria-label="$t('nav.main')"
+        class="ms-4 flex h-full items-center gap-1"
+      >
         <UButton
           v-for="(item, index) in navItems.filter((item) => item.visible ?? true)"
           :key="index"
@@ -233,7 +250,7 @@ function editBotLogin(botId: string) {
         />
         <UDropdownMenu :items="toolMenuItems" :content="{ align: 'start' }">
           <UButton
-            label="Tools"
+            :label="$t('nav.tools')"
             icon="i-mdi-toolbox-outline"
             trailing-icon="mdi:chevron-down"
             color="neutral"
@@ -246,15 +263,12 @@ function editBotLogin(botId: string) {
 
       <div class="ms-auto flex min-w-0 items-center gap-2">
         <template v-if="!isMobile">
-          <UTooltip
-            v-if="!settingsStore.confirmDialog"
-            text="Confirmations are off: force exits run immediately."
-          >
+          <UTooltip v-if="!settingsStore.confirmDialog" :text="$t('nav.noConfirmationsHelp')">
             <UBadge
               color="warning"
               variant="subtle"
               icon="mdi:alert-outline"
-              label="No confirmations"
+              :label="$t('nav.noConfirmations')"
               class="cursor-help"
             />
           </UTooltip>
@@ -266,16 +280,22 @@ function editBotLogin(botId: string) {
           >
             <span class="size-2 shrink-0 rounded-full" :class="botStatus.dot" aria-hidden="true" />
             <span class="max-w-40 truncate text-sm font-medium text-highlighted">
-              {{ activeBot?.botName || 'No bot selected' }}
+              {{ activeBot?.botName || $t('nav.noBotSelected') }}
             </span>
             <span class="sr-only">{{ botStatus.label }}</span>
-            <UBadge v-if="isDryRun" color="neutral" variant="soft" size="sm" label="Dry run" />
+            <UBadge
+              v-if="isDryRun"
+              color="neutral"
+              variant="soft"
+              size="sm"
+              :label="$t('common.dryRun')"
+            />
             <UButton
               v-if="activeBot && !activeBot.isBotLoggedIn"
               color="error"
               variant="soft"
               size="xs"
-              label="Sign in again"
+              :label="$t('nav.signInAgain')"
               @click="editBotLogin(botStore.selectedBot)"
             />
             <BotSelect />
@@ -283,6 +303,8 @@ function editBotLogin(botId: string) {
           </div>
 
           <ThemeSelect />
+          <!-- Without the account menu (signed out) the language choice sits in the header -->
+          <LanguageSelect v-if="!botStore.hasBots" />
 
           <UDropdownMenu v-if="botStore.hasBots" :items="menuItems" :content="{ align: 'end' }">
             <UButton
@@ -290,7 +312,7 @@ function editBotLogin(botId: string) {
               variant="ghost"
               icon="mdi:account-circle-outline"
               trailing-icon="mdi:chevron-down"
-              aria-label="Account and settings"
+              :aria-label="$t('nav.account')"
             />
           </UDropdownMenu>
           <UButton
@@ -298,7 +320,7 @@ function editBotLogin(botId: string) {
             color="primary"
             variant="solid"
             icon="mdi:login"
-            label="Sign in"
+            :label="$t('common.signIn')"
             @click="loginDialog({})"
           />
         </template>
@@ -315,7 +337,7 @@ function editBotLogin(botId: string) {
           </span>
           <USlideover
             v-model:open="mobileMenuOpen"
-            title="Menu"
+            :title="$t('nav.menu')"
             :close="{ color: 'neutral', variant: 'ghost' }"
           >
             <UButton
@@ -323,7 +345,7 @@ function editBotLogin(botId: string) {
               variant="ghost"
               size="xl"
               icon="mdi:menu"
-              aria-label="Open menu"
+              :aria-label="$t('nav.openMenu')"
             />
             <template #title>
               <div class="flex items-center gap-2">
@@ -332,8 +354,8 @@ function editBotLogin(botId: string) {
               </div>
             </template>
             <template #body="{ close }">
-              <div class="flex h-full flex-col gap-6 text-left">
-                <nav aria-label="Main" class="flex flex-col gap-1">
+              <div class="flex h-full flex-col gap-6 text-start">
+                <nav :aria-label="$t('nav.main')" class="flex flex-col gap-1">
                   <UButton
                     v-for="(item, index) in navItems.filter((item) => item.visible ?? true)"
                     :key="index"
@@ -350,7 +372,7 @@ function editBotLogin(botId: string) {
                   <UButton
                     to="/settings"
                     icon="i-mdi-cog-outline"
-                    label="Settings"
+                    :label="$t('nav.settings')"
                     color="neutral"
                     variant="ghost"
                     size="xl"
@@ -361,7 +383,9 @@ function editBotLogin(botId: string) {
                 </nav>
 
                 <section class="flex flex-col gap-1" aria-labelledby="mobile-tools">
-                  <h2 id="mobile-tools" class="px-2.5 text-sm font-medium text-muted">Tools</h2>
+                  <h2 id="mobile-tools" class="px-2.5 text-sm font-medium text-muted">
+                    {{ $t('nav.tools') }}
+                  </h2>
                   <UButton
                     v-for="item in toolItems"
                     :key="item.to"
@@ -389,7 +413,9 @@ function editBotLogin(botId: string) {
                   class="flex flex-col gap-2"
                   aria-labelledby="mobile-bot"
                 >
-                  <h2 id="mobile-bot" class="px-2.5 text-sm font-medium text-muted">Bot</h2>
+                  <h2 id="mobile-bot" class="px-2.5 text-sm font-medium text-muted">
+                    {{ $t('common.bot') }}
+                  </h2>
                   <div
                     class="flex items-center justify-between gap-2 rounded-md border border-default p-3"
                   >
@@ -398,22 +424,30 @@ function editBotLogin(botId: string) {
                       <span class="truncate font-medium">{{ activeBot?.botName }}</span>
                       <span class="text-sm text-muted">{{ botStatus.label }}</span>
                     </span>
-                    <UBadge v-if="isDryRun" color="neutral" variant="soft" label="Dry run" />
+                    <UBadge
+                      v-if="isDryRun"
+                      color="neutral"
+                      variant="soft"
+                      :label="$t('common.dryRun')"
+                    />
                   </div>
                   <BotSelect />
                   <ReloadControl show-label />
                 </section>
 
-                <ThemeSelect show-text class="justify-start" />
+                <div class="flex flex-col gap-1">
+                  <LanguageSelect show-text class="justify-start" />
+                  <ThemeSelect show-text class="justify-start" />
+                </div>
 
                 <div class="mt-auto flex items-center justify-between text-sm text-muted">
-                  <span>Version {{ settingsStore.uiVersion }}</span>
+                  <span>{{ $t('common.version', { version: settingsStore.uiVersion }) }}</span>
                   <UButton
                     v-if="botStore.hasBots && botStore.botCount === 1"
                     color="neutral"
                     variant="outline"
                     icon="mdi:logout"
-                    label="Sign out"
+                    :label="$t('common.signOut')"
                     @click="
                       close();
                       clickLogout();

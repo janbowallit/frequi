@@ -9,9 +9,9 @@ export interface ConfirmDialogBoxProps {
   danger?: boolean;
 }
 withDefaults(defineProps<ConfirmDialogBoxProps>(), {
-  description: 'Confirmation',
-  cancelText: 'Cancel',
-  confirmText: 'Ok',
+  description: undefined,
+  cancelText: undefined,
+  confirmText: undefined,
   danger: false,
 });
 defineEmits<{
@@ -22,7 +22,7 @@ defineEmits<{
 <template>
   <UModal
     :title="title"
-    :description="description"
+    :description="description ?? $t('general.confirmation')"
     :ui="{ description: 'sr-only', footer: 'justify-end gap-2' }"
   >
     <template #body>
@@ -33,7 +33,7 @@ defineEmits<{
     <template #footer>
       <UButton
         class="min-w-24 justify-center"
-        :label="cancelText"
+        :label="cancelText ?? $t('common.cancel')"
         variant="outline"
         color="neutral"
         :autofocus="danger"
@@ -41,7 +41,7 @@ defineEmits<{
       />
       <UButton
         class="min-w-24 justify-center"
-        :label="confirmText"
+        :label="confirmText ?? $t('common.ok')"
         :color="danger ? 'error' : 'primary'"
         variant="solid"
         :autofocus="!danger"

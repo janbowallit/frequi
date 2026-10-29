@@ -2,15 +2,16 @@
 import type { Lock } from '@/types';
 import type { TableColumn } from '@nuxt/ui';
 import { h } from 'vue';
+import { t } from '@/i18n';
 
 const botStore = useBotStore();
 
-const columns: TableColumn<Lock>[] = [
-  { accessorKey: 'pair', header: 'Pair' },
-  { accessorKey: 'lock_end_timestamp', header: 'Until' },
-  { accessorKey: 'reason', header: 'Reason' },
-  { id: 'actions', header: () => h('span', { class: 'sr-only' }, 'Actions') },
-];
+const columns = computed<TableColumn<Lock>[]>(() => [
+  { accessorKey: 'pair', header: t('pairs.locksPair') },
+  { accessorKey: 'lock_end_timestamp', header: t('pairs.until') },
+  { accessorKey: 'reason', header: t('pairs.reason') },
+  { id: 'actions', header: () => h('span', { class: 'sr-only' }, t('pairs.actions')) },
+]);
 
 const loading = ref(false);
 async function refreshLocks() {
@@ -33,15 +34,15 @@ function removePairLock(item: Lock) {
 
 <template>
   <div class="flex flex-col">
-    <PanelHeader title="Pair locks" description="Locked pairs can't be entered until the lock ends">
+    <PanelHeader :title="$t('pairs.locksTitle')" :description="$t('pairs.locksHelp')">
       <template #actions>
         <UButton
           color="neutral"
           variant="ghost"
           size="sm"
           icon="mdi:refresh"
-          title="Refresh"
-          aria-label="Refresh pair locks"
+          :title="$t('common.refresh')"
+          :aria-label="$t('pairs.refreshLocks')"
           :loading="loading"
           @click="refreshLocks"
         />
@@ -49,8 +50,8 @@ function removePairLock(item: Lock) {
     </PanelHeader>
     <EmptyState
       v-if="botStore.activeBot.activeLocks.length === 0"
-      title="No active locks"
-      description="Protections and manual locks show here."
+      :title="$t('pairs.noLocks')"
+      :description="$t('pairs.noLocksHelp')"
       icon="mdi:lock-open-variant-outline"
     />
     <UTable
@@ -68,8 +69,8 @@ function removePairLock(item: Lock) {
           color="neutral"
           variant="ghost"
           icon="mdi:delete"
-          :title="`Delete lock on ${row.original.pair}`"
-          :aria-label="`Delete lock on ${row.original.pair}`"
+          :title="$t('pairs.deleteLock', { pair: row.original.pair })"
+          :aria-label="$t('pairs.deleteLock', { pair: row.original.pair })"
           @click="removePairLock(row.original)"
         />
       </template>

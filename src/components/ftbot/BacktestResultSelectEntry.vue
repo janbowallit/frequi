@@ -21,7 +21,7 @@ withDefaults(
       <span class="font-normal text-muted">{{ backtestResult.strategy.timeframe }}</span>
     </p>
     <p class="text-xs text-muted tabular-nums">
-      {{ backtestResult.strategy.total_trades }} trades,
+      {{ $t('backtest.tradesCount', { n: backtestResult.strategy.total_trades }) }}
       <span
         :class="
           backtestResult.strategy.profit_total >= 0

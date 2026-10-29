@@ -37,7 +37,7 @@ function confirmInput(run_id: string, result: BacktestResultInMemory) {
 </script>
 
 <template>
-  <ul class="flex flex-col gap-1 text-left" aria-label="Backtest results">
+  <ul class="flex flex-col gap-1 text-start" :aria-label="$t('backtest.resultsList')">
     <li
       v-for="[key, result] in Object.entries(backtestHistory)"
       :key="key"
@@ -62,8 +62,8 @@ function confirmInput(run_id: string, result: BacktestResultInMemory) {
             size="xs"
             color="neutral"
             variant="ghost"
-            title="Edit notes"
-            aria-label="Edit notes"
+            :title="$t('backtest.editNotes')"
+            :aria-label="$t('backtest.editNotes')"
             icon="mdi:pencil-outline"
             @click.stop="result.metadata.editing = !result.metadata.editing"
           />
@@ -71,8 +71,8 @@ function confirmInput(run_id: string, result: BacktestResultInMemory) {
             size="xs"
             color="neutral"
             variant="ghost"
-            title="Remove from this list"
-            aria-label="Remove from this list"
+            :title="$t('backtest.removeFromList')"
+            :aria-label="$t('backtest.removeFromList')"
             icon="mdi:close"
             @click.stop="$emit('removeResult', key)"
           />
@@ -81,15 +81,15 @@ function confirmInput(run_id: string, result: BacktestResultInMemory) {
       <template v-else>
         <UTextarea
           v-model="result.metadata.notes"
-          placeholder="Notes"
+          :placeholder="$t('backtest.notes')"
           size="sm"
           class="flex-1"
           @click.stop
         />
         <UButton
           size="sm"
-          title="Save notes"
-          aria-label="Save notes"
+          :title="$t('backtest.saveNotes')"
+          :aria-label="$t('backtest.saveNotes')"
           variant="solid"
           icon="mdi:check"
           @click.stop="confirmInput(key, result)"

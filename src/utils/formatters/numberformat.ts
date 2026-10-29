@@ -1,11 +1,20 @@
+import { ltr } from '@/i18n';
+
+/*
+ * The display formatters here wrap their result with ltr(): in the Persian (right-to-left) UI
+ * that keeps "-0.72%" or "12.5 USDT" in reading order. In English they return the text unchanged.
+ */
+
 export function isNotUndefined<T>(val: T | undefined | null): val is T {
   return !(val === undefined || val === null);
 }
 
 export function formatPercent(value: number | undefined | null, decimals = 3): string {
-  return isNotUndefined(value)
-    ? `${(value * 100).toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}%`
-    : 'N/A%';
+  return ltr(
+    isNotUndefined(value)
+      ? `${(value * 100).toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}%`
+      : 'N/A%',
+  );
 }
 
 /**
@@ -16,12 +25,14 @@ export function formatPercent(value: number | undefined | null, decimals = 3): s
  */
 export function formatNumber(value: number | null | undefined, decimals = 15): string {
   // const format = new Intl.NumberFormat('', {maximumFractionDigits: decimals}
-  return isNotUndefined(value)
-    ? value.toLocaleString('fullwide', {
-        useGrouping: false,
-        maximumFractionDigits: decimals,
-      })
-    : 'N/A';
+  return ltr(
+    isNotUndefined(value)
+      ? value.toLocaleString('fullwide', {
+          useGrouping: false,
+          maximumFractionDigits: decimals,
+        })
+      : 'N/A',
+  );
 }
 
 /**
@@ -44,7 +55,7 @@ export function formatPrice(value: number | null, decimals = 15): string {
  * @returns
  */
 export function formatPriceCurrency(price: number | null, currency: string, decimals = 3) {
-  return `${formatPrice(price, decimals)} ${currency ?? ''}`;
+  return ltr(`${formatPrice(price, decimals)} ${currency ?? ''}`);
 }
 
 /**
@@ -75,6 +86,7 @@ export function formatDecimal(value: number | null, locale = 'fullwide'): string
   } else if (absValue < 100) {
     decimals = 3;
   }
+  // Not wrapped with ltr(): charts use the result as an axis bound, so it must stay parseable
   return Intl.NumberFormat(locale, { useGrouping: false, maximumFractionDigits: decimals }).format(
     value,
   );

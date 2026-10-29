@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ltr, t } from '@/i18n';
+
 /** At-a-glance numbers for the selected bots: realized profit, open profit, balance and win rate. */
 const botStore = useBotStore();
 
@@ -52,13 +54,13 @@ const summary = computed(() => {
 
 function money(value: number): string {
   const s = summary.value;
-  if (!s.sameCurrency) return 'Mixed currencies';
+  if (!s.sameCurrency) return t('summary.mixed');
   return formatPriceCurrency(value, s.currency, s.decimals);
 }
 
 function signed(value: number): string {
   const text = money(value);
-  return value > 0 && summary.value.sameCurrency ? `+${text}` : text;
+  return value > 0 && summary.value.sameCurrency ? ltr(`+${text}`) : text;
 }
 
 const cards = computed<StatCard[]>(() => {
@@ -66,31 +68,37 @@ const cards = computed<StatCard[]>(() => {
   const decided = s.wins + s.losses;
   return [
     {
-      label: 'Realized profit',
+      label: t('summary.realized'),
       value: signed(s.closedProfit),
       detail:
         s.closedRatio !== undefined && s.closedTrades > 0
-          ? `${formatPercent(s.closedRatio, 2)} over ${s.closedTrades} closed trades`
-          : `${s.closedTrades} closed trades`,
+          ? t('summary.realizedDetail', { pct: formatPercent(s.closedRatio, 2), n: s.closedTrades })
+          : t('summary.closedTrades', { n: s.closedTrades }),
       sign: Math.sign(s.closedProfit),
     },
     {
-      label: 'Open profit',
+      label: t('summary.openProfit'),
       value: signed(s.openProfit),
       detail: s.maxOpenTrades
-        ? `${s.openTrades} of ${s.maxOpenTrades} trade slots in use`
-        : `${s.openTrades} open trades`,
+        ? t('summary.slotsInUse', { open: s.openTrades, max: s.maxOpenTrades })
+        : t('summary.openTrades', { n: s.openTrades }),
       sign: s.openTrades ? Math.sign(s.openProfit) : 0,
     },
     {
-      label: 'Balance',
+      label: t('summary.balance'),
       value: money(s.balance),
-      detail: s.isDryRun ? 'Dry run, simulated funds' : s.isLive ? 'Live' : 'Dry run and live',
+      detail: s.isDryRun
+        ? t('summary.dryRunFunds')
+        : s.isLive
+          ? t('summary.live')
+          : t('summary.mixedModes'),
     },
     {
-      label: 'Win rate',
+      label: t('summary.winRate'),
       value: decided ? formatPercent(s.wins / decided, 0) : '–',
-      detail: decided ? `${s.wins} won, ${s.losses} lost` : 'No closed trades yet',
+      detail: decided
+        ? t('summary.wonLost', { won: s.wins, lost: s.losses })
+        : t('summary.noClosed'),
     },
   ];
 });
@@ -98,8 +106,8 @@ const cards = computed<StatCard[]>(() => {
 
 <template>
   <section
-    aria-label="Summary"
-    class="panel grid grid-cols-2 text-left lg:grid-cols-4 [&>*]:border-default max-lg:[&>*:nth-child(-n+2)]:border-b max-lg:[&>*:nth-child(odd)]:border-e lg:[&>*:not(:last-child)]:border-e"
+    :aria-label="$t('summary.label')"
+    class="panel grid grid-cols-2 text-start lg:grid-cols-4 [&>*]:border-default max-lg:[&>*:nth-child(-n+2)]:border-b max-lg:[&>*:nth-child(odd)]:border-e lg:[&>*:not(:last-child)]:border-e"
   >
     <div v-for="card in cards" :key="card.label" class="min-w-0 px-4 py-3 lg:px-5 lg:py-4">
       <p class="text-sm text-muted">{{ card.label }}</p>

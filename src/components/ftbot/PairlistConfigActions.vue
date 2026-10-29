@@ -4,10 +4,10 @@ const pairlistStore = usePairlistConfigStore();
 </script>
 <template>
   <div class="flex flex-col gap-2 sm:flex-row sm:items-end">
-    <UFormField label="Configuration" class="min-w-0 grow">
+    <UFormField :label="$t('pairlistBuilder.configuration')" class="min-w-0 grow">
       <EditValue
         v-model="pairlistStore.config.name"
-        editable-name="config"
+        :editable-name="$t('pairlistBuilder.editableName')"
         :allow-add="true"
         :allow-duplicate="true"
         :allow-edit="true"
@@ -21,7 +21,7 @@ const pairlistStore = usePairlistConfigStore();
           v-model="pairlistStore.configName"
           class="w-full text-start"
           :items="pairlistStore.savedConfigs.map((c) => c.name)"
-          placeholder="Choose or create a configuration"
+          :placeholder="$t('pairlistBuilder.choose')"
           @update:model-value="(config) => pairlistStore.selectOrCreateConfig(config as string)"
         />
       </EditValue>
@@ -31,16 +31,16 @@ const pairlistStore = usePairlistConfigStore();
         color="neutral"
         variant="outline"
         icon="mdi:content-save-outline"
-        label="Save"
+        :label="$t('common.save')"
         @click="pairlistStore.saveConfig(pairlistStore.config.name)"
       />
       <UButton
         :disabled="pairlistStore.evaluating || !pairlistStore.pairlistValid"
         variant="solid"
         :loading="pairlistStore.evaluating"
-        label="Evaluate"
+        :label="$t('pairlistBuilder.evaluate')"
         icon="mdi:play"
-        title="Run this pairlist on the exchange and list the pairs it returns"
+        :title="$t('pairlistBuilder.evaluateHelp')"
         @click="pairlistStore.startPairlistEvaluation()"
       />
     </div>

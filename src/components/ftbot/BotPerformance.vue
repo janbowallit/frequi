@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '@/i18n';
 const botStore = useBotStore();
 enum PerformanceOptions {
   performance = 'performance',
@@ -24,32 +25,34 @@ const performanceTable = computed<
 >(() => {
   const textLength = 17;
   const initialCol = {
-    [PerformanceOptions.performance]: { key: 'pair', label: 'Pair' },
+    [PerformanceOptions.performance]: { key: 'pair', label: t('performance.pair') },
     [PerformanceOptions.entryStats]: {
       key: 'enter_tag',
-      label: 'Enter tag',
+      label: t('performance.enterTag'),
       formatter: (v: unknown) => formatTextLen(v as string, textLength),
     },
     [PerformanceOptions.exitStats]: {
       key: 'exit_reason',
-      label: 'Exit Reason',
+      label: t('performance.exitReason'),
       formatter: (v: unknown) => formatTextLen(v as string, textLength),
     },
     [PerformanceOptions.mixTagStats]: {
       key: 'mix_tag',
-      label: 'Mix Tag',
+      label: t('performance.mixTag'),
       formatter: (v: unknown) => formatTextLen(v as string, textLength),
     },
   };
   return [
     initialCol[selectedOption.value],
-    { key: 'profit', label: 'Profit %' },
+    { key: 'profit', label: t('performance.profitPct') },
     {
       key: 'profit_abs',
-      label: `Profit ${botStore.activeBot.botState?.stake_currency}`,
+      label: t('performance.profitIn', {
+        currency: botStore.activeBot.botState?.stake_currency ?? '',
+      }),
       formatter: (v: unknown) => formatPrice(v as number, 5),
     },
-    { key: 'count', label: 'Count' },
+    { key: 'count', label: t('performance.count') },
   ];
 });
 
@@ -69,21 +72,20 @@ const performanceData = computed(() => {
   return [];
 });
 
-const options = [
-  { value: PerformanceOptions.performance, text: 'Pairs' },
-  { value: PerformanceOptions.entryStats, text: 'Entry tags' },
-  { value: PerformanceOptions.exitStats, text: 'Exit reasons' },
-  { value: PerformanceOptions.mixTagStats, text: 'Mixed' },
-];
+const options = computed(() => [
+  { value: PerformanceOptions.performance, text: t('performance.pairs') },
+  { value: PerformanceOptions.entryStats, text: t('performance.entryTags') },
+  { value: PerformanceOptions.exitStats, text: t('performance.exitReasons') },
+  { value: PerformanceOptions.mixTagStats, text: t('performance.mixed') },
+]);
 
 const emptyText = computed(
   () =>
     ({
-      [PerformanceOptions.performance]: 'Profit per pair shows here once trades close.',
-      [PerformanceOptions.entryStats]: 'Profit per entry tag shows here once trades close.',
-      [PerformanceOptions.exitStats]: 'Profit per exit reason shows here once trades close.',
-      [PerformanceOptions.mixTagStats]:
-        'Profit per entry tag and exit reason shows here once trades close.',
+      [PerformanceOptions.performance]: t('performance.emptyPairs'),
+      [PerformanceOptions.entryStats]: t('performance.emptyEntry'),
+      [PerformanceOptions.exitStats]: t('performance.emptyExit'),
+      [PerformanceOptions.mixTagStats]: t('performance.emptyMixed'),
     })[selectedOption.value],
 );
 const loading = ref(false);
@@ -121,7 +123,7 @@ const tableColumns = computed(() => {
     accessorKey: field.key,
     header: field.label,
     // Numbers line up on the right
-    meta: index === 0 ? undefined : { class: { th: 'text-right', td: 'text-right tabular-nums' } },
+    meta: index === 0 ? undefined : { class: { th: 'text-end', td: 'text-end tabular-nums' } },
     cell: ({ row }: { row: { original: Record<string, unknown> } }) =>
       field.formatter ? field.formatter(row.original[field.key]) : row.original[field.key],
   }));
@@ -133,15 +135,15 @@ watch(selectedOption, () => {
 </script>
 <template>
   <div class="flex flex-col">
-    <PanelHeader title="Performance">
+    <PanelHeader :title="$t('performance.title')">
       <template #actions>
         <UButton
           color="neutral"
           variant="ghost"
           size="sm"
           icon="mdi:refresh"
-          title="Refresh"
-          aria-label="Refresh performance"
+          :title="$t('common.refresh')"
+          :aria-label="$t('performance.refresh')"
           :loading="loading"
           @click="refreshSummary"
         />
@@ -149,7 +151,7 @@ watch(selectedOption, () => {
       <USegmentedControl
         v-if="botStore.activeBot.botFeatures.hasAdvancedStats"
         v-model="selectedOption"
-        aria-label="Group profit by"
+        :aria-label="$t('performance.groupBy')"
         :items="options"
         label-key="text"
         value-key="value"
@@ -158,7 +160,7 @@ watch(selectedOption, () => {
     </PanelHeader>
     <EmptyState
       v-if="!performanceData?.length"
-      title="No closed trades yet"
+      :title="$t('performance.empty')"
       :description="emptyText"
       icon="mdi:chart-line"
     />

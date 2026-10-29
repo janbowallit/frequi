@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '@/i18n';
 import ECharts from 'vue-echarts';
 
 import { use } from 'echarts/core';
@@ -123,19 +124,22 @@ const walletHistoryOptions: ComputedRef<EChartsOption> = computed(() => {
 
     const markLineData: MarkLineComponentOption['data'] = [
       {
-        name: 'Starting balance',
+        name: t('charts.startingBalance'),
         yAxis: startingValue,
         emphasis: { disabled: true },
         label: {
           show: true,
           position: 'insideStartTop',
           // The bot name only helps when several bots share the chart
-          formatter: walletEntries.length > 1 ? `Starting balance ${botName}` : 'Starting balance',
+          formatter:
+            walletEntries.length > 1
+              ? t('charts.startingBalanceFor', { bot: botName })
+              : t('charts.startingBalance'),
           color: captureLineColor,
         },
       },
       {
-        name: 'Zero',
+        name: t('charts.zero'),
         label: {
           show: false,
         },
@@ -149,13 +153,16 @@ const walletHistoryOptions: ComputedRef<EChartsOption> = computed(() => {
 
     if (shouldShowCaptureLine) {
       markLineData.push({
-        name: 'Capture start',
+        name: t('charts.captureStart'),
         xAxis: captureStartTs,
         emphasis: { disabled: true },
         label: {
           show: true,
           position: 'insideEndTop',
-          formatter: walletEntries.length > 1 ? `Capture start ${botName}` : 'Capture start',
+          formatter:
+            walletEntries.length > 1
+              ? t('charts.captureStartFor', { bot: botName })
+              : t('charts.captureStart'),
           color: captureLineColor,
         },
         lineStyle: {
@@ -237,7 +244,7 @@ const walletHistoryOptions: ComputedRef<EChartsOption> = computed(() => {
 
   const option: EChartsOption = {
     title: {
-      text: 'Wallet Balance',
+      text: t('charts.walletBalance'),
       left: 'center',
       show: props.showTitle,
     },
@@ -342,9 +349,9 @@ const walletHistoryOptions: ComputedRef<EChartsOption> = computed(() => {
     autoresize
   />
   <div v-else class="flex flex-col items-center justify-center h-full gap-2">
-    <p class="text-gray-500">No historic wallet data available.</p>
+    <p class="text-gray-500">{{ $t('charts.noWallet') }}</p>
     <p class="text-gray-500 text-sm">
-      You may need to update your freqtrade version to have historic wallet balance data available.
+      {{ $t('charts.noWalletHelp') }}
     </p>
   </div>
 </template>

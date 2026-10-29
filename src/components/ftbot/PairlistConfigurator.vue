@@ -79,12 +79,12 @@ if (pairlistStore.whitelist.length > 0) {
 
 <template>
   <div
-    class="grid w-full grid-cols-1 items-start gap-4 text-left xl:grid-cols-[20rem_minmax(0,1fr)_22rem]"
+    class="grid w-full grid-cols-1 items-start gap-4 text-start xl:grid-cols-[20rem_minmax(0,1fr)_22rem]"
   >
     <!-- 1. What can be added -->
     <PanelSection
-      title="Available filters"
-      info="Drag a filter into your pairlist, or use the arrow. The first one must generate pairs."
+      :title="$t('pairlistBuilder.available')"
+      :info="$t('pairlistBuilder.availableHelp')"
       body-class="max-h-[70vh] overflow-auto"
     >
       <ul ref="availablePairlistsEl" class="flex flex-col divide-y divide-default">
@@ -109,8 +109,9 @@ if (pairlistStore.whitelist.length > 0) {
               pairlistStore.config.pairlists.length === 0 && !pairlist.is_pairlist_generator
             "
             icon="mdi:arrow-right"
-            :aria-label="`Add ${pairlist.name}`"
-            :title="`Add ${pairlist.name}`"
+            :ui="{ leadingIcon: 'rtl:-scale-x-100' }"
+            :aria-label="$t('pairlistBuilder.addFilter', { name: pairlist.name })"
+            :title="$t('pairlistBuilder.addFilter', { name: pairlist.name })"
             @click="pairlistStore.addToConfig(pairlist, pairlistStore.config.pairlists.length)"
           />
         </li>
@@ -119,14 +120,16 @@ if (pairlistStore.whitelist.length > 0) {
 
     <!-- 2. The pairlist being built -->
     <div class="flex min-w-0 flex-col gap-4">
-      <PanelSection title="Your pairlist" body-class="flex flex-col gap-4 p-4">
+      <PanelSection :title="$t('pairlistBuilder.yours')" body-class="flex flex-col gap-4 p-4">
         <PairlistConfigActions />
         <div class="grid gap-3 sm:grid-cols-2">
-          <UFormField label="Stake currency">
+          <UFormField :label="$t('pairlistBuilder.stakeCurrency')">
             <UInput v-model="pairlistStore.stakeCurrency" class="w-full" />
           </UFormField>
           <div class="flex flex-col gap-2 sm:pt-6">
-            <BaseCheckbox v-model="pairlistStore.customExchange">Use another exchange</BaseCheckbox>
+            <BaseCheckbox v-model="pairlistStore.customExchange">{{
+              $t('pairlistBuilder.otherExchange')
+            }}</BaseCheckbox>
             <ExchangeSelect
               v-if="pairlistStore.customExchange"
               v-model="pairlistStore.selectedExchange"
@@ -140,11 +143,11 @@ if (pairlistStore.whitelist.length > 0) {
           "
           color="warning"
           icon="mdi:alert-outline"
-          title="The first step must generate pairs"
-          description="Start with a generating pairlist such as StaticPairList or VolumePairList."
+          :title="$t('pairlistBuilder.needsGenerator')"
+          :description="$t('pairlistBuilder.needsGeneratorHelp')"
         />
         <div class="flex flex-col gap-1.5">
-          <h3 class="text-sm font-medium text-muted">Steps, applied top to bottom</h3>
+          <h3 class="text-sm font-medium text-muted">{{ $t('pairlistBuilder.steps') }}</h3>
           <div
             ref="pairlistConfigsEl"
             class="relative flex min-h-32 flex-col gap-2 rounded-md border border-dashed border-default p-2"
@@ -163,7 +166,7 @@ if (pairlistStore.whitelist.length > 0) {
     </div>
 
     <!-- 3. Output -->
-    <PanelSection title="Output" body-class="flex flex-col gap-3 p-4">
+    <PanelSection :title="$t('pairlistBuilder.output')" body-class="flex flex-col gap-3 p-4">
       <template #actions>
         <USegmentedControl
           v-model="selectedView"
@@ -171,8 +174,12 @@ if (pairlistStore.whitelist.length > 0) {
           value-key="value"
           size="xs"
           :items="[
-            { label: 'Config', value: 'Config' },
-            { label: 'Pairs', value: 'Results', disabled: pairlistStore.whitelist.length === 0 },
+            { label: $t('pairlistBuilder.config'), value: 'Config' },
+            {
+              label: $t('pairlistBuilder.pairs'),
+              value: 'Results',
+              disabled: pairlistStore.whitelist.length === 0,
+            },
           ]"
           disabled-key="disabled"
         />
@@ -180,8 +187,8 @@ if (pairlistStore.whitelist.length > 0) {
       <p class="text-xs text-muted">
         {{
           selectedView === 'Config'
-            ? 'Copy this into the pairlists section of your config.'
-            : `${pairlistStore.whitelist.length} pairs from the last evaluation.`
+            ? $t('pairlistBuilder.configHelp')
+            : $t('pairlistBuilder.pairsHelp', { n: pairlistStore.whitelist.length })
         }}
       </p>
       <div class="relative overflow-auto">

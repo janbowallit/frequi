@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '@/i18n';
 import type { EChartsOption } from 'echarts';
 import ECharts from 'vue-echarts';
 
@@ -42,7 +43,7 @@ const settingsStore = useSettingsStore();
 const balanceChartOptions = computed((): EChartsOption => {
   return {
     title: {
-      text: 'Balance',
+      text: t('charts.balance'),
       show: props.showTitle,
     },
     center: ['50%', '50%'],

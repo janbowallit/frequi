@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '@/i18n';
 // TODO: is this component used?!?
 import ECharts from 'vue-echarts';
 
@@ -31,8 +32,8 @@ use([
 ]);
 
 // Define Column labels here to avoid typos
-const CHART_PROFIT = 'Profit %';
-const CHART_TRADE_COUNT = 'Trade Count';
+const chartProfit = () => t('charts.profitPct');
+const chartTradeCount = () => t('charts.tradeCount');
 
 const props = withDefaults(
   defineProps<{
@@ -66,7 +67,7 @@ const hourlyData = computed(() => {
 const hourlyChartOptions = computed((): EChartsOption => {
   return {
     title: {
-      text: 'Hourly Profit',
+      text: t('charts.hourlyProfit'),
       show: props.showTitle,
     },
     backgroundColor: 'rgba(0, 0, 0, 0)',
@@ -84,7 +85,7 @@ const hourlyChartOptions = computed((): EChartsOption => {
       },
     },
     legend: {
-      data: [CHART_PROFIT, CHART_TRADE_COUNT],
+      data: [chartProfit(), chartTradeCount()],
       right: '5%',
       top: 0,
     },
@@ -94,7 +95,7 @@ const hourlyChartOptions = computed((): EChartsOption => {
     yAxis: [
       {
         type: 'value',
-        name: CHART_PROFIT,
+        name: chartProfit(),
         splitLine: {
           show: false,
         },
@@ -104,7 +105,7 @@ const hourlyChartOptions = computed((): EChartsOption => {
       },
       {
         type: 'value',
-        name: CHART_TRADE_COUNT,
+        name: chartTradeCount(),
         nameRotate: 90,
         nameLocation: 'middle',
         nameGap: 30,
@@ -132,13 +133,13 @@ const hourlyChartOptions = computed((): EChartsOption => {
     series: [
       {
         type: 'line',
-        name: CHART_PROFIT,
+        name: chartProfit(),
         animation: false,
         // symbol: 'none',
       },
       {
         type: 'bar',
-        name: CHART_TRADE_COUNT,
+        name: chartTradeCount(),
         animation: false,
         itemStyle: {
           color: 'rgba(150,150,150,0.3)',

@@ -1,6 +1,23 @@
 import type { EChartsOption, SeriesOption, TooltipComponentFormatterCallbackParams } from 'echarts';
 import type { Ref } from 'vue';
 import { format as echartsFormat } from 'echarts';
+import { t } from '@/i18n';
+
+/**
+ * The candle chart's built-in series keep English names (other code looks them up by name);
+ * this is what the legend and tooltip show instead.
+ */
+const SERIES_LABELS: Record<string, () => string> = {
+  Candles: () => t('charts.candles'),
+  Volume: () => t('charts.volume'),
+  Entry: () => t('charts.entry'),
+  Exit: () => t('charts.exit'),
+  Trades: () => t('charts.trades'),
+};
+
+export function chartSeriesLabel(name: string): string {
+  return SERIES_LABELS[name]?.() ?? name;
+}
 
 type CandleTooltipParam = Exclude<
   TooltipComponentFormatterCallbackParams,
@@ -185,7 +202,7 @@ export function useCandleChartTooltip(chartOptions: Ref<EChartsOption>) {
 
     const values = getTooltipDimensionValues(param);
     const marker = typeof param.marker === 'string' ? param.marker : '';
-    const label = param.seriesName ?? '';
+    const label = chartSeriesLabel(param.seriesName ?? '');
     // Series without a value on this candle (e.g. no entry signal) only add noise
     if (values.length === 0) {
       return [];
@@ -247,7 +264,7 @@ export function useCandleChartTooltip(chartOptions: Ref<EChartsOption>) {
           title === 'Volume'
             ? ''
             : `<div style="margin:${index === 0 ? '6px' : '8px'} 0 2px;font-weight:700; text-decoration:underline; text-align:left;"
-            >${echartsFormat.encodeHTML(title)}</div>`;
+            >${echartsFormat.encodeHTML(chartSeriesLabel(title))}</div>`;
         const linesHtml = lines.map((line) => renderTooltipRow(line)).join('');
         return `${titleHtml}${linesHtml}`;
       })

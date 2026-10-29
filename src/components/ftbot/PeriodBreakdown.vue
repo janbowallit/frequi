@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { TimeSummaryOptions } from '@/types';
+import { t } from '@/i18n';
 
 const botStore = useBotStore();
 const settingsStore = useSettingsStore();
@@ -13,16 +14,16 @@ const hasWeekly = computed(
 );
 
 const periodicBreakdownSelections = computed(() => {
-  const vals = [{ value: TimeSummaryOptions.daily, text: 'Days' }];
+  const vals = [{ value: TimeSummaryOptions.daily, text: t('period.days') }];
   if (hasWeekly.value) {
-    vals.push({ value: TimeSummaryOptions.weekly, text: 'Weeks' });
-    vals.push({ value: TimeSummaryOptions.monthly, text: 'Months' });
+    vals.push({ value: TimeSummaryOptions.weekly, text: t('period.weeks') });
+    vals.push({ value: TimeSummaryOptions.monthly, text: t('period.months') });
   }
   return vals;
 });
 
-const absRelSelections = ref([
-  { value: 'abs_profit', text: 'Amount' },
+const absRelSelections = computed(() => [
+  { value: 'abs_profit', text: t('period.amount') },
   { value: 'rel_profit', text: '%' },
 ]);
 
@@ -63,14 +64,14 @@ const hasTrades = computed(() =>
   (selectedStatsSorted.value.data ?? []).some((d) => (d.trade_count ?? 0) > 0),
 );
 
-const periodNoun = computed(() => {
+const emptyText = computed(() => {
   switch (settingsStore.timeProfitPeriod) {
     case TimeSummaryOptions.weekly:
-      return 'week';
+      return t('period.emptyWeek');
     case TimeSummaryOptions.monthly:
-      return 'month';
+      return t('period.emptyMonth');
     default:
-      return 'day';
+      return t('period.emptyDay');
   }
 });
 
@@ -88,16 +89,16 @@ onMounted(() => {
 
 const tableColumns = computed(() => {
   const cols: { accessorKey: string; header: string }[] = [
-    { accessorKey: 'date', header: 'Day' },
-    { accessorKey: 'abs_profit', header: 'Profit' },
+    { accessorKey: 'date', header: t('period.day') },
+    { accessorKey: 'abs_profit', header: t('period.profit') },
     {
       accessorKey: 'fiat_value',
-      header: `In ${selectedStats.value.fiat_display_currency}`,
+      header: t('period.inFiat', { currency: selectedStats.value.fiat_display_currency }),
     },
-    { accessorKey: 'trade_count', header: 'Trades' },
+    { accessorKey: 'trade_count', header: t('period.trades') },
   ];
   if (botStore.activeBot.botFeatures.advancedDailyMetrics) {
-    cols.push({ accessorKey: 'rel_profit', header: 'Profit%' });
+    cols.push({ accessorKey: 'rel_profit', header: t('period.profitPct') });
   }
   return cols;
 });
@@ -114,7 +115,7 @@ watch(
   <div class="flex h-full flex-col">
     <PanelHeader
       v-if="!props.multiBotView"
-      :title="hasWeekly ? 'Profit per period' : 'Profit per day'"
+      :title="hasWeekly ? $t('period.perPeriod') : $t('period.perDay')"
     >
       <template #actions>
         <UButton
@@ -122,15 +123,15 @@ watch(
           variant="ghost"
           size="sm"
           icon="mdi:refresh"
-          title="Refresh"
-          aria-label="Refresh profit breakdown"
+          :title="$t('common.refresh')"
+          :aria-label="$t('period.refresh')"
           @click="refreshSummary"
         />
       </template>
       <USegmentedControl
         v-if="hasWeekly"
         v-model="settingsStore.timeProfitPeriod"
-        aria-label="Period"
+        :aria-label="$t('period.periodLabel')"
         :items="periodicBreakdownSelections"
         size="xs"
         label-key="text"
@@ -138,7 +139,7 @@ watch(
       />
       <USegmentedControl
         v-model="settingsStore.timeProfitPreference"
-        aria-label="Profit unit"
+        :aria-label="$t('period.unit')"
         size="xs"
         label-key="text"
         value-key="value"
@@ -149,7 +150,7 @@ watch(
       <USegmentedControl
         v-if="hasWeekly"
         v-model="settingsStore.timeProfitPeriod"
-        aria-label="Period"
+        :aria-label="$t('period.periodLabel')"
         :items="periodicBreakdownSelections"
         size="xs"
         label-key="text"
@@ -157,7 +158,7 @@ watch(
       />
       <USegmentedControl
         v-model="settingsStore.timeProfitPreference"
-        aria-label="Profit unit"
+        :aria-label="$t('period.unit')"
         size="xs"
         label-key="text"
         value-key="value"
@@ -169,8 +170,8 @@ watch(
       v-if="!hasTrades"
       class="flex-1"
       icon="i-mdi-chart-bar"
-      title="No closed trades yet"
-      :description="`Profit per ${periodNoun} shows here once the bot closes trades.`"
+      :title="$t('period.empty')"
+      :description="emptyText"
     />
     <div
       v-else-if="
@@ -191,8 +192,8 @@ watch(
       v-else
       class="flex-1"
       icon="i-mdi-percent"
-      title="Relative profit needs a single bot"
-      description="Select one bot, or switch to absolute profit, to see this chart."
+      :title="$t('period.singleBot')"
+      :description="$t('period.singleBotHelp')"
     />
     <div v-if="!props.multiBotView && hasTrades">
       <UTable

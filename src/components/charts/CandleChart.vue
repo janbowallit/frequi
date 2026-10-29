@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { t } from '@/i18n';
+import { chartSeriesLabel } from '@/composables/useCandleChartTooltip';
 import type { ChartSliderPosition, IndicatorConfig, PairHistory, PlotConfig, Trade } from '@/types';
 import { ChartType } from '@/types';
 
@@ -350,7 +352,7 @@ function updateChart(initial = false) {
         symbol: 'triangle',
         symbolSize: 10,
         color: buySignalColor,
-        tooltipPrefix: 'Long entry',
+        tooltipPrefix: t('charts.longEntry'),
         colTooltip: colEnterTag,
       },
       {
@@ -359,7 +361,7 @@ function updateChart(initial = false) {
         symbol: 'diamond',
         symbolSize: 8,
         color: sellSignalColor,
-        tooltipPrefix: 'Long exit',
+        tooltipPrefix: t('charts.longExit'),
         colTooltip: colExitTag,
       },
       {
@@ -369,7 +371,7 @@ function updateChart(initial = false) {
         symbolSize: 10,
         symbolRotate: 180,
         color: shortEntrySignalColor,
-        tooltipPrefix: 'Short entry',
+        tooltipPrefix: t('charts.shortEntry'),
         colTooltip: colEnterTag,
       },
       {
@@ -378,7 +380,7 @@ function updateChart(initial = false) {
         symbol: 'pin',
         symbolSize: 8,
         color: shortexitSignalColor,
-        tooltipPrefix: 'Short exit',
+        tooltipPrefix: t('charts.shortExit'),
         colTooltip: colExitTag,
       },
     ];
@@ -608,6 +610,7 @@ function initializeChartOptions() {
     legend: {
       // Initial legend, further entries are pushed to the below list
       data: ['Candles', 'Volume', 'Entry', 'Exit'],
+      formatter: chartSeriesLabel,
       right: '1%',
       top: 0,
       type: 'scroll',

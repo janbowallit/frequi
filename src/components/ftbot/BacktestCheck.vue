@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { fmtGap } from '@/composables/useNextEntry';
 import { durationText } from '@/composables/useNextEntry';
+import { joinList, ltr, t } from '@/i18n';
 
 /**
  * Is the live bot behaving like its backtest? Compares live stats from /profit with the
@@ -34,7 +35,7 @@ const elapsedDays = computed(() =>
 const closed = computed(() => profit.value?.closed_trade_count ?? 0);
 
 function pct(ratio: number, decimals = 1) {
-  return `${(ratio * 100).toFixed(decimals)}%`;
+  return ltr(`${(ratio * 100).toFixed(decimals)}%`);
 }
 
 function signedPct(ratio: number) {
@@ -73,10 +74,20 @@ const rows = computed<Row[]>(() => {
   const expected = perDay * elapsedDays.value;
 
   const tradesRow: Row = {
-    label: 'Trades',
-    live: `${tradeCount} in ${durationText(elapsedDays.value * 86_400_000)}`,
-    backtest: `${(perDay * 7).toFixed(1)} a week`,
-    note: `${expected < 1 ? 'Less than one' : `About ${Math.round(expected)}`} expected by now. ${pct(ref.quietWeekShare, 0)} of backtest weeks had no new trade, and the longest wait was ${Math.round(ref.longestWaitDays)} days.`,
+    label: t('backtestCheck.trades'),
+    live: t('backtestCheck.tradesLive', {
+      count: tradeCount,
+      duration: durationText(elapsedDays.value * 86_400_000),
+    }),
+    backtest: t('backtestCheck.perWeek', { n: (perDay * 7).toFixed(1) }),
+    note: t('backtestCheck.tradesNote', {
+      expected:
+        expected < 1
+          ? t('backtestCheck.lessThanOne')
+          : t('backtestCheck.aboutN', { n: Math.round(expected) }),
+      quiet: pct(ref.quietWeekShare, 0),
+      days: Math.round(ref.longestWaitDays),
+    }),
     status:
       tradeCount === 0 && elapsedDays.value > ref.longestWaitDays
         ? 'worse'
@@ -88,10 +99,10 @@ const rows = computed<Row[]>(() => {
   const winRate = p.winrate ?? (closed.value ? p.winning_trades / closed.value : 0);
   const [lowWin, highWin] = ref.winRateRange;
   const winRow: Row = {
-    label: 'Winning trades',
+    label: t('backtestCheck.winning'),
     live: closed.value ? pct(winRate, 0) : '-',
     backtest: pct(ref.winRate, 0),
-    note: `Over any 20 trades the backtest won between ${pct(lowWin, 0)} and ${pct(highWin, 0)}.`,
+    note: t('backtestCheck.winningNote', { low: pct(lowWin, 0), high: pct(highWin, 0) }),
     status:
       closed.value < MIN_TRADES
         ? 'early'
@@ -106,10 +117,13 @@ const rows = computed<Row[]>(() => {
 
   const avg = p.profit_closed_ratio_mean ?? 0;
   const avgRow: Row = {
-    label: 'Average trade',
+    label: t('backtestCheck.average'),
     live: closed.value ? signedPct(avg) : '-',
     backtest: signedPct(ref.avgProfit),
-    note: `The typical backtest trade lost ${pct(Math.abs(ref.medianProfit))}. A few big winners (best ${signedPct(ref.bestTrade)}) pulled the average up.`,
+    note: t('backtestCheck.averageNote', {
+      median: pct(Math.abs(ref.medianProfit)),
+      best: signedPct(ref.bestTrade),
+    }),
     status:
       closed.value < MIN_TRADES
         ? 'early'
@@ -124,10 +138,10 @@ const rows = computed<Row[]>(() => {
 
   const hold = durationHours(p.avg_duration);
   const holdRow: Row = {
-    label: 'Time in a trade',
+    label: t('backtestCheck.hold'),
     live: closed.value && hold !== null ? hoursText(hold) : '-',
     backtest: hoursText(ref.avgHoldHours),
-    note: 'Winners were held about 6 days on average, losers about 2.',
+    note: t('backtestCheck.holdNote'),
     status:
       closed.value < 5 || hold === null
         ? 'early'
@@ -138,10 +152,12 @@ const rows = computed<Row[]>(() => {
 
   const streak = lossStreaks.value;
   const streakRow: Row = {
-    label: 'Losses in a row',
-    live: closed.value ? `${streak.current} now, ${streak.longest} longest` : '-',
-    backtest: `up to ${ref.maxLossStreak}`,
-    note: 'Long losing runs are part of this strategy: it loses small and often, and wins big rarely.',
+    label: t('backtestCheck.streak'),
+    live: closed.value
+      ? t('backtestCheck.streakLive', { current: streak.current, longest: streak.longest })
+      : '-',
+    backtest: t('backtestCheck.upTo', { value: ref.maxLossStreak }),
+    note: t('backtestCheck.streakNote'),
     status:
       closed.value === 0
         ? 'early'
@@ -154,10 +170,10 @@ const rows = computed<Row[]>(() => {
 
   const drawdown = p.max_drawdown ?? 0;
   const drawdownRow: Row = {
-    label: 'Biggest drop',
+    label: t('backtestCheck.drawdown'),
     live: closed.value ? pct(drawdown) : '-',
-    backtest: `up to ${pct(ref.maxDrawdown)}`,
-    note: `Measured from the highest balance. The biggest backtest drop took ${Math.round(ref.drawdownDays / 30)} months to recover.`,
+    backtest: t('backtestCheck.upTo', { value: pct(ref.maxDrawdown) }),
+    note: t('backtestCheck.drawdownNote', { months: Math.round(ref.drawdownDays / 30) }),
     status:
       closed.value === 0
         ? 'early'
@@ -176,49 +192,55 @@ const verdict = computed<{ title: string; detail: string; tone: 'ok' | 'watch' |
   const worse = rows.value.filter((r) => r.status === 'worse');
   if (worse.length) {
     return {
-      title: `Worse than the backtest: ${worse.map((r) => r.label.toLowerCase()).join(', ')}`,
-      detail:
-        "This never happened in the backtest. It's worth checking whether the strategy still fits the market before it keeps trading.",
+      title: t('backtestCheck.worseTitle', {
+        what: joinList(worse.map((r) => r.label.toLowerCase())),
+      }),
+      detail: t('backtestCheck.worseDetail'),
       tone: 'bad',
     };
   }
   if (closed.value < MIN_TRADES && ref) {
     const weeks = Math.round(SETTLED_TRADES / ((ref.trades / ref.days) * 7));
     return {
-      title: 'Too early to judge',
-      detail: `${closed.value} closed trade${closed.value === 1 ? '' : 's'} so far. The averages start to mean something after ${MIN_TRADES} to ${SETTLED_TRADES} trades, about ${weeks} weeks at the backtest's pace.`,
+      title: t('backtestCheck.earlyTitle'),
+      detail: t(
+        'backtestCheck.earlyDetail',
+        { n: closed.value, min: MIN_TRADES, settled: SETTLED_TRADES, weeks },
+        closed.value,
+      ),
       tone: 'ok',
     };
   }
   const watch = rows.value.filter((r) => r.status === 'watch');
   if (watch.length) {
     return {
-      title: `Mostly in line. Keep an eye on ${watch.map((r) => r.label.toLowerCase()).join(', ')}`,
-      detail: 'Still within what the backtest went through, but on the weak side.',
+      title: t('backtestCheck.watchTitle', {
+        what: joinList(watch.map((r) => r.label.toLowerCase())),
+      }),
+      detail: t('backtestCheck.watchDetail'),
       tone: 'watch',
     };
   }
   return {
-    title: 'In line with the backtest',
-    detail: 'The live bot is trading the way the backtest said it would.',
+    title: t('backtestCheck.okTitle'),
+    detail: t('backtestCheck.okDetail'),
     tone: 'ok',
   };
 });
 
-const statusBadge: Record<
-  Status,
-  { label: string; color: 'neutral' | 'success' | 'warning' | 'error' }
-> = {
-  early: { label: 'Too early', color: 'neutral' },
-  ok: { label: 'In line', color: 'success' },
-  better: { label: 'Better', color: 'success' },
-  watch: { label: 'Watch', color: 'warning' },
-  worse: { label: 'Worse', color: 'error' },
-};
+const statusBadge = computed<
+  Record<Status, { label: string; color: 'neutral' | 'success' | 'warning' | 'error' }>
+>(() => ({
+  early: { label: t('backtestCheck.statusEarly'), color: 'neutral' },
+  ok: { label: t('backtestCheck.statusOk'), color: 'success' },
+  better: { label: t('backtestCheck.statusBetter'), color: 'success' },
+  watch: { label: t('backtestCheck.statusWatch'), color: 'warning' },
+  worse: { label: t('backtestCheck.statusWorse'), color: 'error' },
+}));
 </script>
 
 <template>
-  <div v-if="reference && profit" class="@container flex flex-col gap-4 p-4 text-left">
+  <div v-if="reference && profit" class="@container flex flex-col gap-4 p-4 text-start">
     <div
       role="status"
       class="border-s-2 ps-3"
@@ -235,12 +257,12 @@ const statusBadge: Record<
     <div class="overflow-x-auto">
       <table class="w-full text-sm">
         <thead class="hidden @lg:table-header-group">
-          <tr class="border-b border-default text-left text-[13px] text-muted">
-            <th class="py-2 pe-3 font-medium">What</th>
-            <th class="py-2 pe-3 font-medium">Live</th>
-            <th class="py-2 pe-3 font-medium">Backtest</th>
-            <th class="py-2 pe-3 font-medium">Status</th>
-            <th class="py-2 font-medium">What's normal</th>
+          <tr class="border-b border-default text-start text-[13px] text-muted">
+            <th class="py-2 pe-3 font-medium">{{ $t('backtestCheck.what') }}</th>
+            <th class="py-2 pe-3 font-medium">{{ $t('backtestCheck.live') }}</th>
+            <th class="py-2 pe-3 font-medium">{{ $t('backtestCheck.backtest') }}</th>
+            <th class="py-2 pe-3 font-medium">{{ $t('backtestCheck.status') }}</th>
+            <th class="py-2 font-medium">{{ $t('backtestCheck.normal') }}</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-default">
@@ -251,10 +273,11 @@ const statusBadge: Record<
           >
             <td class="font-medium text-highlighted @lg:py-2.5 @lg:pe-3">{{ row.label }}</td>
             <td class="row-start-2 tabular-nums @lg:py-2.5 @lg:pe-3">
-              <span class="text-muted @lg:hidden">Live </span>{{ row.live }}
+              <span class="text-muted @lg:hidden">{{ $t('backtestCheck.live') }} </span
+              >{{ row.live }}
             </td>
             <td class="row-start-3 tabular-nums text-muted @lg:py-2.5 @lg:pe-3">
-              <span class="@lg:hidden">Backtest </span>{{ row.backtest }}
+              <span class="@lg:hidden">{{ $t('backtestCheck.backtest') }} </span>{{ row.backtest }}
             </td>
             <td class="col-start-2 row-start-1 @lg:py-2.5 @lg:pe-3">
               <UBadge
@@ -271,9 +294,14 @@ const statusBadge: Record<
     </div>
 
     <p class="max-w-prose text-xs text-muted">
-      Live since {{ since ? timestampms(since) : '-' }}. Backtest: {{ reference.source }},
-      {{ reference.trades }} trades, {{ signedPct(reference.totalProfit) }} in total. Past results
-      don't guarantee future returns.
+      {{
+        $t('backtestCheck.footnote', {
+          since: since ? timestampms(since) : '-',
+          source: $t(reference.source),
+          trades: reference.trades,
+          profit: signedPct(reference.totalProfit),
+        })
+      }}
     </p>
   </div>
 </template>

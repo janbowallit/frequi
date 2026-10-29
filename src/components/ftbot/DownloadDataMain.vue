@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '@/i18n';
 import type { DownloadDataPayload, ExchangeSelection } from '@/types';
 import { MarginMode, TradingMode } from '@/types';
 import type { SelectMenuItem } from '@nuxt/ui';
@@ -39,14 +40,14 @@ const advancedOptions = ref({
 
 // State to track the collapse status
 const isAdvancedOpen = ref(false);
-const candleTypes: SelectMenuItem[] = [
-  { label: 'Spot', value: 'spot' },
-  { label: 'Futures', value: 'futures' },
-  { label: 'Funding Rate', value: 'funding_rate' },
-  { label: 'Mark', value: 'mark' },
-  { label: 'Index', value: 'index' },
-  { label: 'Premium Index', value: 'premiumIndex' },
-];
+const candleTypes = computed<SelectMenuItem[]>(() => [
+  { label: t('download.spot'), value: 'spot' },
+  { label: t('download.futures'), value: 'futures' },
+  { label: t('download.fundingRate'), value: 'funding_rate' },
+  { label: t('download.mark'), value: 'mark' },
+  { label: t('download.index'), value: 'index' },
+  { label: t('download.premiumIndex'), value: 'premiumIndex' },
+]);
 
 function addPairs(_pairs: string[]) {
   pairs.value.push(..._pairs);
@@ -95,15 +96,17 @@ async function startDownload() {
 </script>
 
 <template>
-  <div class="flex w-full flex-col gap-4 text-left">
+  <div class="flex w-full flex-col gap-4 text-start">
     <BackgroundJobTracking />
 
     <form class="panel flex flex-col divide-y divide-default" @submit.prevent="startDownload">
       <!-- Pairs -->
       <section class="flex flex-col gap-3 p-5" aria-labelledby="dl-pairs">
         <div>
-          <h2 id="dl-pairs" class="text-base font-semibold text-highlighted">Pairs</h2>
-          <p class="text-sm text-muted">Type pairs one per row, or add a set.</p>
+          <h2 id="dl-pairs" class="text-base font-semibold text-highlighted">
+            {{ $t('download.pairs') }}
+          </h2>
+          <p class="text-sm text-muted">{{ $t('download.pairsHelp') }}</p>
         </div>
         <div class="flex flex-wrap gap-2">
           <UButton
@@ -122,35 +125,41 @@ async function startDownload() {
             variant="outline"
             size="sm"
             icon="mdi:format-list-numbered"
-            label="Pairs from the pairlist builder"
+            :label="$t('download.fromBuilder')"
             :disabled="pairlistStore.whitelist.length === 0"
-            title="Replace the list with the result of the last pairlist evaluation"
+            :title="$t('download.fromBuilderHelp')"
             @click="replacePairs(pairlistStore.whitelist)"
           />
         </div>
-        <BaseStringList v-model="pairs" placeholder="e.g. BTC/USDT" />
+        <BaseStringList v-model="pairs" :placeholder="$t('download.pairPlaceholder')" />
       </section>
 
       <!-- Timeframes -->
       <section class="flex flex-col gap-3 p-5" aria-labelledby="dl-timeframes">
-        <h2 id="dl-timeframes" class="text-base font-semibold text-highlighted">Timeframes</h2>
-        <BaseStringList v-model="timeframes" placeholder="e.g. 1h" />
+        <h2 id="dl-timeframes" class="text-base font-semibold text-highlighted">
+          {{ $t('download.timeframes') }}
+        </h2>
+        <BaseStringList v-model="timeframes" :placeholder="$t('download.timeframePlaceholder')" />
       </section>
 
       <!-- Time range -->
       <section class="flex flex-col gap-3 p-5" aria-labelledby="dl-range">
         <div class="flex flex-wrap items-center justify-between gap-2">
-          <h2 id="dl-range" class="text-base font-semibold text-highlighted">Time range</h2>
-          <BaseCheckbox v-model="timeSelection.useCustomTimerange">Pick exact dates</BaseCheckbox>
+          <h2 id="dl-range" class="text-base font-semibold text-highlighted">
+            {{ $t('download.timeRange') }}
+          </h2>
+          <BaseCheckbox v-model="timeSelection.useCustomTimerange">{{
+            $t('download.exactDates')
+          }}</BaseCheckbox>
         </div>
         <TimeRangeSelect
           v-if="timeSelection.useCustomTimerange"
           v-model="timeSelection.timerange"
         />
-        <UFormField v-else label="Days back from today">
+        <UFormField v-else :label="$t('download.daysBack')">
           <UInputNumber
             v-model="timeSelection.days"
-            aria-label="Days to download"
+            :aria-label="$t('download.daysLabel')"
             :min="1"
             :step="1"
             class="w-40"
@@ -160,35 +169,37 @@ async function startDownload() {
 
       <!-- Advanced -->
       <section class="p-5">
-        <BaseCollapsible v-model:open="isAdvancedOpen" title="Advanced options">
+        <BaseCollapsible v-model:open="isAdvancedOpen" :title="$t('download.advanced')">
           <div class="flex flex-col gap-3 pt-3">
-            <p class="text-sm text-muted">These options apply only while this section is open.</p>
-            <BaseCheckbox v-model="advancedOptions.erase">Erase existing data first</BaseCheckbox>
+            <p class="text-sm text-muted">{{ $t('download.advancedHelp') }}</p>
+            <BaseCheckbox v-model="advancedOptions.erase">{{ $t('download.erase') }}</BaseCheckbox>
             <BaseCheckbox
               v-if="botStore.activeBot.botFeatures.downloadDataPrepend"
               v-model="advancedOptions.prepend_data"
             >
-              Add older data in front of what's there
+              {{ $t('download.prepend') }}
             </BaseCheckbox>
             <BaseCheckbox v-model="advancedOptions.downloadTrades">
-              Download trades instead of candles
+              {{ $t('download.trades') }}
             </BaseCheckbox>
             <UFormField
               v-if="botStore.activeBot.botFeatures.downloadDataCandleTypes"
-              label="Candle types"
-              help="Leave empty to download what normal operation needs."
+              :label="$t('download.candleTypes')"
+              :help="$t('download.candleTypesHelp')"
             >
               <USelectMenu
                 v-model="advancedOptions.candleTypes"
                 multiple
                 :items="candleTypes"
-                placeholder="Automatic"
+                :placeholder="$t('download.automatic')"
                 value-key="value"
                 class="w-full sm:w-80"
               />
             </UFormField>
             <UCollapsible v-model:open="exchange.customExchange" class="flex flex-col gap-2">
-              <BaseCheckbox v-model="exchange.customExchange">Use another exchange</BaseCheckbox>
+              <BaseCheckbox v-model="exchange.customExchange">{{
+                $t('download.otherExchange')
+              }}</BaseCheckbox>
               <template #content>
                 <ExchangeSelect v-model="exchange.selectedExchange" />
               </template>
@@ -199,10 +210,14 @@ async function startDownload() {
 
       <div class="flex items-center justify-end gap-3 p-4">
         <span class="text-sm text-muted tabular-nums">
-          {{ pairs.filter(Boolean).length }} pairs, {{ timeframes.filter(Boolean).length }}
-          timeframes
+          {{
+            $t('download.summary', {
+              pairs: pairs.filter(Boolean).length,
+              timeframes: timeframes.filter(Boolean).length,
+            })
+          }}
         </span>
-        <UButton type="submit" variant="solid" icon="mdi:download" label="Download candles" />
+        <UButton type="submit" variant="solid" icon="mdi:download" :label="$t('download.title')" />
       </div>
     </form>
   </div>

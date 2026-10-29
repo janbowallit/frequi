@@ -1,7 +1,15 @@
 <script setup lang="ts">
+import { t } from '@/i18n';
+
 const botStore = useBotStore();
 
 const multiBot = computed(() => botStore.botCount > 1);
+/** Panel title, naming the bot when several are connected */
+function forBot(title: string) {
+  return multiBot.value
+    ? t('dashboard.forBot', { title, bot: botStore.activeBot.uiBotName })
+    : title;
+}
 const hasReference = computed(
   () => !!STRATEGY_REFERENCE[botStore.activeBot.botState?.strategy ?? ''],
 );
@@ -15,12 +23,12 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="mx-auto flex w-full max-w-[1400px] flex-col gap-4 p-3 text-left sm:p-4 lg:p-6">
+  <div class="mx-auto flex w-full max-w-[1400px] flex-col gap-4 p-3 text-start sm:p-4 lg:p-6">
     <BotSummaryStats />
 
     <PanelSection
-      :title="`Next entry${multiBot ? `: ${botStore.activeBot.uiBotName}` : ''}`"
-      info="How close each pair is to the strategy's entry conditions."
+      :title="forBot($t('dashboard.nextEntry'))"
+      :info="$t('dashboard.nextEntryInfo')"
       body-class=""
     >
       <NextEntryPanel compact />
@@ -28,8 +36,8 @@ onMounted(async () => {
 
     <PanelSection
       v-if="hasReference"
-      :title="`Live vs backtest${multiBot ? `: ${botStore.activeBot.uiBotName}` : ''}`"
-      info="Is the live bot trading the way its backtest did? Numbers settle after 10 to 20 closed trades."
+      :title="forBot($t('dashboard.liveVsBacktest'))"
+      :info="$t('dashboard.liveVsBacktestInfo')"
       body-class=""
     >
       <BacktestCheck />
@@ -37,13 +45,13 @@ onMounted(async () => {
 
     <div class="grid gap-4 lg:grid-cols-3">
       <PanelSection
-        :title="`Profit over time${multiBot ? ' (all bots)' : ''}`"
+        :title="multiBot ? $t('dashboard.profitOverTimeAll') : $t('dashboard.profitOverTime')"
         class="h-96 lg:col-span-2"
         body-class="overflow-hidden"
       >
         <PeriodBreakdown multi-bot-view />
       </PanelSection>
-      <PanelSection v-if="multiBot" title="Bot comparison" class="h-96">
+      <PanelSection v-if="multiBot" :title="$t('dashboard.botComparison')" class="h-96">
         <BotComparisonList />
       </PanelSection>
       <section v-else class="panel h-96 overflow-auto">
@@ -53,51 +61,59 @@ onMounted(async () => {
 
     <PanelSection
       v-if="botStore.activeBot.openTradeCount > 0"
-      :title="`Exit plan${multiBot ? `: ${botStore.activeBot.uiBotName}` : ''}`"
-      info="The prices where each open trade will be sold."
+      :title="forBot($t('dashboard.exitPlan'))"
+      :info="$t('dashboard.exitPlanInfo')"
       body-class=""
     >
       <ExitPlanPanel />
     </PanelSection>
 
     <PanelSection
-      title="Open trades"
-      :info="multiBot ? 'Open trades of every selected bot.' : undefined"
+      :title="$t('dashboard.openTrades')"
+      :info="multiBot ? $t('dashboard.openTradesAll') : undefined"
       body-class=""
     >
       <TradeList
         active-trades
         :trades="botStore.allOpenTradesSelectedBots"
         :multi-bot-view="multiBot"
-        empty-text="No open trades"
+        :empty-text="$t('dashboard.noOpenTrades')"
       />
     </PanelSection>
 
-    <PanelSection title="Closed trades" body-class="">
+    <PanelSection :title="$t('dashboard.closedTrades')" body-class="">
       <TradeList
         :active-trades="false"
         show-filter
         :trades="botStore.allClosedTradesSelectedBots"
         :multi-bot-view="multiBot"
-        empty-text="No closed trades yet."
+        :empty-text="$t('dashboard.noClosedTrades')"
       />
     </PanelSection>
 
     <div v-if="hasClosedTrades" class="grid gap-4 lg:grid-cols-2">
-      <PanelSection title="Cumulative profit" class="h-80" body-class="overflow-hidden">
+      <PanelSection :title="$t('dashboard.cumProfit')" class="h-80" body-class="overflow-hidden">
         <CumProfitChart
           :trades="botStore.allTradesSelectedBots"
           :open-trades="botStore.allOpenTradesSelectedBots"
           :show-title="false"
         />
       </PanelSection>
-      <PanelSection title="Profit distribution" class="h-80" body-class="overflow-hidden">
+      <PanelSection
+        :title="$t('dashboard.profitDistribution')"
+        class="h-80"
+        body-class="overflow-hidden"
+      >
         <ProfitDistributionChart :trades="botStore.allTradesSelectedBots" :show-title="false" />
       </PanelSection>
-      <PanelSection title="Wallet history" class="h-80" body-class="overflow-hidden">
+      <PanelSection
+        :title="$t('dashboard.walletHistory')"
+        class="h-80"
+        body-class="overflow-hidden"
+      >
         <WalletHistoryChart :wallet-data="botStore.allBalanceHistory" :show-title="false" />
       </PanelSection>
-      <PanelSection title="Trades log" class="h-80" body-class="overflow-hidden">
+      <PanelSection :title="$t('dashboard.tradesLog')" class="h-80" body-class="overflow-hidden">
         <TradesLogChart :trades="botStore.allTradesSelectedBots" :show-title="false" />
       </PanelSection>
     </div>
@@ -106,8 +122,7 @@ onMounted(async () => {
       class="flex items-center gap-2 rounded-(--app-panel-radius) border border-dashed border-default px-4 py-3 text-sm text-muted"
     >
       <UIcon name="mdi:chart-areaspline" class="size-4 shrink-0" aria-hidden="true" />
-      Cumulative profit, profit distribution, wallet history and the trades log appear after the
-      first closed trade.
+      {{ $t('dashboard.chartsAfterFirst') }}
     </p>
   </div>
 </template>

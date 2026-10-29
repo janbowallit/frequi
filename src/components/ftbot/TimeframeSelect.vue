@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '@/i18n';
 interface Props {
   value?: string;
   belowTimeframe?: string;
@@ -14,9 +15,9 @@ const emit = defineEmits<{ input: [value: string] }>();
 
 const selectedTimeframe = ref('');
 // The below list must always remain sorted correctly!
-const availableTimeframesBase = [
+const availableTimeframesBase = computed(() => [
   // Placeholder value
-  { value: null, label: 'Use strategy default' },
+  { value: null, label: t('selectors.strategyDefault') },
   { value: '1m', label: '1m' },
   { value: '3m', label: '3m' },
   { value: '5m', label: '5m' },
@@ -34,15 +35,15 @@ const availableTimeframesBase = [
   { value: '2w', label: '2w' },
   { value: '1M', label: '1M' },
   { value: '1y', label: '1y' },
-];
+]);
 
 const availableTimeframes = computed(() => {
   if (!props.belowTimeframe) {
-    return availableTimeframesBase;
+    return availableTimeframesBase.value;
   }
-  const idx = availableTimeframesBase.findIndex((v) => v.value === props.belowTimeframe);
+  const idx = availableTimeframesBase.value.findIndex((v) => v.value === props.belowTimeframe);
 
-  return [...availableTimeframesBase].splice(0, idx);
+  return [...availableTimeframesBase.value].splice(0, idx);
 });
 
 const emitSelectedTimeframe = () => {
@@ -53,7 +54,7 @@ const emitSelectedTimeframe = () => {
 <template>
   <USelect
     v-model="selectedTimeframe"
-    placeholder="Use strategy default"
+    :placeholder="$t('selectors.strategyDefault')"
     :size="size"
     :items="availableTimeframes"
     @change="emitSelectedTimeframe"

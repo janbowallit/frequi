@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Lock, Trade } from '@/types';
+import { t } from '@/i18n';
 
 interface CombinedPairList {
   pair: string;
@@ -74,10 +75,10 @@ const combinedPairList = computed(() => {
     const tradeCount = trades.length;
     const trade = tradeCount ? trades[0] : undefined;
     if (trades.length > 0) {
-      profitString = `Current profit: ${formatPercent(profit)}`;
+      profitString = t('pairs.currentProfit', { pct: formatPercent(profit) });
     }
     if (trade) {
-      profitString += `\nOpen since: ${timestampms(trade.open_timestamp)}`;
+      profitString += `\n${t('pairs.openSince', { time: timestampms(trade.open_timestamp) })}`;
     }
     if (
       filterText.value === '' ||
@@ -125,34 +126,51 @@ const combinedPairList = computed(() => {
       v-model="filterText"
       type="search"
       icon="mdi:magnify"
-      placeholder="Filter pairs"
-      aria-label="Filter pairs"
+      :placeholder="$t('pairs.filter')"
+      :aria-label="$t('pairs.filter')"
       class="w-full"
       :class="{ 'pe-2': backtestMode }"
     />
     <EmptyState
       v-if="combinedPairList.length === 0"
-      :title="filterText ? 'No matching pairs' : 'No pairs in the whitelist'"
+      :title="filterText ? $t('pairs.noMatch') : $t('pairs.noWhitelist')"
       icon="mdi:magnify-close"
     />
-    <ul v-else class="flex flex-col gap-0.5" aria-label="Pairs">
+    <ul v-else class="flex flex-col gap-0.5" :aria-label="$t('pairs.label')">
       <li v-for="comb in combinedPairList" :key="comb.pair">
         <button
           type="button"
-          class="flex w-full items-center justify-between gap-2 rounded-md border-s-2 px-2.5 py-2 text-left text-sm"
+          class="flex w-full items-center justify-between gap-2 rounded-md border-s-2 px-2.5 py-2 text-start text-sm"
           :class="
             comb.pair === botStore.activeBot.selectedPair
               ? 'border-primary bg-primary/10 font-semibold text-highlighted'
               : 'border-transparent text-default hover:bg-elevated'
           "
           :aria-current="comb.pair === botStore.activeBot.selectedPair ? 'true' : undefined"
-          :title="`${comb.pair} - ${comb.tradeCount} trade(s), ${formatPriceCurrency(comb.profitAbs, botStore.activeBot.stakeCurrency, botStore.activeBot.stakeCurrencyDecimals)}`"
+          :title="
+            $t('pairs.pairTitle', {
+              pair: comb.pair,
+              count: comb.tradeCount,
+              profit: formatPriceCurrency(
+                comb.profitAbs,
+                botStore.activeBot.stakeCurrency,
+                botStore.activeBot.stakeCurrencyDecimals,
+              ),
+            })
+          "
           @click="botStore.activeBot.selectedPair = comb.pair"
         >
           <span class="flex min-w-0 items-center gap-2">
             <span class="truncate">{{ comb.pair }}</span>
-            <UTooltip v-if="comb.locks" :text="`Locked until ${comb.lockReason}`">
-              <UIcon name="mdi:lock" class="size-4 shrink-0 text-warning" aria-label="Locked" />
+            <UTooltip
+              v-if="comb.locks"
+              :text="$t('pairs.lockedUntil', { reason: comb.lockReason })"
+            >
+              <UIcon
+                name="mdi:lock"
+                class="size-4 shrink-0 text-warning"
+                :aria-label="$t('pairs.locked')"
+              />
             </UTooltip>
           </span>
 
@@ -162,13 +180,18 @@ const combinedPairList = computed(() => {
             color="success"
             variant="solid"
             size="sm"
-            label="Signal"
+            :label="$t('pairs.signal')"
           />
           <span
             v-else-if="readiness.get(comb.pair)"
             class="flex h-1.5 w-12 shrink-0 gap-0.5"
             role="img"
-            :aria-label="`${readiness.get(comb.pair)!.met} of ${readiness.get(comb.pair)!.total} buy checks met`"
+            :aria-label="
+              $t('pairs.checksMet', {
+                met: readiness.get(comb.pair)!.met,
+                total: readiness.get(comb.pair)!.total,
+              })
+            "
           >
             <span
               v-for="i in readiness.get(comb.pair)!.total"

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import humanizeDuration from 'humanize-duration';
 import { BotStates } from '@/types';
 import type { PairHistory } from '@/types';
+import { botStateLabel, t } from '@/i18n';
 
 /**
  * Explains why the bot did (not) enter a trade for the selected pair, following the
@@ -11,6 +11,8 @@ import type { PairHistory } from '@/types';
 type CheckStatus = 'pass' | 'fail' | 'warn';
 
 interface Check {
+  /** Set on the check the verdict looks for */
+  id?: 'noSignal';
   label: string;
   status: CheckStatus;
   detail: string;
@@ -62,7 +64,7 @@ async function refresh() {
     analysis.value = await bot.value.getPairAnalysis(pair.value, timeframe.value);
   } catch (e) {
     analysis.value = null;
-    error.value = 'Could not load the analyzed candles for this pair.';
+    error.value = t('signals.loadError');
     console.error(e);
   } finally {
     loading.value = false;
@@ -73,7 +75,7 @@ watch([pair, timeframe], refresh, { immediate: true });
 useIntervalFn(refresh, REFRESH_MS);
 
 function ago(ms: number): string {
-  return humanizeDuration(Math.max(ms, 0), { largest: 2, round: true, units: ['d', 'h', 'm'] });
+  return humanizeMs(Math.max(ms, 0), { largest: 2, round: true, units: ['d', 'h', 'm'] });
 }
 
 /** Candle rows as objects keyed by column name, oldest first */
@@ -121,7 +123,7 @@ const nextCandleCloseMs = computed(() =>
 const nextCheckText = computed(() => {
   if (nextCandleCloseMs.value === undefined) return '';
   const wait = nextCandleCloseMs.value - now.value.getTime();
-  return wait > 0 ? `Next candle closes in ${ago(wait)}.` : 'Next candle is closing now.';
+  return wait > 0 ? t('signals.nextCloseIn', { time: ago(wait) }) : t('signals.nextClosingNow');
 });
 
 const lastEntrySignal = computed(() => {
@@ -146,7 +148,7 @@ const timeline = computed(() =>
       ts: row.__date_ts as number,
       enter,
       exit,
-      label: `${timestampms(row.__date_ts as number)}${enter ? ' · entry signal' : ''}${exit ? ' · exit signal' : ''}`,
+      label: `${timestampms(row.__date_ts as number)}${enter ? t('signals.entrySignalMark') : ''}${exit ? t('signals.exitSignalMark') : ''}`,
     };
   }),
 );
@@ -162,39 +164,41 @@ const checks = computed<Check[]>(() => {
 
   // 1. Bot state - entries only happen while running
   if (state.state === BotStates.RUNNING) {
-    result.push({ label: 'Bot is running', status: 'pass', detail: 'Entries are allowed.' });
+    result.push({
+      label: t('signals.running'),
+      status: 'pass',
+      detail: t('signals.runningDetail'),
+    });
   } else if (state.state === BotStates.PAUSED) {
     result.push({
-      label: 'Bot is paused',
+      label: t('signals.paused'),
       status: 'fail',
-      detail: 'Open trades are managed, but no new trades are entered. Press Resume.',
+      detail: t('signals.pausedDetail'),
     });
   } else {
     result.push({
-      label: `Bot is ${state.state}`,
+      label: t('signals.botIs', { state: botStateLabel(state.state) }),
       status: 'fail',
-      detail: 'The bot does not trade until it is started.',
+      detail: t('signals.notStartedDetail'),
     });
   }
 
   // 2. Whitelist
   const inWhitelist = bot.value.whitelist.includes(pair.value);
   result.push({
-    label: inWhitelist ? 'Pair is in the whitelist' : 'Pair is not in the whitelist',
+    label: inWhitelist ? t('signals.inWhitelist') : t('signals.notInWhitelist'),
     status: inWhitelist ? 'pass' : 'fail',
-    detail: inWhitelist
-      ? 'The pairlist includes this pair.'
-      : 'The bot only enters pairs from its current pairlist.',
+    detail: inWhitelist ? t('signals.inWhitelistDetail') : t('signals.notInWhitelistDetail'),
   });
 
   // 3. One trade per pair
   const openTrade = bot.value.openTrades.find((t) => t.pair === pair.value);
   result.push({
-    label: openTrade ? 'Already in a trade' : 'No open trade on this pair',
+    label: openTrade ? t('signals.inTrade') : t('signals.noTrade'),
     status: openTrade ? 'fail' : 'pass',
     detail: openTrade
-      ? `Trade #${openTrade.trade_id} is open - freqtrade holds one trade per pair.`
-      : 'A new trade can be opened.',
+      ? t('signals.inTradeDetail', { id: openTrade.trade_id })
+      : t('signals.noTradeDetail'),
   });
 
   // 4. Free trade slots
@@ -203,9 +207,11 @@ const checks = computed<Check[]>(() => {
   const used = bot.value.openTradeCount;
   const hasSlot = unlimited || used < maxTrades;
   result.push({
-    label: hasSlot ? 'Trade slot available' : 'All trade slots in use',
+    label: hasSlot ? t('signals.slotFree') : t('signals.slotsFull'),
     status: hasSlot ? 'pass' : 'fail',
-    detail: unlimited ? `${used} open, no limit.` : `${used} of ${maxTrades} slots in use.`,
+    detail: unlimited
+      ? t('signals.unlimited', { used })
+      : t('signals.slotsUsed', { used, max: maxTrades }),
   });
 
   // 5. Locks - global ('*') or for this pair, on both sides or the long side
@@ -218,13 +224,17 @@ const checks = computed<Check[]>(() => {
   result.push({
     label: longest
       ? longest.pair === '*'
-        ? 'All pairs are locked'
-        : 'Pair is locked'
-      : 'No locks',
+        ? t('signals.allLocked')
+        : t('signals.pairLocked')
+      : t('signals.noLocks'),
     status: longest ? 'fail' : 'pass',
     detail: longest
-      ? `Until ${timestampms(longest.lock_end_timestamp)} (in ${ago(longest.lock_end_timestamp - now.value.getTime())}) - ${longest.reason || 'no reason given'}.`
-      : 'No protection or manual lock applies.',
+      ? t('signals.lockDetail', {
+          until: timestampms(longest.lock_end_timestamp),
+          wait: ago(longest.lock_end_timestamp - now.value.getTime()),
+          reason: longest.reason || t('signals.noReason'),
+        })
+      : t('signals.noLocksDetail'),
   });
 
   // 6. Data freshness (strategy.get_latest_candle)
@@ -233,11 +243,11 @@ const checks = computed<Check[]>(() => {
     const age = now.value.getTime() - latestCandleTs.value;
     const fresh = age <= maxAgeMs;
     result.push({
-      label: fresh ? 'Candle data is up to date' : 'Candle data is outdated',
+      label: fresh ? t('signals.fresh') : t('signals.outdated'),
       status: fresh ? 'pass' : 'fail',
       detail: fresh
-        ? `Last candle closed ${ago(age - timeframeMs.value)} ago. ${nextCheckText.value}`
-        : `Latest candle is ${ago(age)} old - freqtrade ignores signals on outdated data. Check the exchange connection.`,
+        ? t('signals.freshDetail', { ago: ago(age - timeframeMs.value), next: nextCheckText.value })
+        : t('signals.outdatedDetail', { age: ago(age) }),
     });
   }
 
@@ -245,21 +255,24 @@ const checks = computed<Check[]>(() => {
   const sig = latestSignal.value;
   if (sig.signal) {
     result.push({
-      label: `Entry signal (${sig.signal})`,
+      label: t('signals.entrySignal', {
+        side: sig.signal === 'short' ? t('trades.short') : t('trades.long'),
+      }),
       status: 'pass',
-      detail: sig.tag ? `Tag: ${sig.tag}` : 'The strategy signals an entry on the latest candle.',
+      detail: sig.tag ? t('signals.tag', { tag: sig.tag }) : t('signals.entrySignalDetail'),
     });
   } else if (sig.conflict) {
     result.push({
-      label: 'Conflicting signals',
+      label: t('signals.conflict'),
       status: 'fail',
-      detail: 'Entry and exit are both set on the latest candle - freqtrade ignores the entry.',
+      detail: t('signals.conflictDetail'),
     });
   } else {
     result.push({
-      label: 'No entry signal',
+      id: 'noSignal',
+      label: t('signals.noSignal'),
       status: 'fail',
-      detail: "The strategy's entry conditions are not met on the latest closed candle.",
+      detail: t('signals.noSignalDetail'),
     });
   }
 
@@ -270,12 +283,17 @@ const checks = computed<Check[]>(() => {
   if (free !== undefined) {
     const fixedStake = Number(state.stake_amount);
     const enough = Number.isNaN(fixedStake) ? free > 0 : free >= fixedStake;
+    const freeText = formatPriceCurrency(
+      free,
+      state.stake_currency,
+      state.stake_currency_decimals ?? 3,
+    );
     result.push({
-      label: enough ? 'Balance available' : 'Balance may be too low',
+      label: enough ? t('signals.balanceOk') : t('signals.balanceLow'),
       status: enough ? 'pass' : 'warn',
-      detail: `${formatPriceCurrency(free, state.stake_currency, state.stake_currency_decimals ?? 3)} free${
-        Number.isNaN(fixedStake) ? ' (stake: unlimited)' : `, stake per trade ${state.stake_amount}`
-      }.`,
+      detail: Number.isNaN(fixedStake)
+        ? t('signals.balanceUnlimited', { free: freeText })
+        : t('signals.balanceStake', { free: freeText, stake: state.stake_amount }),
     });
   }
   return result;
@@ -286,22 +304,22 @@ const verdict = computed<{ title: string; detail: string; tone: 'success' | 'neu
     const failing = checks.value.filter((c) => c.status === 'fail');
     if (failing.length === 0) {
       return {
-        title: 'Ready to enter',
-        detail: 'Every check passes - the bot should open a trade on its next loop.',
+        title: t('signals.ready'),
+        detail: t('signals.readyDetail'),
         tone: 'success',
       };
     }
-    const onlySignal = failing.length === 1 && failing[0]!.label === 'No entry signal';
+    const onlySignal = failing.length === 1 && failing[0]!.id === 'noSignal';
     if (onlySignal) {
       return {
-        title: 'Waiting for an entry signal',
-        detail: `Nothing blocks a trade - the strategy just has not signalled an entry yet. ${nextCheckText.value}`,
+        title: t('signals.waiting'),
+        detail: t('signals.waitingDetail', { next: nextCheckText.value }),
         tone: 'neutral',
       };
     }
-    const blockers = failing.filter((c) => c.label !== 'No entry signal');
+    const blockers = failing.filter((c) => c.id !== 'noSignal');
     return {
-      title: `Blocked: ${blockers[0]!.label.toLowerCase()}`,
+      title: t('signals.blocked', { what: blockers[0]!.label.toLowerCase() }),
       detail: blockers[0]!.detail,
       tone: 'error',
     };
@@ -352,21 +370,21 @@ const statusColor: Record<CheckStatus, string> = {
 </script>
 
 <template>
-  <div class="flex flex-col gap-3 p-3 text-left">
+  <div class="flex flex-col gap-3 p-3 text-start">
     <div class="flex items-center gap-2">
       <USelect
         v-model="pair"
         :items="botStore.activeBot.whitelist"
-        placeholder="Select a pair"
-        aria-label="Pair to inspect"
+        :placeholder="$t('signals.selectPair')"
+        :aria-label="$t('signals.pairToInspect')"
         class="min-w-0 flex-1"
       />
       <UButton
         color="neutral"
         variant="outline"
         icon="mdi:refresh"
-        aria-label="Re-check"
-        title="Re-check"
+        :aria-label="$t('signals.recheck')"
+        :title="$t('signals.recheck')"
         :loading="loading"
         :disabled="!pair"
         @click="refresh"
@@ -375,8 +393,8 @@ const statusColor: Record<CheckStatus, string> = {
 
     <EmptyState
       v-if="!pair"
-      title="Pick a pair"
-      description="Choose a pair to see whether the bot can enter it, and why not."
+      :title="$t('signals.pickPair')"
+      :description="$t('signals.pickPairHelp')"
       icon="mdi:radar"
     />
     <UAlert v-else-if="error" color="error" icon="mdi:alert-circle-outline" :title="error" />
@@ -416,7 +434,7 @@ const statusColor: Record<CheckStatus, string> = {
             :name="statusIcon[check.status]"
             class="mt-0.5 size-4 shrink-0"
             :class="statusColor[check.status]"
-            :aria-label="check.status"
+            :aria-label="$t(`signals.${check.status}`)"
           />
           <div class="min-w-0">
             <p class="text-sm font-medium text-highlighted">{{ check.label }}</p>
@@ -427,11 +445,20 @@ const statusColor: Record<CheckStatus, string> = {
 
       <!-- Signal history -->
       <section aria-labelledby="signal-history-heading" class="flex flex-col gap-2">
-        <h3 id="signal-history-heading" class="text-sm font-medium text-muted">Signal history</h3>
+        <h3 id="signal-history-heading" class="text-sm font-medium text-muted">
+          {{ $t('signals.history') }}
+        </h3>
         <div
           class="flex h-6 items-stretch gap-px"
           role="img"
-          :aria-label="`Last ${timeline.length} candles: ${timeline.filter((c) => c.enter).length} entry and ${timeline.filter((c) => c.exit).length} exit signals`"
+          dir="ltr"
+          :aria-label="
+            $t('signals.historyLabel', {
+              n: timeline.length,
+              entries: timeline.filter((c) => c.enter).length,
+              exits: timeline.filter((c) => c.exit).length,
+            })
+          "
         >
           <span
             v-for="candle in timeline"
@@ -449,46 +476,60 @@ const statusColor: Record<CheckStatus, string> = {
             :title="candle.label"
           />
         </div>
-        <div class="flex justify-between text-xs text-muted">
-          <span>{{ timeline.length }} candles ago</span>
+        <div class="flex justify-between text-xs text-muted" dir="ltr">
+          <span>{{ $t('signals.candlesAgo', { n: timeline.length }) }}</span>
           <span class="flex items-center gap-3">
             <span class="flex items-center gap-1"
-              ><span class="size-2 rounded-[2px] bg-(--color-profit)" />Entry</span
+              ><span class="size-2 rounded-[2px] bg-(--color-profit)" />{{
+                $t('signals.entry')
+              }}</span
             >
             <span class="flex items-center gap-1"
-              ><span class="size-2 rounded-[2px] bg-(--color-loss)" />Exit</span
+              ><span class="size-2 rounded-[2px] bg-(--color-loss)" />{{ $t('signals.exit') }}</span
             >
           </span>
-          <span>Latest</span>
+          <span>{{ $t('signals.latest') }}</span>
         </div>
         <p class="text-sm text-muted">
-          <template v-if="lastEntrySignal">
-            Last entry signal
-            <strong class="text-highlighted">{{
-              lastEntrySignal.candlesAgo === 0
-                ? 'on the latest candle'
-                : `${lastEntrySignal.candlesAgo} candle${lastEntrySignal.candlesAgo === 1 ? '' : 's'} ago`
-            }}</strong>
-            ({{ timestampms(lastEntrySignal.ts)
-            }}{{ lastEntrySignal.tag ? `, ${lastEntrySignal.tag}` : '' }}).
-          </template>
-          <template v-else>
-            <strong class="text-highlighted">No entry signal</strong> in the last
-            {{ rows.length }} candles ({{ timeframe }}).
-          </template>
+          <I18nT
+            v-if="lastEntrySignal"
+            :keypath="lastEntrySignal.tag ? 'signals.lastEntryTag' : 'signals.lastEntry'"
+            scope="global"
+          >
+            <template #when>
+              <strong class="text-highlighted">{{
+                lastEntrySignal.candlesAgo === 0
+                  ? $t('signals.onLatest')
+                  : $t(
+                      'signals.nCandlesAgo',
+                      { n: lastEntrySignal.candlesAgo },
+                      lastEntrySignal.candlesAgo,
+                    )
+              }}</strong>
+            </template>
+            <template #time>{{ timestampms(lastEntrySignal.ts) }}</template>
+            <template #tag>{{ lastEntrySignal.tag }}</template>
+          </I18nT>
+          <I18nT v-else keypath="signals.noSignalIn" scope="global">
+            <template #none>
+              <strong class="text-highlighted">{{ $t('signals.noSignal') }}</strong>
+            </template>
+            <template #n>{{ rows.length }}</template>
+            <template #timeframe>{{ timeframe }}</template>
+          </I18nT>
         </p>
       </section>
 
       <!-- Indicators -->
-      <BaseCollapsible :title="`Indicators on the latest candle (${indicators.length})`">
+      <BaseCollapsible :title="$t('signals.indicators', { n: indicators.length })">
         <div class="flex flex-col gap-2 p-2">
           <UInput
             v-model="indicatorFilter"
             type="search"
             icon="mdi:magnify"
             size="sm"
-            placeholder="Filter indicators"
-            aria-label="Filter indicators"
+            :placeholder="$t('signals.filterIndicators')"
+            :aria-label="$t('signals.filterIndicators')"
           />
           <dl class="divide-y divide-default text-sm">
             <div
@@ -507,26 +548,29 @@ const statusColor: Record<CheckStatus, string> = {
                   v-if="ind.change !== 0"
                   :name="ind.change > 0 ? 'mdi:arrow-up' : 'mdi:arrow-down'"
                   class="size-3.5 text-muted"
-                  :aria-label="
-                    ind.change > 0 ? 'up from previous candle' : 'down from previous candle'
-                  "
+                  :aria-label="ind.change > 0 ? $t('signals.up') : $t('signals.down')"
                 />
               </dd>
             </div>
           </dl>
           <p v-if="indicators.length === 0" class="py-2 text-center text-sm text-muted">
-            No matching indicators.
+            {{ $t('signals.noIndicators') }}
           </p>
         </div>
       </BaseCollapsible>
 
       <p class="text-xs text-muted">
-        Latest closed candle {{ latestCandleTs ? timestampms(latestCandleTs) : '–' }}
+        {{ $t('signals.footLatest', { time: latestCandleTs ? timestampms(latestCandleTs) : '–' }) }}
         <template v-if="analysis.last_analyzed_ts">
-          · analyzed {{ ago(now.getTime() - analysis.last_analyzed_ts * 1000) }} ago
+          {{
+            $t('signals.footAnalyzed', {
+              ago: ago(now.getTime() - analysis.last_analyzed_ts * 1000),
+            })
+          }}
         </template>
-        · rechecks every minute. Exchange minimums and strategy callbacks such as
-        <code>confirm_trade_entry</code> can still prevent a trade.
+        <I18nT keypath="signals.footRest" scope="global">
+          <template #fn><code>confirm_trade_entry</code></template>
+        </I18nT>
       </p>
     </template>
   </div>

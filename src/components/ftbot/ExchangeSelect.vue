@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ExchangeSelection } from '@/types';
 import type { SelectMenuItem } from '@nuxt/ui';
+import { t } from '@/i18n';
 
 const exchangeModel = defineModel<ExchangeSelection>({ required: true });
 
@@ -17,11 +18,11 @@ const exchangeList = computed<SelectMenuItem[]>(() => {
 
   return [
     [
-      { label: 'Supported', type: 'label' },
+      { label: t('selectors.supported'), type: 'label' },
       ...supported.map((e) => ({ value: e.classname ?? e.name, label: e.name })),
     ],
     [
-      { label: 'Unsupported', type: 'label' },
+      { label: t('selectors.unsupported'), type: 'label' },
       ...unsupported.map((e) => ({ value: e.classname ?? e.name, label: e.name })),
     ],
   ];

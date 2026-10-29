@@ -7,7 +7,7 @@ defineEmits<{
 </script>
 
 <template>
-  <UModal :title="`Custom data for trade ${tradeId}`" description="">
+  <UModal :title="$t('tradeActions.customDataTitle', { id: tradeId })" description="">
     <template #body>
       <TradeCustomData :trade-id="tradeId" />
     </template>

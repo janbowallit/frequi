@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { metricLabel, t } from '@/i18n';
 import type { ExitReasonResults, PairResult } from '@/types';
 
 type ResultsType = PairResult | ExitReasonResults;
@@ -66,6 +67,11 @@ const metrics = computed(() =>
   ),
 );
 
+/** The selectable metric columns, named in the UI language */
+const metricItems = computed(() =>
+  availableBacktestMetrics.value.map((m) => ({ ...m, header: metricLabel(m.header) })),
+);
+
 const tableColumns = computed(() => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const cols: any[] = [];
@@ -80,31 +86,31 @@ const tableColumns = computed(() => {
   });
 
   // Fixed metric columns
-  cols.push({ accessorKey: 'trades', header: 'Trades' });
+  cols.push({ accessorKey: 'trades', header: t('backtest.trades') });
   cols.push({
     id: 'profit_mean',
-    header: 'Avg Profit %',
+    header: t('backtest.avgProfit'),
     cell: ({ row }) => formatPercent(row.original.profit_mean, 2),
   });
   cols.push({
     id: 'profit_total_abs',
-    header: `Tot Profit ${props.stakeCurrency}`,
+    header: t('backtest.totProfitIn', { currency: props.stakeCurrency }),
     cell: ({ row }) => formatPrice(row.original.profit_total_abs, props.stakeCurrencyDecimals),
   });
   cols.push({
     id: 'profit_total',
-    header: 'Tot Profit %',
+    header: t('backtest.totProfit'),
     cell: ({ row }) => formatPercent(row.original.profit_total, 2),
   });
-  cols.push({ accessorKey: 'wins', header: 'Wins' });
-  cols.push({ accessorKey: 'draws', header: 'Draws' });
-  cols.push({ accessorKey: 'losses', header: 'Losses' });
+  cols.push({ accessorKey: 'wins', header: t('backtest.wins') });
+  cols.push({ accessorKey: 'draws', header: t('backtest.draws') });
+  cols.push({ accessorKey: 'losses', header: t('backtest.losses') });
 
   // Dynamic additional metric columns
   metrics.value.forEach((col) => {
     cols.push({
       accessorKey: col.field,
-      header: col.header,
+      header: metricLabel(col.header),
       cell: ({ row }) =>
         col.is_ratio
           ? formatPercent(row.original[col.field as keyof ResultsTypeWithKey] as number, 2)
@@ -121,11 +127,11 @@ const tableColumns = computed(() => {
       <USelectMenu
         v-model="settingsStore.backtestAdditionalMetrics"
         multiple
-        :items="availableBacktestMetrics"
+        :items="metricItems"
         label-key="header"
         value-key="field"
-        placeholder="Columns"
-        aria-label="Columns to show"
+        :placeholder="$t('backtest.columns')"
+        :aria-label="$t('backtest.columnsLabel')"
         size="sm"
         class="w-48"
         icon="mdi:table-column"

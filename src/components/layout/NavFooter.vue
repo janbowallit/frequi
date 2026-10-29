@@ -2,19 +2,19 @@
 const botStore = useBotStore();
 
 const tabs = [
-  { to: '/trade', label: 'Trade', icon: 'mdi:swap-horizontal' },
-  { to: '/dashboard', label: 'Dashboard', icon: 'mdi:view-dashboard-outline' },
-  { to: '/graph', label: 'Chart', icon: 'mdi:chart-line' },
-  { to: '/logs', label: 'Logs', icon: 'mdi:text-box-outline' },
-  { to: '/settings', label: 'Settings', icon: 'mdi:cog-outline' },
-];
+  { to: '/trade', label: 'nav.trade', icon: 'mdi:swap-horizontal' },
+  { to: '/dashboard', label: 'nav.dashboard', icon: 'mdi:view-dashboard-outline' },
+  { to: '/graph', label: 'nav.chart', icon: 'mdi:chart-line' },
+  { to: '/logs', label: 'nav.logs', icon: 'mdi:text-box-outline' },
+  { to: '/settings', label: 'nav.settings', icon: 'mdi:cog-outline' },
+] as const;
 </script>
 
 <template>
   <!-- Only visible on phone-sized screens -->
   <nav
     v-if="!botStore.canRunBacktest"
-    aria-label="Quick navigation"
+    :aria-label="$t('nav.quick')"
     class="border-t border-default bg-default pb-[env(safe-area-inset-bottom)] md:hidden"
   >
     <ul class="grid grid-cols-5">
@@ -29,7 +29,7 @@ const tabs = [
           >
             <UIcon :name="tab.icon" class="size-5" aria-hidden="true" />
           </span>
-          {{ tab.label }}
+          {{ $t(tab.label) }}
         </RouterLink>
       </li>
     </ul>

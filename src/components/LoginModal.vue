@@ -20,8 +20,8 @@ function loginResult(result: boolean) {
 
 <template>
   <UModal
-    :title="loginInfo ? 'Sign in to your bot' : 'Connect a bot'"
-    description="Use the API credentials from the bot's configuration."
+    :title="loginInfo ? $t('loginForm.modalTitleEdit') : $t('loginForm.modalTitleNew')"
+    :description="$t('loginForm.modalDescription')"
   >
     <template #body>
       <BotLogin in-modal :existing-auth="loginInfo" @login-result="loginResult" />

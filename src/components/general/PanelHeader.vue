@@ -9,7 +9,7 @@ defineProps<{
 </script>
 
 <template>
-  <div class="flex flex-col gap-2 border-b border-default px-3 py-2 text-left">
+  <div class="flex flex-col gap-2 border-b border-default px-3 py-2 text-start">
     <div class="flex min-h-8 items-center gap-2">
       <div class="me-auto min-w-0">
         <h3 class="truncate text-sm font-semibold text-highlighted">

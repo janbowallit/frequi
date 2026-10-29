@@ -1,3 +1,4 @@
+import { t } from '@/i18n';
 import type { BackgroundTaskStatus } from '@/types';
 import type { ShowAlertType } from '@/utils/alerts';
 import type { AxiosInstance } from 'axios';
@@ -28,7 +29,7 @@ function startBgJob(api: AxiosInstance, showAlert: ShowAlertType, jobId: string,
       jobs.value[jobId] = { ...jobs.value[jobId]!, taskStatus: result.value };
     } catch (error) {
       console.error(error);
-      showAlert('Failed to get background job status', 'error');
+      showAlert(t('alerts.jobStatusFailed'), 'error');
       clearJobFromRunningList();
     }
   }, 500);

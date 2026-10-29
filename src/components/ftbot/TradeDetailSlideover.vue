@@ -19,8 +19,12 @@ const open = computed({
 <template>
   <USlideover
     v-model:open="open"
-    :title="bot?.tradeDetail ? `${bot.tradeDetail.pair} trade` : 'Trade'"
-    description="Trade details"
+    :title="
+      bot?.tradeDetail
+        ? $t('trades.detailTitle', { pair: bot.tradeDetail.pair })
+        : $t('trades.trade')
+    "
+    :description="$t('trades.details')"
     :ui="{ content: 'sm:max-w-md', description: 'sr-only' }"
     :close="{ color: 'neutral', variant: 'ghost' }"
   >

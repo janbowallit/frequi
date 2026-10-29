@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { TabsItem } from '@nuxt/ui';
 import { breakpointsTailwind } from '@vueuse/core';
+import { t } from '@/i18n';
 
 const botStore = useBotStore();
 
@@ -20,40 +21,40 @@ watch(isDesktop, (desktop) => {
 });
 
 const tradingTabItems = computed<TabsItem[]>(() => [
-  ...(isDesktop.value ? [] : [{ slot: 'pairs', value: 'pairs', label: 'Pairs' }]),
+  ...(isDesktop.value ? [] : [{ slot: 'pairs', value: 'pairs', label: t('trade.pairs') }]),
   {
     slot: 'open-trades',
     value: 'open-trades',
-    label: 'Open trades',
+    label: t('trade.openTrades'),
     badge: botStore.activeBot.openTradeCount || undefined,
   },
-  { slot: 'exit-plan', value: 'exit-plan', label: 'Exit plan' },
-  { slot: 'closed-trades', value: 'closed-trades', label: 'Closed trades' },
-  { slot: 'next-entry', value: 'next-entry', label: 'Next entry' },
-  { slot: 'signals', value: 'signals', label: 'Why no trade?' },
-  { slot: 'performance', value: 'performance', label: 'Performance' },
-  { slot: 'time-breakdown', value: 'time-breakdown', label: 'Profit by period' },
-  { slot: 'balance', value: 'balance', label: 'Balance' },
-  { slot: 'pairlist', value: 'pairlist', label: 'Pairlist' },
-  { slot: 'pair-locks', value: 'pair-locks', label: 'Locks' },
-  { slot: 'general', value: 'general', label: 'Bot status' },
+  { slot: 'exit-plan', value: 'exit-plan', label: t('trade.exitPlan') },
+  { slot: 'closed-trades', value: 'closed-trades', label: t('trade.closedTrades') },
+  { slot: 'next-entry', value: 'next-entry', label: t('trade.nextEntry') },
+  { slot: 'signals', value: 'signals', label: t('trade.whyNoTrade') },
+  { slot: 'performance', value: 'performance', label: t('trade.performance') },
+  { slot: 'time-breakdown', value: 'time-breakdown', label: t('trade.profitByPeriod') },
+  { slot: 'balance', value: 'balance', label: t('trade.balance') },
+  { slot: 'pairlist', value: 'pairlist', label: t('trade.pairlist') },
+  { slot: 'pair-locks', value: 'pair-locks', label: t('trade.locks') },
+  { slot: 'general', value: 'general', label: t('trade.botStatus') },
 ]);
 </script>
 
 <template>
   <div
-    class="flex min-h-full flex-col text-left lg:grid lg:h-full lg:grid-cols-[18.5rem_minmax(0,1fr)]"
+    class="flex min-h-full flex-col text-start lg:grid lg:h-full lg:grid-cols-[18.5rem_minmax(0,1fr)]"
   >
     <!-- Rail: controls and pairs -->
     <aside
-      aria-label="Bot"
+      :aria-label="$t('common.bot')"
       class="flex flex-col border-b border-default bg-default lg:min-h-0 lg:border-e lg:border-b-0"
     >
       <div class="border-default p-4 lg:border-b">
         <BotControls />
       </div>
       <template v-if="isDesktop">
-        <h2 class="px-4 pt-3 text-sm font-semibold text-highlighted">Pairs</h2>
+        <h2 class="px-4 pt-3 text-sm font-semibold text-highlighted">{{ $t('trade.pairs') }}</h2>
         <div class="min-h-0 flex-1 overflow-auto">
           <PairSummary
             :pairlist="botStore.activeBot.whitelist"
@@ -67,7 +68,7 @@ const tradingTabItems = computed<TabsItem[]>(() => [
     <!-- Main: chart, then everything else in tabs -->
     <div class="flex min-w-0 flex-col lg:min-h-0 lg:overflow-auto">
       <section
-        aria-label="Chart"
+        :aria-label="$t('trade.chart')"
         class="h-[45vh] min-h-80 shrink-0 border-b border-default bg-default lg:h-[58vh] lg:min-h-96"
       >
         <CandleChartContainer
@@ -103,9 +104,9 @@ const tradingTabItems = computed<TabsItem[]>(() => [
         <template #open-trades>
           <TradeList
             :trades="botStore.activeBot.openTrades"
-            title="Open trades"
+            :title="$t('trade.openTrades')"
             :active-trades="true"
-            empty-text="No open trades"
+            :empty-text="$t('trade.noOpenTrades')"
           />
         </template>
         <template #exit-plan>
@@ -114,9 +115,9 @@ const tradingTabItems = computed<TabsItem[]>(() => [
         <template #closed-trades>
           <TradeList
             :trades="botStore.activeBot.closedTrades"
-            title="Closed trades"
+            :title="$t('trade.closedTrades')"
             :show-filter="true"
-            empty-text="No closed trades yet"
+            :empty-text="$t('trade.noClosedTrades')"
           />
         </template>
         <template #next-entry>

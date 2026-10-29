@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ComboboxInput } from 'reka-ui';
+import { t } from '@/i18n';
 
 const props = withDefaults(
   defineProps<{
@@ -10,8 +11,8 @@ const props = withDefaults(
     virtualize?: boolean | Record<string, unknown>;
   }>(),
   {
-    placeholder: 'Select items',
-    searchPlaceholder: 'Search...',
+    placeholder: undefined,
+    searchPlaceholder: undefined,
     size: 'md',
     virtualize: false,
   },
@@ -59,7 +60,7 @@ function toggleFilteredItems() {
     v-model:search-term="searchTerm"
     multiple
     :items="items"
-    :placeholder="placeholder"
+    :placeholder="placeholder ?? t('general.selectItems')"
     :search-input="false"
     :size="size"
     :virtualize="virtualize"
@@ -71,7 +72,7 @@ function toggleFilteredItems() {
             autofocus
             autocomplete="off"
             class="w-full"
-            :placeholder="searchPlaceholder"
+            :placeholder="searchPlaceholder ?? t('general.searchEllipsis')"
             :size="size"
             data-slot="input"
             variant="none"
@@ -84,6 +85,7 @@ function toggleFilteredItems() {
           :disabled="filteredItems.length === 0"
           @click.stop="toggleFilteredItems"
           icon="mdi:check"
+          :aria-label="t('general.selectAllMatching')"
         />
       </div>
     </template>

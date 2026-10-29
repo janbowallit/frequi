@@ -18,7 +18,7 @@ const plotStore = usePlotConfigStore();
     :allow-edit="allowEdit"
     :allow-add="allowEdit"
     :allow-duplicate="allowEdit"
-    editable-name="plot configuration"
+    :editable-name="$t('plotConfig.editableName')"
     @rename="plotStore.renamePlotConfig"
     @delete="plotStore.deletePlotConfig"
     @new="plotStore.newPlotConfig"
@@ -28,7 +28,7 @@ const plotStore = usePlotConfigStore();
       id="plotConfigSelect"
       v-model="plotStore.plotConfigName"
       :items="plotStore.availablePlotConfigNames"
-      class="w-full text-left"
+      class="w-full text-start"
       @update:model-value="plotStore.plotConfigChanged"
     >
     </USelect>

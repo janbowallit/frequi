@@ -13,12 +13,12 @@ const props = withDefaults(
     stakeCurrencyDecimals?: number;
   }>(),
   {
-    title: 'Trades',
+    title: undefined,
     stakeCurrency: '',
     activeTrades: false,
     showFilter: false,
     multiBotView: false,
-    emptyText: 'No trades to show',
+    emptyText: undefined,
     stakeCurrencyDecimals: 3,
   },
 );
@@ -52,7 +52,7 @@ const tradeClick = (trade) => {
     </div>
     <EmptyState
       v-if="trades.length === 0"
-      :title="emptyText"
+      :title="emptyText ?? $t('trades.empty')"
       :icon="activeTrades ? 'mdi:swap-horizontal' : 'mdi:history'"
     />
 
@@ -67,7 +67,12 @@ const tradeClick = (trade) => {
         :items-per-page="perPage"
         aria-controls="tradeList"
       />
-      <UInput v-if="showFilter" v-model="filterText" type="text" placeholder="Filter" />
+      <UInput
+        v-if="showFilter"
+        v-model="filterText"
+        type="text"
+        :placeholder="$t('tradeActions.filter')"
+      />
     </div>
   </div>
 </template>

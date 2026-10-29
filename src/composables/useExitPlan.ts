@@ -1,3 +1,4 @@
+import { t } from '@/i18n';
 import type { Trade } from '@/types';
 
 /**
@@ -26,15 +27,15 @@ export interface TradeExitPlan {
 }
 
 /** Plain-language text for the exit levels BitpinBreakout publishes */
-const KNOWN: Record<string, { label: string; help: string }> = {
+const KNOWN: Record<string, { label: () => string; help: () => string }> = {
   channel_low: {
-    label: 'Exit line',
-    help: 'Sells when a candle closes below the lowest close of the last 48 hours.',
+    label: () => t('exitPlan.exitLine'),
+    help: () => t('exitPlan.exitLineHelp'),
   },
 };
 
 function label(key: string) {
-  if (KNOWN[key]) return KNOWN[key].label;
+  if (KNOWN[key]) return KNOWN[key].label();
   const text = key.replaceAll('_', ' ');
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
@@ -54,7 +55,7 @@ export function useExitPlan() {
       const lines = (analysis?.exits ?? []).map((e) => ({
         key: e.key,
         label: label(e.key),
-        help: KNOWN[e.key]?.help ?? null,
+        help: KNOWN[e.key]?.help() ?? null,
         price: e.price,
         fromNow: move(current, e.price),
       }));

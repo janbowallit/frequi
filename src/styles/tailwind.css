@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import '@nuxt/ui';
 @import '@fontsource-variable/instrument-sans/wdth.css';
+@import '@fontsource-variable/vazirmatn/index.css';
 @import '@fontsource/jetbrains-mono/400.css';
 @import '@fontsource/jetbrains-mono/500.css';
 
@@ -36,8 +37,10 @@
   --color-graphite-900: #1d222b;
   --color-graphite-950: #15181d;
 
+  /* Vazirmatn draws Persian; it only downloads when Persian text is on screen */
   --font-sans:
-    'Instrument Sans Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    'Instrument Sans Variable', 'Vazirmatn Variable', ui-sans-serif, system-ui, -apple-system,
+    'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 }
 
@@ -152,4 +155,9 @@ body.ft-theme-transition *:after {
   background-color: var(--ui-bg);
   border: 1px solid var(--ui-border);
   border-radius: var(--app-panel-radius);
+}
+
+/* Charts keep left-to-right axes and labels in the Persian (right-to-left) UI */
+[dir='rtl'] .echarts {
+  direction: ltr;
 }

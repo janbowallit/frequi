@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { en as uiEn, fa_ir as uiFa } from '@nuxt/ui/locale';
+import { applyLocale, isLocale } from '@/i18n';
+
 const settingsStore = useSettingsStore();
 const botStore = useBotStore();
 const colorStore = useColorStore();
@@ -15,6 +18,13 @@ watch(
   },
   { immediate: true },
 );
+// The chosen language drives the messages, <html lang/dir> and Nuxt UI's own labels
+watch(
+  () => settingsStore.locale,
+  (code) => applyLocale(isLocale(code) ? code : 'en'),
+  { immediate: true },
+);
+const uiLocale = computed(() => (settingsStore.locale === 'fa' ? uiFa : uiEn));
 onMounted(() => {
   setTimezone(settingsStore.timezone);
   colorStore.updateProfitLossColor();
@@ -29,7 +39,7 @@ watch(
 </script>
 
 <template>
-  <UApp>
+  <UApp :locale="uiLocale">
     <div id="app" class="flex flex-col h-dvh">
       <NavBar v-if="showAppChrome" />
       <StatusStrip v-if="showAppChrome && botStore.hasBots" />

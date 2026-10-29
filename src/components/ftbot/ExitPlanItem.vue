@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { TradeExitPlan } from '@/composables/useExitPlan';
 import { fmtEntryPrice, fmtGap } from '@/composables/useNextEntry';
+import { t } from '@/i18n';
 
 /** Where one open trade will be sold, with a price ruler: stop, exit lines, entry and now */
 const props = withDefaults(
@@ -20,7 +21,7 @@ function pct(ratio: number | null) {
   return ratio === null ? '' : fmtGap(ratio * 100);
 }
 
-const below = computed(() => (props.plan.trade.is_short ? 'above' : 'below'));
+const isShort = computed(() => props.plan.trade.is_short);
 
 /** Ruler positions in % of the width, with some room on both sides */
 const ruler = computed(() => {
@@ -42,9 +43,9 @@ const ruler = computed(() => {
   const nearest = levels.length ? (p.trade.is_short ? Math.min : Math.max)(...levels) : null;
   // Labels under the ruler, dropping one that would overlap a more important one
   const candidates = [
-    ...(p.stop ? [{ key: 'stop', text: 'Stop', at: pos(p.stop.price) }] : []),
+    ...(p.stop ? [{ key: 'stop', text: t('exitPlan.stop'), at: pos(p.stop.price) }] : []),
     ...p.lines.map((l) => ({ key: l.key, text: l.label, at: pos(l.price) })),
-    { key: 'bought', text: 'Bought', at: pos(p.trade.open_rate) },
+    { key: 'bought', text: t('exitPlan.bought'), at: pos(p.trade.open_rate) },
   ];
   const labels: typeof candidates = [];
   for (const c of candidates) {
@@ -60,20 +61,26 @@ function labelShift(at: number) {
 </script>
 
 <template>
-  <div class="flex flex-col gap-3 text-left">
+  <div class="flex flex-col gap-3 text-start">
     <div v-if="showHeader" class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
       <div class="min-w-0">
         <button
           type="button"
           class="rounded-sm text-base font-semibold text-highlighted hover:text-primary"
-          :title="`Show trade #${plan.trade.trade_id}`"
+          :title="$t('exitPlan.showTrade', { id: plan.trade.trade_id })"
           @click="emit('select', plan.trade.trade_id)"
         >
           {{ plan.trade.pair }}
         </button>
         <p class="text-sm text-muted tabular-nums">
-          Bought at {{ fmtEntryPrice(plan.trade.open_rate)
-          }}<template v-if="plan.current">, now {{ fmtEntryPrice(plan.current) }}</template>
+          {{
+            plan.current
+              ? $t('exitPlan.boughtAtNow', {
+                  price: fmtEntryPrice(plan.trade.open_rate),
+                  now: fmtEntryPrice(plan.current),
+                })
+              : $t('exitPlan.boughtAt', { price: fmtEntryPrice(plan.trade.open_rate) })
+          }}
         </p>
       </div>
       <TradeProfit :trade="plan.trade" />
@@ -83,7 +90,7 @@ function labelShift(at: number) {
       v-if="plan.exitSignal"
       class="rounded-md border-s-2 border-(--color-loss) bg-(--color-loss)/8 px-3 py-2 text-sm font-medium text-highlighted"
     >
-      The latest candle closed {{ below }} the exit line. The bot is selling this trade.
+      {{ isShort ? $t('exitPlan.sellingAbove') : $t('exitPlan.sellingBelow') }}
     </p>
 
     <!-- Ruler -->
@@ -91,7 +98,8 @@ function labelShift(at: number) {
       v-if="plan.current"
       class="relative mx-1 h-12 text-[11px] text-muted"
       role="img"
-      :aria-label="`Price ruler for ${plan.trade.pair}: sell levels on the left, the current price as a dot`"
+      dir="ltr"
+      :aria-label="$t('exitPlan.rulerLabel', { pair: plan.trade.pair })"
     >
       <span
         class="absolute top-0 font-medium whitespace-nowrap text-highlighted"
@@ -99,7 +107,7 @@ function labelShift(at: number) {
           left: `${ruler.pos(plan.current)}%`,
           transform: `translateX(${labelShift(ruler.pos(plan.current))})`,
         }"
-        >Now</span
+        >{{ $t('exitPlan.now') }}</span
       >
       <span
         v-for="l in ruler.labels"
@@ -116,13 +124,13 @@ function labelShift(at: number) {
           left: `${Math.min(ruler.pos(ruler.nearest), ruler.pos(plan.current))}%`,
           width: `${Math.abs(ruler.pos(plan.current) - ruler.pos(ruler.nearest))}%`,
         }"
-        title="Room before the trade is sold"
+        :title="$t('exitPlan.room')"
       />
       <span
         v-if="plan.stop"
         class="absolute top-4 h-4 w-0.5 -translate-x-1/2 bg-(--color-loss)"
         :style="{ left: `${ruler.pos(plan.stop.price)}%` }"
-        :title="`Stoploss ${fmtEntryPrice(plan.stop.price)}`"
+        :title="$t('exitPlan.stoploss', { price: fmtEntryPrice(plan.stop.price) })"
       />
       <span
         v-for="l in plan.lines"
@@ -134,12 +142,12 @@ function labelShift(at: number) {
       <span
         class="absolute top-4.5 h-3 w-0.5 -translate-x-1/2 bg-(--ui-text-muted)"
         :style="{ left: `${ruler.pos(plan.trade.open_rate)}%` }"
-        :title="`Bought at ${fmtEntryPrice(plan.trade.open_rate)}`"
+        :title="$t('exitPlan.boughtAt', { price: fmtEntryPrice(plan.trade.open_rate) })"
       />
       <span
         class="absolute top-6 size-3 -translate-1/2 rounded-full bg-(--ui-text-highlighted) ring-2 ring-(--ui-bg)"
         :style="{ left: `${ruler.pos(plan.current)}%` }"
-        :title="`Now ${fmtEntryPrice(plan.current)}`"
+        :title="$t('exitPlan.nowAt', { price: fmtEntryPrice(plan.current) })"
       />
     </div>
 
@@ -154,14 +162,19 @@ function labelShift(at: number) {
             <span class="font-medium text-highlighted"
               >{{ l.label }} {{ fmtEntryPrice(l.price) }}</span
             >
-            <span v-if="l.fromNow !== null" class="ms-1.5 text-muted"
-              >{{ pct(l.fromNow) }} from now</span
-            >
+            <span v-if="l.fromNow !== null" class="ms-1.5 text-muted">{{
+              $t('exitPlan.fromNow', { pct: pct(l.fromNow) })
+            }}</span>
           </p>
           <p class="text-muted">
-            {{ l.help ?? `Sells when a candle closes ${below} this level.` }}
+            {{ l.help ?? (isShort ? $t('exitPlan.sellsAbove') : $t('exitPlan.sellsBelow')) }}
             <template v-if="plan.nextCheck">
-              Next check {{ fmtTime(plan.nextCheck) }} ({{ untilText(plan.nextCheck) }}).
+              {{
+                $t('exitPlan.nextCheck', {
+                  time: fmtTime(plan.nextCheck),
+                  until: untilText(plan.nextCheck),
+                })
+              }}
             </template>
           </p>
         </div>
@@ -170,16 +183,15 @@ function labelShift(at: number) {
         <span class="mt-1 h-3.5 w-0.5 shrink-0 bg-(--color-loss)" aria-hidden="true" />
         <div class="min-w-0">
           <p class="tabular-nums">
-            <span class="font-medium text-highlighted"
-              >Stoploss {{ fmtEntryPrice(plan.stop.price) }}</span
-            >
-            <span v-if="plan.stop.fromNow !== null" class="ms-1.5 text-muted"
-              >{{ pct(plan.stop.fromNow) }} from now</span
-            >
+            <span class="font-medium text-highlighted">{{
+              $t('exitPlan.stoploss', { price: fmtEntryPrice(plan.stop.price) })
+            }}</span>
+            <span v-if="plan.stop.fromNow !== null" class="ms-1.5 text-muted">{{
+              $t('exitPlan.fromNow', { pct: pct(plan.stop.fromNow) })
+            }}</span>
           </p>
           <p class="text-muted">
-            Sells right away if the price reaches it ({{ pct(plan.stop.fromEntry) }} from the entry
-            price). Checked every few seconds, not just at candle close.
+            {{ $t('exitPlan.stopHelp', { pct: pct(plan.stop.fromEntry) }) }}
           </p>
         </div>
       </li>

@@ -2,6 +2,8 @@ import axios from 'axios';
 import { TimeSummaryCols, TimeSummaryOptions } from '@/types';
 import type { ThemeName, UiVersion } from '@/types';
 import { FtWsMessageTypes } from '@/types/wsMessageTypes';
+import { browserLocale } from '@/i18n';
+import type { LocaleCode } from '@/i18n';
 
 export enum OpenTradeVizOptions {
   showPill = 'showPill',
@@ -20,6 +22,7 @@ export const useSettingsStore = defineStore('uiSettings', {
   // other options...
   state: () => {
     return {
+      locale: browserLocale() as LocaleCode,
       openTradesInTitle: OpenTradeVizOptions.showPill as OpenTradeVizOptions,
       timezone: 'UTC',
       backgroundSync: true,

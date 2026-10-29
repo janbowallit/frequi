@@ -104,7 +104,7 @@ onMounted(() => {
 <template>
   <div>
     <div class="grid grid-cols-2 gap-3">
-      <UFormField label="Start date">
+      <UFormField :label="$t('selectors.startDate')">
         <UInput id="dateFrom" v-model="dateFromText" placeholder="yyyy-mm-dd" class="flex-1">
           <template #trailing>
             <UButton
@@ -113,7 +113,7 @@ onMounted(() => {
               color="neutral"
               variant="ghost"
               size="xs"
-              title="Clear start date"
+              :title="$t('selectors.clearStart')"
               @click="dateFromText = ''"
             />
             <UPopover v-model:open="popoverFromOpen">
@@ -129,8 +129,13 @@ onMounted(() => {
           </template>
         </UInput>
       </UFormField>
-      <UFormField label="End date">
-        <UInput id="dateTo" v-model="dateToText" placeholder="Today" class="flex-1">
+      <UFormField :label="$t('selectors.endDate')">
+        <UInput
+          id="dateTo"
+          v-model="dateToText"
+          :placeholder="$t('selectors.today')"
+          class="flex-1"
+        >
           <template #trailing>
             <UButton
               v-if="dateToText"
@@ -138,7 +143,7 @@ onMounted(() => {
               color="neutral"
               variant="ghost"
               size="xs"
-              title="Clear end date"
+              :title="$t('selectors.clearEnd')"
               @click="dateToText = ''"
             />
             <UPopover v-model:open="popoverToOpen">
@@ -157,7 +162,11 @@ onMounted(() => {
     </div>
 
     <p class="mt-1.5 text-start text-xs text-muted">
-      Time range <span class="font-medium text-default tabular-nums">{{ timeRange }}</span>
+      <I18nT keypath="selectors.timeRange" scope="global">
+        <template #range>
+          <span class="font-medium text-default tabular-nums">{{ timeRange }}</span>
+        </template>
+      </I18nT>
     </p>
   </div>
 </template>

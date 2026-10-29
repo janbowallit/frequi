@@ -64,19 +64,21 @@ function stopEditBot(botId: string) {
 
 <template>
   <div v-if="botStore.botCount > 0" class="w-full">
-    <h3 v-if="!small && !embedded" class="mb-2 text-lg font-semibold">Available bots</h3>
+    <h3 v-if="!small && !embedded" class="mb-2 text-lg font-semibold">
+      {{ $t('bots.available') }}
+    </h3>
     <ul ref="sortContainer" class="panel flex flex-col divide-y divide-default overflow-hidden">
       <li
         v-for="bot in botListComp"
         :key="bot.botId"
         :title="`${bot.botId} - ${bot.botName} - ${bot.botUrl} - ${
-          botStore.botStores[bot.botId]?.isBotLoggedIn ? '' : 'Login info expired!'
+          botStore.botStores[bot.botId]?.isBotLoggedIn ? '' : $t('bots.loginExpiredTitle')
         }`"
         tabindex="0"
         :aria-current="bot.botId === botStore.selectedBot ? 'true' : undefined"
-        class="flex cursor-pointer items-center gap-2 px-3 py-2.5 text-left transition-colors duration-150 hover:bg-elevated/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
+        class="flex cursor-pointer items-center gap-2 px-3 py-2.5 text-start transition-colors duration-150 hover:bg-elevated/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
         :class="{
-          'bg-primary/10 font-semibold shadow-[inset_3px_0_0_var(--ui-primary)]':
+          'bg-primary/10 font-semibold shadow-[inset_3px_0_0_var(--ui-primary)] rtl:shadow-[inset_-3px_0_0_var(--ui-primary)]':
             bot.botId === botStore.selectedBot,
         }"
         @click="botStore.selectBot(bot.botId)"
@@ -86,7 +88,7 @@ function stopEditBot(botId: string) {
           v-if="!small"
           class="handle size-5 shrink-0 cursor-grab text-dimmed"
           aria-hidden="true"
-          title="Drag to reorder"
+          :title="$t('bots.dragToReorder')"
         />
         <BotRename
           v-if="editingBots.includes(bot.botId)"
@@ -111,7 +113,7 @@ function stopEditBot(botId: string) {
       class="mt-3"
       @click="loginDialog({})"
       icon="mdi:plus"
-      label="Add new Bot"
+      :label="$t('bots.addNew')"
     />
   </div>
 </template>

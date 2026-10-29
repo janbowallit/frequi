@@ -1,3 +1,4 @@
+import { t } from '@/i18n';
 import type { StrategyBacktestResult, Trade } from '@/types';
 
 function getSortedTrades(trades: Trade[]): Trade[] {
@@ -8,7 +9,7 @@ function getSortedTrades(trades: Trade[]): Trade[] {
 function getBestPair(trades: Trade[]) {
   const value = trades[trades.length - 1];
   if (!value) {
-    return 'N/A';
+    return t('common.na');
   }
   return `${value.pair} ${formatPercent(value.profit_ratio, 2)}`;
 }
@@ -16,7 +17,7 @@ function getBestPair(trades: Trade[]) {
 function getWorstPair(trades: Trade[]) {
   const value = trades[0];
   if (!value) {
-    return 'N/A';
+    return t('common.na');
   }
   return `${value.pair} ${formatPercent(value.profit_ratio, 2)}`;
 }
@@ -71,7 +72,8 @@ export function generateBacktestMetricRows(result: StrategyBacktestResult) {
           [`Max Drawdown abs${_b_append}`]: formatPriceStake(result.wallet_stats.max_drawdown_abs),
         },
         {
-          [`Drawdown duration${_b_append}`]: result.wallet_stats.drawdown_duration ?? 'N/A',
+          [`Drawdown duration${_b_append}`]:
+            result.wallet_stats.drawdown_duration ?? t('common.na'),
         },
         {
           [`Profit at Drawdown start | end${_b_append}`]: `${formatPriceStake(result.wallet_stats.max_drawdown_high)} | ${formatPriceStake(
@@ -102,7 +104,7 @@ export function generateBacktestMetricRows(result: StrategyBacktestResult) {
       )}`,
     },
     {
-      CAGR: `${result.cagr ? formatPercent(result.cagr) : 'N/A'}`,
+      CAGR: `${result.cagr ? formatPercent(result.cagr) : t('common.na')}`,
     },
     {
       Sortino: formatNumber(result.sortino, 2),
@@ -122,7 +124,7 @@ export function generateBacktestMetricRows(result: StrategyBacktestResult) {
           ? result.expectancy_ratio
             ? `${formatNumber(result.expectancy, 2)} (${formatNumber(result.expectancy_ratio, 2)})`
             : formatNumber(result.expectancy, 2)
-          : 'N/A'
+          : t('common.na')
       }`,
     },
     {
@@ -181,7 +183,7 @@ export function generateBacktestMetricRows(result: StrategyBacktestResult) {
     {
       'Max Consecutive Wins / Loss':
         result.max_consecutive_wins === undefined
-          ? 'N/A'
+          ? t('common.na')
           : `${result.max_consecutive_wins} / ${result.max_consecutive_losses}`,
     },
     { 'Rejected entry signals': result.rejected_signals },
@@ -189,13 +191,13 @@ export function generateBacktestMetricRows(result: StrategyBacktestResult) {
       'Entry/Exit timeouts': `${result.timedout_entry_orders} / ${result.timedout_exit_orders}`,
     },
     {
-      'Canceled Trade Entries': result.canceled_trade_entries ?? 'N/A',
+      'Canceled Trade Entries': result.canceled_trade_entries ?? t('common.na'),
     },
     {
-      'Canceled Entry Orders': result.canceled_entry_orders ?? 'N/A',
+      'Canceled Entry Orders': result.canceled_entry_orders ?? t('common.na'),
     },
     {
-      'Replaced Entry Orders': result.replaced_entry_orders ?? 'N/A',
+      'Replaced Entry Orders': result.replaced_entry_orders ?? t('common.na'),
     },
 
     ...shortMetrics,
@@ -216,7 +218,7 @@ export function generateBacktestMetricRows(result: StrategyBacktestResult) {
       'Max Drawdown ABS': formatPriceStake(result.max_drawdown_abs),
     },
     {
-      'Drawdown duration': result.drawdown_duration ?? 'N/A',
+      'Drawdown duration': result.drawdown_duration ?? t('common.na'),
     },
     {
       'Profit at Drawdown start | end': `${formatPriceStake(result.max_drawdown_high)} | ${formatPriceStake(
@@ -272,7 +274,7 @@ export function generateBacktestSettingRows(result: StrategyBacktestResult) {
     },
     { 'Max open trades': result.max_open_trades },
     { Timeframe: result.timeframe },
-    { 'Timeframe Detail': result.timeframe_detail || 'N/A' },
+    { 'Timeframe Detail': result.timeframe_detail || t('common.na') },
     { Timerange: result.timerange },
     { Stoploss: formatPercent(result.stoploss, 2) },
     { 'Trailing Stoploss': result.trailing_stop },

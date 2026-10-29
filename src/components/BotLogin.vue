@@ -3,6 +3,7 @@ import type { AuthPayload, AuthStorageWithBotId } from '@/types';
 
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
+import { t } from '@/i18n';
 
 const props = withDefaults(
   defineProps<{
@@ -73,8 +74,8 @@ const connectionSummary = computed(() => {
 const isRemoteUrl = computed(() => normalizeUrl(auth.value.url) !== window.location.origin);
 
 const submitLabel = computed(() => {
-  if (submitting.value) return 'Signing in…';
-  return botEdit.value ? 'Save and sign in' : 'Sign in';
+  if (submitting.value) return t('loginForm.signingIn');
+  return botEdit.value ? t('loginForm.saveAndSignIn') : t('common.signIn');
 });
 
 function emitLoginResult(value: boolean) {
@@ -88,16 +89,16 @@ function focusField(field: Field) {
 function validate(): Field | undefined {
   const errors: Partial<Record<Field, string>> = {};
   if (!auth.value.username.trim()) {
-    errors.username = 'Enter your username.';
+    errors.username = t('loginForm.enterUsername');
   }
   if (!auth.value.password) {
-    errors.password = 'Enter your password.';
+    errors.password = t('loginForm.enterPassword');
   }
   const url = normalizeUrl(auth.value.url);
   if (!url) {
-    errors.url = 'Enter the bot URL.';
+    errors.url = t('loginForm.enterUrl');
   } else if (!/^https?:\/\/[^\s/]+/i.test(url)) {
-    errors.url = 'Use a full URL, for example http://127.0.0.1:8080';
+    errors.url = t('loginForm.fullUrl');
   }
   fieldErrors.value = errors;
   const order: Field[] = ['username', 'password', 'url'];
@@ -192,17 +193,16 @@ async function handleSubmit() {
       fieldErrors.value = { username: true, password: true };
       showFormError({
         kind: 'credentials',
-        title: 'Wrong username or password',
-        description:
-          'The bot rejected these credentials. They are set under "api_server" in your bot configuration.',
+        title: t('loginForm.wrongCredentials'),
+        description: t('loginForm.wrongCredentialsDetail'),
       });
     } else {
       fieldErrors.value = { url: true };
       connectionOpen.value = true;
       showFormError({
         kind: 'connection',
-        title: "Can't reach the bot",
-        description: `No response from ${auth.value.url}. Make sure the bot is running and its API server is enabled.`,
+        title: t('loginForm.unreachable'),
+        description: t('loginForm.unreachableDetail', { url: auth.value.url }),
       });
     }
     emitLoginResult(false);
@@ -249,7 +249,7 @@ onMounted(() => {
 
 <template>
   <form
-    class="flex flex-col gap-5 text-left"
+    class="flex flex-col gap-5 text-start"
     novalidate
     :aria-busy="submitting"
     @submit.prevent="handleSubmit"
@@ -276,7 +276,7 @@ onMounted(() => {
               rel="noopener noreferrer"
               class="font-medium underline underline-offset-2"
             >
-              Test the connection
+              {{ $t('loginForm.testConnection') }}
             </a>
             <a
               v-if="isRemoteUrl"
@@ -285,14 +285,14 @@ onMounted(() => {
               rel="noopener noreferrer"
               class="font-medium underline underline-offset-2"
             >
-              Check the CORS setup
+              {{ $t('loginForm.checkCors') }}
             </a>
           </p>
         </template>
       </UAlert>
     </div>
 
-    <UFormField label="Username" name="username" :error="fieldErrors.username">
+    <UFormField :label="$t('loginForm.username')" name="username" :error="fieldErrors.username">
       <UInput
         id="username-input"
         v-model="auth.username"
@@ -308,10 +308,10 @@ onMounted(() => {
     </UFormField>
 
     <UFormField
-      label="Password"
+      :label="$t('loginForm.password')"
       name="password"
       :error="fieldErrors.password"
-      :help="capsLockOn ? 'Caps Lock is on' : undefined"
+      :help="capsLockOn ? $t('loginForm.capsLock') : undefined"
     >
       <UInput
         id="password-input"
@@ -335,7 +335,7 @@ onMounted(() => {
             size="md"
             class="size-[40px] justify-center"
             :icon="showPassword ? 'mdi:eye-off-outline' : 'mdi:eye-outline'"
-            :aria-label="showPassword ? 'Hide password' : 'Show password'"
+            :aria-label="showPassword ? $t('loginForm.hidePassword') : $t('loginForm.showPassword')"
             :aria-pressed="showPassword"
             aria-controls="password-input"
             @click="showPassword = !showPassword"
@@ -357,7 +357,7 @@ onMounted(() => {
             'group-data-[state=open]:rotate-180 transition-transform duration-200 motion-reduce:transition-none',
         }"
       >
-        <span>Connection</span>
+        <span>{{ $t('loginForm.connection') }}</span>
         <span v-if="!connectionOpen" class="font-normal text-dimmed"
           >· {{ connectionSummary }}</span
         >
@@ -365,10 +365,10 @@ onMounted(() => {
       <template #content>
         <div class="flex flex-col gap-5 pt-3">
           <UFormField
-            label="Bot URL"
+            :label="$t('loginForm.botUrl')"
             name="url"
             :error="fieldErrors.url"
-            help="Address of the bot's API server. Defaults to this page's address."
+            :help="$t('loginForm.botUrlHelp')"
           >
             <UInput
               id="url-input"
@@ -383,6 +383,7 @@ onMounted(() => {
               size="xl"
               class="w-full"
               :ui="{ base: 'h-[44px]' }"
+              dir="ltr"
             />
           </UFormField>
           <UAlert
@@ -390,19 +391,19 @@ onMounted(() => {
             color="warning"
             variant="subtle"
             icon="mdi:alert-outline"
-            title="You're already connected to a bot at this URL."
+            :title="$t('loginForm.duplicate')"
           />
           <UFormField
-            label="Display name"
+            :label="$t('loginForm.displayName')"
             name="botName"
-            hint="Optional"
-            help="Helps you tell bots apart when you manage several."
+            :hint="$t('loginForm.optional')"
+            :help="$t('loginForm.displayNameHelp')"
           >
             <UInput
               id="name-input"
               v-model="auth.botName"
               name="botName"
-              placeholder="e.g. Bitpin bot"
+              :placeholder="$t('loginForm.displayNamePlaceholder')"
               autocomplete="off"
               icon="mdi:robot-outline"
               size="xl"
@@ -418,7 +419,7 @@ onMounted(() => {
       <UButton
         v-if="inModal"
         type="button"
-        label="Cancel"
+        :label="$t('common.cancel')"
         color="neutral"
         variant="outline"
         size="xl"
@@ -433,7 +434,7 @@ onMounted(() => {
         :loading="submitting"
         :block="!inModal"
         trailing-icon="mdi:arrow-right"
-        :ui="{ trailingIcon: 'ms-0' }"
+        :ui="{ trailingIcon: 'ms-0 rtl:-scale-x-100' }"
         class="h-[44px] justify-center font-semibold text-white bg-brand-600 hover:bg-brand-700 dark:bg-brand-400 dark:hover:bg-brand-300 dark:text-brand-950 transition-colors duration-200 motion-reduce:transition-none"
       />
     </div>

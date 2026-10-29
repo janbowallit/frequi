@@ -101,7 +101,7 @@ watch(
 </script>
 
 <template>
-  <div class="flex h-full flex-col gap-3 p-0 text-left md:p-3">
+  <div class="flex h-full flex-col gap-3 p-0 text-start md:p-3">
     <!-- Webserver mode: pick what to plot (only affects this chart, not the bot) -->
     <section
       v-if="botStore.activeBot.isWebserverMode"
@@ -109,16 +109,16 @@ watch(
       class="panel flex flex-col gap-3 p-4"
     >
       <div class="flex items-center gap-2">
-        <h2 id="chart-source" class="text-sm font-semibold text-highlighted">Chart data</h2>
-        <InfoBox
-          hint="These choices only change this chart. The bot's configuration stays as it is."
-        />
+        <h2 id="chart-source" class="text-sm font-semibold text-highlighted">
+          {{ $t('chartPage.data') }}
+        </h2>
+        <InfoBox :hint="$t('chartPage.dataHint')" />
       </div>
       <div class="grid gap-3 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,2fr)]">
-        <UFormField label="Strategy">
+        <UFormField :label="$t('chartPage.strategy')">
           <StrategySelect v-model="chartStore.strategy" />
         </UFormField>
-        <UFormField label="Timeframe">
+        <UFormField :label="$t('chartPage.timeframe')">
           <TimeframeSelect v-model="chartStore.selectedTimeframe" />
         </UFormField>
         <TimeRangeSelect v-model="chartStore.timerange" />
@@ -127,16 +127,22 @@ watch(
         <BaseCheckbox
           v-if="botStore.activeBot.botFeatures.chartLiveData"
           v-model="chartStore.useLiveData"
-          title="Use live data from the exchange. Only use if you don't have data downloaded locally."
+          :title="$t('chartPage.liveDataHint')"
         >
-          Use live exchange data
+          {{ $t('chartPage.liveData') }}
         </BaseCheckbox>
         <UCollapsible v-model:open="exchange.customExchange" class="flex flex-col gap-2">
           <div class="flex flex-wrap items-center gap-3">
-            <BaseCheckbox v-model="exchange.customExchange">Use another exchange</BaseCheckbox>
+            <BaseCheckbox v-model="exchange.customExchange">
+              {{ $t('chartPage.otherExchange') }}
+            </BaseCheckbox>
             <span v-show="!exchange.customExchange" class="text-muted">
-              Now: {{ botStore.activeBot.botState.exchange }}
-              {{ botStore.activeBot.botState.trading_mode }}
+              {{
+                $t('chartPage.now', {
+                  exchange: botStore.activeBot.botState.exchange,
+                  mode: botStore.activeBot.botState.trading_mode ?? '',
+                })
+              }}
             </span>
           </div>
           <template #content>
@@ -146,7 +152,10 @@ watch(
       </div>
     </section>
 
-    <section aria-label="Chart" class="min-h-0 flex-1 overflow-hidden bg-default md:panel">
+    <section
+      :aria-label="$t('trade.chart')"
+      class="min-h-0 flex-1 overflow-hidden bg-default md:panel"
+    >
       <CandleChartContainer
         :available-pairs="availablePairs"
         :historic-view="botStore.activeBot.isWebserverMode"

@@ -1,3 +1,4 @@
+import { t } from '@/i18n';
 import { useBotStore } from './ftbotwrapper';
 
 import type {
@@ -164,7 +165,7 @@ export const usePairlistConfigStore = defineStore(
           }
         }, 1000);
       } catch (error) {
-        showAlert('Evaluation failed', 'error');
+        showAlert(t('alerts.evaluationFailed'), 'error');
         evaluating.value = false;
       }
     }

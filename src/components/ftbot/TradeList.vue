@@ -2,6 +2,7 @@
 import { getPaginationRowModel } from '@tanstack/vue-table';
 import type { TableColumn, TableRow } from '@nuxt/ui';
 import type { MultiDeletePayload, MultiForceExitPayload, Trade } from '@/types';
+import { t } from '@/i18n';
 
 import { useRouter } from 'vue-router';
 
@@ -16,12 +17,12 @@ const props = withDefaults(
     emptyText?: string;
   }>(),
   {
-    title: 'Trades',
+    title: undefined,
     stakeCurrency: '',
     activeTrades: false,
     showFilter: false,
     multiBotView: false,
-    emptyText: 'No trades to show',
+    emptyText: undefined,
   },
 );
 
@@ -39,37 +40,34 @@ function formatPriceWithDecimals(price: number) {
   return formatPrice(price, botStore.activeBot.stakeCurrencyDecimals);
 }
 
-const tableFields = ref([
-  { field: 'trade_id', header: 'ID' },
-  { field: 'pair', header: 'Pair' },
-  { field: 'amount', header: 'Amount' },
+const tableFields = computed(() => [
+  ...(props.multiBotView ? [{ field: 'botName', header: t('trades.bot') }] : []),
+  { field: 'trade_id', header: t('trades.id') },
+  { field: 'pair', header: t('trades.pair') },
+  { field: 'amount', header: t('trades.amount') },
   props.activeTrades
-    ? { field: 'stake_amount', header: 'Stake' }
-    : { field: 'max_stake_amount', header: 'Stake' },
+    ? { field: 'stake_amount', header: t('trades.stake') }
+    : { field: 'max_stake_amount', header: t('trades.stake') },
   {
     field: 'open_rate',
-    header: 'Entry price',
+    header: t('trades.entryPrice'),
   },
   {
     field: props.activeTrades ? 'current_rate' : 'close_rate',
-    header: props.activeTrades ? 'Current price' : 'Exit price',
+    header: props.activeTrades ? t('trades.currentPrice') : t('trades.exitPrice'),
   },
   {
     field: 'profit',
-    header: 'Profit',
+    header: t('trades.profit'),
   },
-  { field: 'open_timestamp', header: 'Opened' },
+  { field: 'open_timestamp', header: t('trades.opened') },
   ...(props.activeTrades
     ? [{ field: 'actions', header: '' }]
     : [
-        { field: 'close_timestamp', header: 'Closed' },
-        { field: 'exit_reason', header: 'Exit reason' },
+        { field: 'close_timestamp', header: t('trades.closed') },
+        { field: 'exit_reason', header: t('trades.exitReason') },
       ]),
 ]);
-
-if (props.multiBotView) {
-  tableFields.value.unshift({ field: 'botName', header: 'Bot' });
-}
 
 const tableColumns = computed<TableColumn<Trade>[]>(() =>
   tableFields.value.map((f) => ({ accessorKey: f.field, header: f.header })),
@@ -89,14 +87,14 @@ const filteredTrades = computed(() => {
 
 async function forceExitHandler(item: Trade, ordertype: string | undefined = undefined) {
   const message = ordertype
-    ? `Sell trade #${item.trade_id} (${item.pair}) now using a ${ordertype} order? This cannot be undone.`
-    : `Sell trade #${item.trade_id} (${item.pair}) now? This cannot be undone.`;
+    ? t('trades.exitMessageType', { id: item.trade_id, pair: item.pair, type: ordertype })
+    : t('trades.exitMessage', { id: item.trade_id, pair: item.pair });
   if (
     settingsStore.confirmDialog !== true ||
     (await confirm({
-      title: 'Exit trade?',
+      title: t('trades.exitTitle'),
       message,
-      confirmText: 'Exit trade',
+      confirmText: t('trades.exitConfirm'),
       danger: true,
     }))
   ) {
@@ -117,9 +115,9 @@ async function forceExitHandler(item: Trade, ordertype: string | undefined = und
 async function removeTradeHandler(item: Trade) {
   if (
     await confirm({
-      title: 'Delete trade?',
-      message: `Remove trade #${item.trade_id} (${item.pair}) from the bot's database? Open orders are cancelled, but coins you hold are not sold. This cannot be undone.`,
-      confirmText: 'Delete trade',
+      title: t('trades.deleteTitle'),
+      message: t('trades.deleteMessage', { id: item.trade_id, pair: item.pair }),
+      confirmText: t('trades.deleteConfirm'),
       danger: true,
     })
   ) {
@@ -141,10 +139,10 @@ function forceExitPartialHandler(item: Trade) {
 async function cancelOpenOrderHandler(item: Trade) {
   if (
     await confirm({
-      title: 'Cancel open order?',
-      message: `Cancel the open order of trade #${item.trade_id} (${item.pair})?`,
-      confirmText: 'Cancel order',
-      cancelText: 'Keep order',
+      title: t('trades.cancelOrderTitle'),
+      message: t('trades.cancelOrderMessage', { id: item.trade_id, pair: item.pair }),
+      confirmText: t('trades.cancelOrderConfirm'),
+      cancelText: t('trades.keepOrder'),
       danger: true,
     })
   ) {
@@ -206,21 +204,21 @@ const rowSelection = computed({
       <UInput
         v-model="filterText"
         icon="mdi:magnify"
-        placeholder="Filter by pair or reason"
-        aria-label="Filter trades"
+        :placeholder="$t('trades.filter')"
+        :aria-label="$t('trades.filterLabel')"
         class="w-full sm:w-64"
       />
     </div>
     <EmptyState
       v-if="filteredTrades.length === 0"
-      :title="filterText ? 'No matching trades' : emptyText"
+      :title="filterText ? $t('trades.noMatch') : (emptyText ?? $t('trades.empty'))"
       :icon="activeTrades ? 'mdi:swap-horizontal' : 'mdi:history'"
       :description="
         filterText
-          ? 'Try a different pair or exit reason.'
+          ? $t('trades.noMatchHelp')
           : activeTrades
-            ? 'The bot opens a trade when every entry condition holds.'
-            : 'Closed trades appear here.'
+            ? $t('trades.openHelp')
+            : $t('trades.closedHelp')
       "
     />
     <UTable
@@ -240,7 +238,8 @@ const rowSelection = computed({
         {{ row.original.trade_id }}
         {{
           botStore.activeBot.botFeatures.futures && row.original.trading_mode !== 'spot'
-            ? (row.original.trade_id ? '| ' : '') + (row.original.is_short ? 'Short' : 'Long')
+            ? (row.original.trade_id ? '| ' : '') +
+              (row.original.is_short ? $t('trades.short') : $t('trades.long'))
             : ''
         }}
       </template>

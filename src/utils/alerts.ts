@@ -1,3 +1,4 @@
+import { t } from '@/i18n';
 import type { AlertSeverity } from '@/types/alertTypes';
 
 export function showAlert(message: string, severity: AlertSeverity = 'warning', bot: string = '') {
@@ -5,7 +6,7 @@ export function showAlert(message: string, severity: AlertSeverity = 'warning', 
 
   alertStore.addAlert({
     message,
-    title: `${bot ? 'Bot: ' + bot : 'Notification'}`,
+    title: bot ? t('alerts.botTitle', { bot }) : t('alerts.notification'),
     severity,
     timeout: 5000,
   });

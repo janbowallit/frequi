@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Trade } from '@/types';
+import { t } from '@/i18n';
 
 const props = withDefaults(
   defineProps<{
@@ -16,10 +17,10 @@ const botStore = useBotStore();
 const selectedTrade = ref({} as Trade);
 const sortDescendingOrder = ref(true);
 const sortMethod = ref('openDate');
-const sortMethodOptions = [
-  { text: 'Open date', value: 'openDate' },
-  { text: 'Profit %', value: 'profit' },
-];
+const sortMethodOptions = computed(() => [
+  { text: t('trades.openDate'), value: 'openDate' },
+  { text: t('trades.profitPct'), value: 'profit' },
+]);
 
 const onTradeSelect = (trade: Trade) => {
   selectedTrade.value = trade;
@@ -46,7 +47,7 @@ watch(
 <template>
   <div>
     <div class="flex justify-center">
-      <span class="me-2">Sort by:</span>
+      <span class="me-2">{{ $t('trades.sortBy') }}</span>
       <URadioGroup
         v-model="sortMethod"
         :items="sortMethodOptions.map((o) => ({ label: o.text, value: o.value }))"
@@ -60,10 +61,10 @@ watch(
         color="neutral"
         variant="ghost"
         class="w-full justify-center"
-        :title="'Trade Navigation'"
+        :title="$t('trades.navigation')"
         @click="sortDescendingOrder = !sortDescendingOrder"
         :trailing-icon="sortDescendingOrder ? 'mdi:arrow-down' : 'mdi:arrow-up'"
-        >Trade Navigation
+        >{{ $t('trades.navigation') }}
       </UButton>
       <li
         v-for="(trade, i) in sortedTrades"
@@ -97,6 +98,7 @@ watch(
             color="neutral"
             @click="ordersVisible[i] = !ordersVisible[i]"
             :icon="ordersVisible[i] ? 'mdi:chevron-down' : 'mdi:chevron-right'"
+            :ui="{ leadingIcon: 'rtl:-scale-x-100' }"
           />
         </div>
         <Transition>
@@ -106,14 +108,20 @@ watch(
                 v-for="order in trade.orders?.filter((o) => o.order_filled_timestamp !== null)"
                 :key="order.order_timestamp"
               >
-                {{ order.ft_order_side }} {{ order.amount }} at {{ order.safe_price }}
+                {{
+                  $t('trades.orderLine', {
+                    side: order.ft_order_side,
+                    amount: order.amount,
+                    price: order.safe_price,
+                  })
+                }}
               </li>
             </ul>
           </div>
         </Transition>
       </li>
       <li v-if="trades.length === 0" class="list-none">
-        <EmptyState title="No trades to show" icon="mdi:history" />
+        <EmptyState :title="$t('trades.empty')" icon="mdi:history" />
       </li>
     </ul>
   </div>

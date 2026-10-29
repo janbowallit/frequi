@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { joinList } from '@/i18n';
 const newblacklistpair = ref('');
 const blacklistSelect = ref<number[]>([]);
 const botStore = useBotStore();
@@ -57,15 +58,15 @@ onMounted(() => {
 
 <template>
   <div class="flex flex-col">
-    <PanelHeader title="Pairlist">
+    <PanelHeader :title="$t('pairs.pairlist')">
       <template #actions>
         <UButton
           color="neutral"
           variant="ghost"
           size="sm"
           icon="mdi:refresh"
-          title="Refresh"
-          aria-label="Refresh pairlist"
+          :title="$t('common.refresh')"
+          :aria-label="$t('pairs.refreshPairlist')"
           :loading="loading"
           @click="refreshLists"
         />
@@ -76,7 +77,7 @@ onMounted(() => {
     <section aria-labelledby="whitelist-heading" class="flex flex-col gap-2 p-3">
       <div class="flex items-baseline justify-between gap-2">
         <h4 id="whitelist-heading" class="text-sm font-medium text-muted">
-          Whitelist
+          {{ $t('pairs.whitelist') }}
           <span class="ms-1 font-normal normal-case tabular-nums">
             ({{ botStore.activeBot.whitelist.length }})
           </span>
@@ -84,7 +85,7 @@ onMounted(() => {
         <span
           v-if="botStore.activeBot.pairlistMethods.length"
           class="truncate text-xs text-muted"
-          :title="`Pairlist methods: ${botStore.activeBot.pairlistMethods.join(', ')}`"
+          :title="$t('pairs.methods', { methods: joinList(botStore.activeBot.pairlistMethods) })"
         >
           {{ botStore.activeBot.pairlistMethods.join(' · ') }}
         </span>
@@ -95,7 +96,7 @@ onMounted(() => {
         </li>
       </ul>
       <p v-else class="text-sm text-muted">
-        Whitelist unavailable. Make sure you are logged in and the bot is running.
+        {{ $t('pairs.whitelistUnavailable') }}
       </p>
     </section>
 
@@ -105,7 +106,7 @@ onMounted(() => {
     <section aria-labelledby="blacklist-heading" class="flex flex-col gap-2 p-3">
       <div class="flex min-h-8 items-center gap-2">
         <h4 id="blacklist-heading" class="me-auto text-sm font-medium text-muted">
-          Blacklist
+          {{ $t('pairs.blacklist') }}
           <span class="ms-1 font-normal normal-case tabular-nums">
             ({{ botStore.activeBot.blacklist.length }})
           </span>
@@ -116,30 +117,41 @@ onMounted(() => {
           variant="soft"
           size="xs"
           icon="mdi:delete"
-          :label="`Remove ${blacklistSelect.length}`"
+          :label="$t('pairs.removeN', { n: blacklistSelect.length })"
           @click="deletePairs"
         />
         <UPopover v-model:open="addOpen">
-          <UButton color="neutral" variant="outline" size="xs" icon="mdi:plus" label="Add" />
+          <UButton
+            color="neutral"
+            variant="outline"
+            size="xs"
+            icon="mdi:plus"
+            :label="$t('common.add')"
+          />
           <template #content>
             <form class="flex w-64 flex-col gap-3 p-3" @submit.prevent="addBlacklistPair">
-              <UFormField label="Pair to blacklist" required>
+              <UFormField :label="$t('pairs.pairToBlacklist')" required>
                 <UInput
                   id="blacklist-pair"
                   v-model="newblacklistpair"
-                  placeholder="e.g. DOGE/USDT"
+                  :placeholder="$t('pairs.pairPlaceholder')"
                   required
                   autofocus
                   class="w-full"
                 />
               </UFormField>
-              <UButton id="blacklist-submit" type="submit" label="Add to blacklist" block />
+              <UButton
+                id="blacklist-submit"
+                type="submit"
+                :label="$t('pairs.addToBlacklist')"
+                block
+              />
             </form>
           </template>
         </UPopover>
       </div>
       <template v-if="botStore.activeBot.blacklist.length">
-        <ul class="flex flex-wrap gap-1.5" aria-label="Blacklisted pairs">
+        <ul class="flex flex-wrap gap-1.5" :aria-label="$t('pairs.blacklisted')">
           <li v-for="(pair, key) in botStore.activeBot.blacklist" :key="pair">
             <UButton
               size="xs"
@@ -154,10 +166,10 @@ onMounted(() => {
           </li>
         </ul>
         <p v-if="botStore.activeBot.botFeatures.botBlacklistModify" class="text-xs text-muted">
-          Select pairs, then remove them from the blacklist.
+          {{ $t('pairs.selectToRemove') }}
         </p>
       </template>
-      <p v-else class="text-sm text-muted">No blacklisted pairs.</p>
+      <p v-else class="text-sm text-muted">{{ $t('pairs.noBlacklist') }}</p>
     </section>
   </div>
 </template>

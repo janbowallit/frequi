@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { BotStates } from '@/types';
+import { ltr, t } from '@/i18n';
 
 /**
  * One line under the navigation that answers "is the bot OK and what is it waiting for".
@@ -19,37 +20,36 @@ const openProfit = computed(
 
 type Tone = 'waiting' | 'good' | 'bad';
 
-const status = computed<{ label: string; tone: Tone }>(() => {
-  if (!bot.value?.isBotLoggedIn) return { label: 'Signed out', tone: 'bad' };
-  if (!bot.value.isBotOnline) return { label: 'Offline', tone: 'bad' };
+const status = computed<{ label: string; tone: Tone; running?: boolean }>(() => {
+  if (!bot.value?.isBotLoggedIn) return { label: t('status.signedOut'), tone: 'bad' };
+  if (!bot.value.isBotOnline) return { label: t('common.offline'), tone: 'bad' };
   switch (botState.value) {
     case BotStates.RUNNING:
       return {
-        label: 'Running',
+        label: t('status.running'),
         tone: bot.value.openTradeCount > 0 || verdict.value.tone === 'ready' ? 'good' : 'waiting',
+        running: true,
       };
     case BotStates.PAUSED:
-      return { label: 'Paused', tone: 'waiting' };
+      return { label: t('status.paused'), tone: 'waiting' };
     case BotStates.STOPPED:
-      return { label: 'Stopped', tone: 'bad' };
+      return { label: t('status.stopped'), tone: 'bad' };
     case BotStates.RELOAD_CONFIG:
-      return { label: 'Reloading', tone: 'waiting' };
+      return { label: t('status.reloading'), tone: 'waiting' };
     default:
-      return { label: 'Connecting', tone: 'waiting' };
+      return { label: t('status.connecting'), tone: 'waiting' };
   }
 });
 
 const message = computed<{ title: string; detail?: string }>(() => {
   const b = bot.value;
-  if (!b?.isBotLoggedIn) return { title: 'Sign in again to see the bot' };
-  if (!b.isBotOnline) return { title: "Can't reach the bot", detail: 'Retrying every minute.' };
+  if (!b?.isBotLoggedIn) return { title: t('status.signInToSee') };
+  if (!b.isBotOnline) return { title: t('status.unreachable'), detail: t('status.retrying') };
   if (botState.value === BotStates.STOPPED)
-    return { title: 'Not trading', detail: 'Open trades are not managed while stopped.' };
-  if (!loaded.value) return { title: 'Checking entry conditions' };
+    return { title: t('status.notTrading'), detail: t('status.notManaged') };
+  if (!loaded.value) return { title: t('status.checking') };
   if (!supported.value) {
-    return b.openTradeCount > 0
-      ? { title: 'Managing open trades' }
-      : { title: 'Looking for entries' };
+    return b.openTradeCount > 0 ? { title: t('status.managing') } : { title: t('status.looking') };
   }
   return { title: verdict.value.title, detail: verdict.value.detail };
 });
@@ -92,7 +92,7 @@ const maxTrades = computed(() => bot.value?.botState?.max_open_trades ?? 0);
       </span>
 
       <!-- What the bot is doing -->
-      <p class="min-w-0 flex-1 truncate text-left">
+      <p class="min-w-0 flex-1 truncate text-start">
         <span class="font-medium text-highlighted">{{ message.title }}</span>
         <span v-if="message.detail" class="ms-2 hidden text-muted md:inline">
           {{ message.detail }}
@@ -106,25 +106,40 @@ const maxTrades = computed(() => bot.value?.botState?.max_open_trades ?? 0);
           to="/trade"
           class="rounded-sm tabular-nums hover:text-highlighted"
         >
-          <span class="text-highlighted">{{ bot.openTradeCount }}</span
-          ><template v-if="maxTrades > 0">/{{ maxTrades }}</template> open
+          <I18nT
+            :keypath="maxTrades > 0 ? 'status.openOf' : 'status.open'"
+            tag="span"
+            scope="global"
+          >
+            <template #count>
+              <span class="text-highlighted">{{ bot.openTradeCount }}</span>
+            </template>
+            <template #max>{{ maxTrades }}</template>
+          </I18nT>
           <span
             v-if="bot.openTradeCount > 0"
             class="ms-1 font-medium"
             :class="openProfit >= 0 ? 'text-(--color-profit)' : 'text-(--color-loss)'"
           >
-            {{ openProfit > 0 ? '+' : ''
-            }}{{ formatPriceCurrency(openProfit, stakeCurrency, decimals) }}
+            {{
+              ltr(
+                `${openProfit > 0 ? '+' : ''}${formatPriceCurrency(openProfit, stakeCurrency, decimals)}`,
+              )
+            }}
           </span>
         </RouterLink>
-        <span
-          v-if="showEarliest && earliest && status.label === 'Running'"
+        <I18nT
+          v-if="showEarliest && earliest && status.running"
+          keypath="status.earliest"
+          tag="span"
+          scope="global"
           class="hidden border-s border-default ps-4 tabular-nums lg:inline"
         >
-          Earliest possible buy
-          <span class="font-medium text-highlighted">{{ fmtTime(earliest) }}</span>
-          ({{ untilText(earliest) }})
-        </span>
+          <template #time>
+            <span class="font-medium text-highlighted">{{ fmtTime(earliest) }}</span>
+          </template>
+          <template #until>{{ untilText(earliest) }}</template>
+        </I18nT>
       </div>
 
       <UButton
@@ -133,7 +148,7 @@ const maxTrades = computed(() => bot.value?.botState?.max_open_trades ?? 0);
         variant="solid"
         size="xs"
         icon="mdi:play"
-        label="Start"
+        :label="$t('common.start')"
         @click="bot.startBot()"
       />
     </div>

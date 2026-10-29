@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { h } from 'vue';
 import type { BalanceValues } from '@/types';
+import { t } from '@/i18n';
 
 const botStore = useBotStore();
 const hideSmallBalances = ref(true);
@@ -61,15 +62,15 @@ const chartValues = computed<BalanceValues[]>(() => {
 
 const tableFields = computed(() => {
   return [
-    { field: 'currency', header: 'Currency' },
+    { field: 'currency', header: t('balance.currency') },
     {
       field: showBotOnly.value && canUseBotBalance.value ? 'bot_owned' : 'free',
-      header: 'Available',
+      header: t('balance.available'),
       asCurrency: true,
     },
     {
       field: showBotOnly.value && canUseBotBalance.value ? 'est_stake_bot' : 'est_stake',
-      header: `in ${botStore.activeBot.balance.stake}`,
+      header: t('balance.inStake', { stake: botStore.activeBot.balance.stake }),
       asCurrency: true,
     },
   ];
@@ -89,14 +90,14 @@ const tableColumns = computed(() => {
   return tableFields.value.map((field, index) => ({
     accessorKey: field.field,
     header: field.header,
-    meta: index === 0 ? undefined : { class: { th: 'text-right', td: 'text-right tabular-nums' } },
+    meta: index === 0 ? undefined : { class: { th: 'text-end', td: 'text-end tabular-nums' } },
     cell: field.asCurrency
       ? ({ row }: { row: { original: Record<string, number | string | null> } }) =>
           formatCurrency(row.original[field.field])
       : undefined,
     footer:
       index === 0
-        ? 'Total'
+        ? t('balance.total')
         : index === 1
           ? undefined
           : () =>
@@ -112,11 +113,14 @@ const tableColumns = computed(() => {
                   'span',
                   {
                     class: 'text-xs font-normal normal-case text-muted tabular-nums',
-                    title: `Change since the starting capital of ${formatCurrency(
-                      botStore.activeBot.balance.starting_capital,
-                    )} ${botStore.activeBot.balance.stake}`,
+                    title: t('balance.changeSince', {
+                      capital: formatCurrency(botStore.activeBot.balance.starting_capital),
+                      stake: botStore.activeBot.balance.stake,
+                    }),
                   },
-                  `${formatPercent(botStore.activeBot.balance.starting_capital_ratio, 2)} since start`,
+                  t('balance.sinceStart', {
+                    pct: formatPercent(botStore.activeBot.balance.starting_capital_ratio, 2),
+                  }),
                 ),
               ]),
   }));
@@ -130,11 +134,9 @@ onMounted(() => {
 <template>
   <div class="flex flex-col">
     <PanelHeader
-      :title="`${showBotOnly && canUseBotBalance ? 'Bot' : 'Account'} balance`"
+      :title="showBotOnly && canUseBotBalance ? $t('balance.botTitle') : $t('balance.accountTitle')"
       :description="
-        showBotOnly && canUseBotBalance
-          ? 'Funds the bot manages'
-          : 'Everything in the exchange account'
+        showBotOnly && canUseBotBalance ? $t('balance.botHelp') : $t('balance.accountHelp')
       "
     >
       <template #actions>
@@ -144,8 +146,8 @@ onMounted(() => {
           variant="ghost"
           size="sm"
           :icon="showBotOnly ? 'mdi:bank' : 'mdi:robot'"
-          :title="showBotOnly ? 'Show account balance' : 'Show bot balance'"
-          :aria-label="showBotOnly ? 'Show account balance' : 'Show bot balance'"
+          :title="showBotOnly ? $t('balance.showAccount') : $t('balance.showBot')"
+          :aria-label="showBotOnly ? $t('balance.showAccount') : $t('balance.showBot')"
           @click="showBotOnly = !showBotOnly"
         />
         <UButton
@@ -153,8 +155,8 @@ onMounted(() => {
           variant="ghost"
           size="sm"
           :icon="hideSmallBalances ? 'mdi:eye' : 'mdi:eye-off'"
-          :title="hideSmallBalances ? 'Show small balances' : 'Hide small balances'"
-          :aria-label="hideSmallBalances ? 'Show small balances' : 'Hide small balances'"
+          :title="hideSmallBalances ? $t('balance.showSmall') : $t('balance.hideSmall')"
+          :aria-label="hideSmallBalances ? $t('balance.showSmall') : $t('balance.hideSmall')"
           :aria-pressed="!hideSmallBalances"
           @click="hideSmallBalances = !hideSmallBalances"
         />
@@ -163,8 +165,8 @@ onMounted(() => {
           variant="ghost"
           size="sm"
           icon="mdi:refresh"
-          title="Refresh"
-          aria-label="Refresh balance"
+          :title="$t('common.refresh')"
+          :aria-label="$t('balance.refresh')"
           :loading="loading"
           @click="refreshBalance"
         />
@@ -172,8 +174,8 @@ onMounted(() => {
     </PanelHeader>
     <EmptyState
       v-if="balanceCurrencies.length === 0"
-      title="No balances"
-      :description="hideSmallBalances ? 'Small balances are hidden.' : undefined"
+      :title="$t('balance.empty')"
+      :description="hideSmallBalances ? $t('balance.smallHidden') : undefined"
       icon="mdi:wallet-outline"
     />
     <template v-else>

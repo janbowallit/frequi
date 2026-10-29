@@ -24,7 +24,7 @@ withDefaults(
 
 <template>
   <section
-    class="panel flex min-w-0 flex-col overflow-hidden text-left"
+    class="panel flex min-w-0 flex-col overflow-hidden text-start"
     :aria-label="title || undefined"
     v-bind="$attrs"
   >

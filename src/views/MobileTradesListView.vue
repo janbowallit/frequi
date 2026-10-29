@@ -9,11 +9,11 @@ const botStore = useBotStore();
   <div class="mx-auto flex w-full max-w-3xl flex-col gap-3 p-3">
     <template v-if="!botStore.activeBot.detailTradeId">
       <PageHeader
-        :title="history ? 'Closed trades' : 'Open trades'"
+        :title="history ? $t('trade.closedTrades') : $t('trade.openTrades')"
         :description="
           history
-            ? `${botStore.activeBot.closedTrades.length} closed trades`
-            : `${botStore.activeBot.openTrades.length} open trades`
+            ? $t('trade.closedCount', botStore.activeBot.closedTrades.length)
+            : $t('trade.openCount', botStore.activeBot.openTrades.length)
         "
         :icon="history ? 'mdi:history' : 'mdi:swap-horizontal-bold'"
       />
@@ -21,17 +21,17 @@ const botStore = useBotStore();
         <CustomTradeList
           v-if="!history"
           :trades="botStore.activeBot.openTrades"
-          title="Open trades"
+          :title="$t('trade.openTrades')"
           :active-trades="true"
           :stake-currency-decimals="botStore.activeBot.stakeCurrencyDecimals"
-          empty-text="No open trades"
+          :empty-text="$t('trade.noOpenTrades')"
         />
         <CustomTradeList
           v-else
           :trades="botStore.activeBot.closedTrades"
-          title="Trade history"
+          :title="$t('trade.tradeHistory')"
           :stake-currency-decimals="botStore.activeBot.stakeCurrencyDecimals"
-          empty-text="No closed trades yet"
+          :empty-text="$t('trade.noClosedTrades')"
         />
       </div>
     </template>
@@ -44,8 +44,9 @@ const botStore = useBotStore();
         variant="ghost"
         class="self-start"
         @click="botStore.activeBot.setDetailTrade(null)"
-        label="Back to trades"
+        :label="$t('trade.backToTrades')"
         icon="mdi:arrow-left"
+        :ui="{ leadingIcon: 'rtl:-scale-x-100' }"
       />
       <div class="panel overflow-hidden">
         <TradeDetail

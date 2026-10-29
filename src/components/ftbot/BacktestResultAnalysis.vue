@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { StrategyBacktestResult } from '@/types';
+import { metricLabel } from '@/i18n';
 
 const props = defineProps<{
   backtestResult: StrategyBacktestResult;
@@ -7,14 +8,20 @@ const props = defineProps<{
 
 const backtestResultStats = computed(() => {
   const tmp = generateBacktestMetricRows(props.backtestResult);
-  return formatObjectForTable({ value: tmp }, 'metric');
+  return formatObjectForTable({ value: tmp }, 'metric').map((row) => ({
+    ...row,
+    metric: metricLabel(String(row.metric)),
+  }));
 });
 
 const backtestResultSettings = computed(() => {
   // Transpose Result into readable format
   const tmp = generateBacktestSettingRows(props.backtestResult);
 
-  return formatObjectForTable({ value: tmp }, 'setting');
+  return formatObjectForTable({ value: tmp }, 'setting').map((row) => ({
+    ...row,
+    setting: metricLabel(String(row.setting)),
+  }));
 });
 </script>
 
@@ -24,27 +31,27 @@ const backtestResultSettings = computed(() => {
       {{ backtestResult.strategy_name }}
     </h2>
     <div class="grid gap-4 xl:grid-cols-2">
-      <PanelSection title="Metrics">
+      <PanelSection :title="$t('backtest.metrics')">
         <UTable
           :data="backtestResultStats"
           :columns="[
-            { accessorKey: 'metric', header: 'Metric' },
-            { accessorKey: 'value', header: 'Value' },
+            { accessorKey: 'metric', header: $t('backtest.metric') },
+            { accessorKey: 'value', header: $t('backtest.value') },
           ]"
         />
       </PanelSection>
-      <PanelSection title="Strategy settings">
+      <PanelSection :title="$t('backtest.settings')">
         <UTable
           :data="backtestResultSettings"
           :columns="[
-            { accessorKey: 'setting', header: 'Setting' },
-            { accessorKey: 'value', header: 'Value' },
+            { accessorKey: 'setting', header: $t('backtest.setting') },
+            { accessorKey: 'value', header: $t('backtest.value') },
           ]"
         />
       </PanelSection>
     </div>
     <BacktestResultTablePer
-      title="By entry tag"
+      :title="$t('backtest.byEntryTag')"
       :results="backtestResult.results_per_enter_tag"
       :stake-currency="backtestResult.stake_currency"
       key-header="Entry tag"
@@ -52,7 +59,7 @@ const backtestResultSettings = computed(() => {
     />
 
     <BacktestResultTablePer
-      title="By exit reason"
+      :title="$t('backtest.byExitReason')"
       :results="backtestResult.exit_reason_summary ?? []"
       :stake-currency="backtestResult.stake_currency"
       key-header="Exit reason"
@@ -61,26 +68,26 @@ const backtestResultSettings = computed(() => {
 
     <BacktestResultTablePer
       v-if="backtestResult.mix_tag_stats"
-      title="By entry and exit tag"
+      :title="$t('backtest.byEntryExit')"
       :results="backtestResult.mix_tag_stats ?? []"
       :stake-currency="backtestResult.stake_currency"
-      :key-headers="['Entry tag', 'Exit tag']"
+      :key-headers="[$t('backtest.entryTag'), $t('backtest.exitTag')]"
       :stake-currency-decimals="backtestResult.stake_currency_decimals"
     />
 
     <BacktestResultTablePer
-      title="By pair"
+      :title="$t('backtest.byPair')"
       :results="backtestResult.results_per_pair"
       :stake-currency="backtestResult.stake_currency"
       key-header="Pair"
       :stake-currency-decimals="backtestResult.stake_currency_decimals"
     />
-    <PanelSection v-if="backtestResult.periodic_breakdown" title="Periodic breakdown">
+    <PanelSection v-if="backtestResult.periodic_breakdown" :title="$t('backtest.periodic')">
       <BacktestResultPeriodBreakdown :periodic-breakdown="backtestResult.periodic_breakdown">
       </BacktestResultPeriodBreakdown>
     </PanelSection>
 
-    <PanelSection title="Single trades">
+    <PanelSection :title="$t('backtest.singleTrades')">
       <TradeList
         :trades="backtestResult.trades"
         :show-filter="true"

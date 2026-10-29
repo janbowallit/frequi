@@ -1,4 +1,5 @@
 import type { Order, PairHistory, Trade, BTOrder } from '@/types';
+import { t } from '@/i18n';
 
 import type {
   MarkAreaComponentOption,
@@ -15,21 +16,25 @@ function buildTooltipCost(order: Order | BTOrder, quoteCurrency: string): string
   )}`;
 }
 
+function tradeSide(trade: Trade) {
+  return trade.is_short ? t('trades.short') : t('trades.long');
+}
+
 function buildToolTip(
   trade: Trade,
   order: Order | BTOrder,
   side: string,
   quoteCurrency: string,
 ): string {
-  let tooltip = `${trade.is_short ? 'Short' : 'Long'} ${side}
+  let tooltip = `${tradeSide(trade)} ${side === 'entry' ? t('charts.entrySide') : t('charts.exitSide')}
   ${formatPercent(trade.profit_ratio)} ${
     trade.profit_abs ? '(' + formatPriceCurrency(trade.profit_abs, quoteCurrency) + ')' : ''
   }
   ${buildTooltipCost(order, quoteCurrency)}
-  Enter-tag: ${trade.enter_tag ?? ''}
-  Order Price: ${formatPriceCurrency(order.safe_price, quoteCurrency)}`;
-  tooltip += `${'ft_order_tag' in order && order.ft_order_tag && trade.enter_tag != order.ft_order_tag ? '\nOrder-Tag: ' + order.ft_order_tag : ''}`;
-  tooltip += `${trade.exit_reason ? '\nExit-Tag: ' + trade.exit_reason : ''}`;
+  ${t('charts.enterTag', { tag: trade.enter_tag ?? '' })}
+  ${t('charts.orderPrice', { price: formatPriceCurrency(order.safe_price, quoteCurrency) })}`;
+  tooltip += `${'ft_order_tag' in order && order.ft_order_tag && trade.enter_tag != order.ft_order_tag ? '\n' + t('charts.orderTag', { tag: order.ft_order_tag }) : ''}`;
+  tooltip += `${trade.exit_reason ? '\n' + t('charts.exitTag', { tag: trade.exit_reason }) : ''}`;
   return tooltip;
 }
 
@@ -38,10 +43,10 @@ function buildAdjustmentToolTip(
   order: Order | BTOrder,
   quoteCurrency: string,
 ): string {
-  let tooltip = `${trade.is_short ? 'Short' : 'Long'} adjustment
+  let tooltip = `${tradeSide(trade)} ${t('charts.adjustment')}
   ${buildTooltipCost(order, quoteCurrency)}
-  Enter-tag: ${trade.enter_tag ?? ''}`;
-  tooltip += `${'ft_order_tag' in order && order.ft_order_tag ? '\nOrder-Tag: ' + order.ft_order_tag : ''}`;
+  ${t('charts.enterTag', { tag: trade.enter_tag ?? '' })}`;
+  tooltip += `${'ft_order_tag' in order && order.ft_order_tag ? '\n' + t('charts.orderTag', { tag: order.ft_order_tag }) : ''}`;
 
   return tooltip;
 }
@@ -96,8 +101,8 @@ function getTradeEntries(dataset: PairHistory, trades: Trade[]) {
                 OPEN_CLOSE_SYMBOL,
                 order.ft_order_side == 'sell' ? 180 : 0,
                 trade.is_short ? SHORT_COLOR : LONG_COLOR,
-                (trade.is_short ? 'Short' : 'Long') +
-                  (!order.order_filled_timestamp ? ' (open)' : ''),
+                tradeSide(trade) +
+                  (!order.order_filled_timestamp ? ` ${t('charts.openSuffix')}` : ''),
                 buildToolTip(trade, order, 'entry', quoteCurrency),
               ]);
               // Trade exit
@@ -205,7 +210,7 @@ export function generateTradeSeries(
       data: [
         [
           {
-            name: 'Stoploss',
+            name: t('charts.stoploss'),
             yAxis: openTrade.stop_loss_abs,
             lineStyle: {
               color: '#ff0000AA',

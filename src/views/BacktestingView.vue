@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '@/i18n';
 enum BtRunModes {
   run = 'run',
   results = 'results',
@@ -71,21 +72,18 @@ watch(
 
 // Results of the selected backtest, in tabs
 const resultTabs = computed(() => [
-  { slot: 'results', value: BtRunModes.results, label: 'Summary' },
-  { slot: 'visualize-summary', value: BtRunModes.visualizesummary, label: 'Charts' },
-  { slot: 'visualize', value: BtRunModes.visualize, label: 'Trades on candles' },
+  { slot: 'results', value: BtRunModes.results, label: t('backtest.summary') },
+  { slot: 'visualize-summary', value: BtRunModes.visualizesummary, label: t('backtest.charts') },
+  { slot: 'visualize', value: BtRunModes.visualize, label: t('backtest.tradesOnCandles') },
   ...(hasMultiBacktestResult.value
-    ? [{ slot: 'compare-results', value: BtRunModes.compareresults, label: 'Compare' }]
+    ? [{ slot: 'compare-results', value: BtRunModes.compareresults, label: t('backtest.compare') }]
     : []),
 ]);
 </script>
 
 <template>
-  <div class="mx-auto flex w-full max-w-[1600px] flex-col gap-4 p-3 text-left md:p-6">
-    <PageHeader
-      title="Backtest"
-      description="See how a strategy would have traded on past candles."
-    >
+  <div class="mx-auto flex w-full max-w-[1600px] flex-col gap-4 p-3 text-start md:p-6">
+    <PageHeader :title="$t('backtest.title')" :description="$t('backtest.description')">
       <template #actions>
         <UBadge
           v-if="botStore.activeBot.backtestRunning"
@@ -100,20 +98,23 @@ const resultTabs = computed(() => [
           color="neutral"
           variant="outline"
           icon="mdi:folder-open-outline"
-          label="Load saved results"
+          :label="$t('backtest.loadSaved')"
           @click="showSavedResults = true"
         />
       </template>
     </PageHeader>
 
-    <WebserverOnlyNotice v-if="!botStore.activeBot.canRunBacktest" feature="Backtesting" />
+    <WebserverOnlyNotice
+      v-if="!botStore.activeBot.canRunBacktest"
+      :feature="$t('general.featureBacktest')"
+    />
 
     <div v-else class="grid items-start gap-4 lg:grid-cols-[22rem_minmax(0,1fr)]">
       <div class="flex flex-col gap-4">
-        <PanelSection title="New backtest" body-class="p-4">
+        <PanelSection :title="$t('backtest.newBacktest')" body-class="p-4">
           <BacktestRun />
         </PanelSection>
-        <PanelSection v-if="hasBacktestResult" title="Results" body-class="p-2">
+        <PanelSection v-if="hasBacktestResult" :title="$t('backtest.results')" body-class="p-2">
           <BacktestResultSelect
             :backtest-history="botStore.activeBot.backtestHistory"
             :selected-backtest-result-key="botStore.activeBot.selectedBacktestResultKey"
@@ -125,13 +126,13 @@ const resultTabs = computed(() => [
         </PanelSection>
       </div>
 
-      <section class="panel min-w-0 overflow-hidden" aria-label="Backtest result">
+      <section class="panel min-w-0 overflow-hidden" :aria-label="$t('backtest.result')">
         <EmptyState
           v-if="!hasBacktestResult || !botStore.activeBot.selectedBacktestResult"
           class="py-24"
           icon="mdi:chart-box-outline"
-          title="No result yet"
-          description="Run a backtest, or load a saved result, to see trades and profit here."
+          :title="$t('backtest.noResult')"
+          :description="$t('backtest.noResultHelp')"
         />
         <UTabs
           v-else
@@ -175,7 +176,7 @@ const resultTabs = computed(() => [
 
     <USlideover
       v-model:open="showSavedResults"
-      title="Saved results"
+      :title="$t('backtest.savedResults')"
       :ui="{ content: 'sm:max-w-4xl' }"
       :close="{ color: 'neutral', variant: 'ghost' }"
     >

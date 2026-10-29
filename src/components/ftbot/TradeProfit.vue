@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Trade } from '@/types';
+import { t } from '@/i18n';
 
 type modes = 'default' | 'total' | 'realized';
 
@@ -13,11 +14,11 @@ const props = withDefaults(
   },
 );
 
-const modeDescs: { [key in modes]: string } = {
-  default: 'Current profit',
-  total: 'Total profit',
-  realized: 'Realized profit',
-};
+const modeDescs = computed<{ [key in modes]: string }>(() => ({
+  default: t('trades.currentProfit'),
+  total: t('trades.totalProfit'),
+  realized: t('trades.realizedProfit'),
+}));
 
 const profitRatio = computed<number | undefined | null>(() => {
   switch (props.mode) {
@@ -44,10 +45,10 @@ const profitAbs = computed<number | undefined>(() => {
   }
 });
 const profitDesc = computed((): string => {
-  let profit = `${modeDescs[props.mode]}: ${
+  let profit = `${modeDescs.value[props.mode]}: ${
     profitRatio.value ? formatPercent(profitRatio.value) : ''
   } (${profitAbs.value})`;
-  profit += `\nOpen since: ${timestampms(props.trade.open_timestamp)}`;
+  profit += `\n${t('trades.openSince', { time: timestampms(props.trade.open_timestamp) })}`;
   return profit;
 });
 </script>

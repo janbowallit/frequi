@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { i18n, t } from '@/i18n';
 import type { EChartsOption } from 'echarts';
 import ECharts from 'vue-echarts';
 
@@ -39,7 +40,7 @@ use([
 ]);
 
 // Define Column labels here to avoid typos
-const CHART_PROFIT = 'Profit';
+const chartProfit = () => t('charts.profit');
 
 const props = withDefaults(
   defineProps<{
@@ -169,7 +170,7 @@ function generateChart(initial = false) {
       },
       {
         type: 'line',
-        name: CHART_PROFIT,
+        name: chartProfit(),
         animation: initial,
         step: 'end',
         lineStyle: {
@@ -206,11 +207,11 @@ function generateChart(initial = false) {
 }
 
 const cumProfitChartOptions: ComputedRefWithControl<EChartsOption> = computedWithControl(
-  () => props.trades,
+  () => [props.trades, i18n.global.locale.value],
   () => {
     const chartOptionsLoc: EChartsOption = {
       title: {
-        text: 'Cumulative Profit',
+        text: t('charts.cumProfit'),
         left: 'center',
         show: props.showTitle,
       },
@@ -221,8 +222,8 @@ const cumProfitChartOptions: ComputedRefWithControl<EChartsOption> = computedWit
           const profit = params[0].data.profit;
           const currentProfit = params[0].data['currentProfit'];
           const profitText = currentProfit
-            ? `Projected profit (incl. unrealized): ${formatPrice(currentProfit, 3)}`
-            : `Profit: ${formatPrice(profit, 3)}`;
+            ? t('charts.projected', { value: formatPrice(currentProfit, 3) })
+            : `${t('charts.profit')}: ${formatPrice(profit, 3)}`;
           return `${echartsFormat.encodeHTML(timestampToDateString(params[1].data.date))}<br />${
             params[1].marker
           }${profitText}`;
@@ -235,7 +236,7 @@ const cumProfitChartOptions: ComputedRefWithControl<EChartsOption> = computedWit
         },
       },
       legend: {
-        data: [CHART_PROFIT],
+        data: [chartProfit()],
         right: '5%',
         top: 0,
         selectedMode: false,
@@ -247,7 +248,7 @@ const cumProfitChartOptions: ComputedRefWithControl<EChartsOption> = computedWit
       yAxis: [
         {
           type: 'value',
-          name: CHART_PROFIT,
+          name: chartProfit(),
           splitLine: {
             show: false,
           },
@@ -309,8 +310,8 @@ watch(
     v-if="trades.length === 0 && openTrades.length === 0"
     class="h-full"
     icon="i-mdi-chart-areaspline"
-    title="No profit history yet"
-    description="Cumulative profit is drawn here as trades close."
+    :title="$t('charts.noProfitHistory')"
+    :description="$t('charts.noProfitHistoryHelp')"
   />
   <ECharts v-else :option="cumProfitChartOptions" :theme="settingsStore.chartTheme" autoresize />
 </template>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '@/i18n';
 import ECharts from 'vue-echarts';
 // import { EChartsOption } from 'echarts';
 import { format as echartsFormat } from 'echarts';
@@ -47,9 +48,9 @@ const props = withDefaults(
 
 // Define Column labels here to avoid typos
 const CHART_PROFIT = computed(() =>
-  props.profitCol === 'abs_profit' ? 'Absolute profit' : 'Relative profit',
+  props.profitCol === 'abs_profit' ? t('charts.absoluteProfit') : t('charts.relativeProfit'),
 );
-const CHART_TRADE_COUNT = 'Trade Count';
+const chartTradeCount = () => t('charts.tradeCount');
 
 const settingsStore = useSettingsStore();
 const colorStore = useColorStore();
@@ -76,7 +77,7 @@ registerTransform(ftEchartsTransforms.multiple);
 const dailyChartOptions: ComputedRef<EChartsOption> = computed(() => {
   return {
     title: {
-      text: 'Daily profit',
+      text: t('charts.dailyProfit'),
       show: props.showTitle,
     },
     backgroundColor: 'rgba(0, 0, 0, 0)',
@@ -140,7 +141,7 @@ const dailyChartOptions: ComputedRef<EChartsOption> = computed(() => {
           icon: 'roundRect',
           itemStyle: { color: colorStore.colorProfit },
         },
-        { name: CHART_TRADE_COUNT, icon: 'roundRect' },
+        { name: chartTradeCount(), icon: 'roundRect' },
       ],
       top: 0,
       left: 'center',
@@ -209,7 +210,7 @@ const dailyChartOptions: ComputedRef<EChartsOption> = computed(() => {
       },
       {
         type: 'bar',
-        name: CHART_TRADE_COUNT,
+        name: chartTradeCount(),
         itemStyle: {
           color: 'rgba(150,150,150,0.3)',
         },

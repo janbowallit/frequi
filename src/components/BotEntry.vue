@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { BotDescriptor } from '@/types';
+import { t } from '@/i18n';
+
 const { confirm } = useConfirmBox();
 
 const props = defineProps<{
@@ -20,9 +22,9 @@ function confirmRemoveBot() {
 async function removeBotQuestion() {
   if (
     await confirm({
-      title: 'Remove bot?',
-      message: `Log out of ${props.bot.botName || props.bot.botId} and remove it from this browser? The bot itself keeps running.`,
-      confirmText: 'Remove',
+      title: t('bots.removeTitle'),
+      message: t('bots.removeMessage', { bot: props.bot.botName || props.bot.botId }),
+      confirmText: t('common.remove'),
       danger: true,
     })
   ) {
@@ -58,8 +60,8 @@ const autoRefreshLoc = computed({
         v-if="!noRefreshSwitch"
         v-model="autoRefreshLoc"
         size="sm"
-        :aria-label="`Auto-refresh ${displayName}`"
-        :title="`Auto refresh for ${displayName}`"
+        :aria-label="$t('bots.autoRefresh', { bot: displayName })"
+        :title="$t('bots.autoRefresh', { bot: displayName })"
         @click.stop
       />
       <span
@@ -73,12 +75,12 @@ const autoRefreshLoc = computed({
           aria-hidden="true"
         />
         <span :class="{ 'sr-only': noText }">
-          {{ selectedBotStore.isBotOnline ? 'Online' : 'Offline' }}
+          {{ selectedBotStore.isBotOnline ? $t('common.online') : $t('common.offline') }}
         </span>
       </span>
       <span v-else class="flex items-center gap-1 text-xs font-medium text-error">
         <i-mdi-cancel aria-hidden="true" />
-        <span :class="{ 'sr-only': noText }">Login expired</span>
+        <span :class="{ 'sr-only': noText }">{{ $t('nav.loginExpired') }}</span>
       </span>
 
       <div class="flex items-center gap-0.5">
@@ -86,8 +88,8 @@ const autoRefreshLoc = computed({
           v-if="!noButtons && selectedBotStore.isBotLoggedIn"
           color="neutral"
           variant="ghost"
-          aria-label="Rename bot"
-          title="Rename bot"
+          :aria-label="$t('bots.rename')"
+          :title="$t('bots.rename')"
           icon="mdi:pencil-outline"
           @click.stop="$emit('edit', bot.botId)"
         />
@@ -95,7 +97,7 @@ const autoRefreshLoc = computed({
           v-if="!noRefreshSwitch && !selectedBotStore.isBotLoggedIn"
           variant="soft"
           color="error"
-          label="Log in again"
+          :label="$t('bots.logInAgain')"
           icon="mdi:login"
           @click.stop="$emit('editLogin', bot.botId)"
         />
@@ -103,8 +105,8 @@ const autoRefreshLoc = computed({
           v-if="!noButtons"
           variant="ghost"
           color="error"
-          aria-label="Remove bot"
-          title="Remove bot"
+          :aria-label="$t('bots.remove')"
+          :title="$t('bots.remove')"
           icon="mdi:delete-outline"
           @click.stop="removeBotQuestion"
         />

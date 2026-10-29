@@ -23,12 +23,17 @@ const save = () => {
 
 <template>
   <form class="flex w-full gap-2" @submit.prevent="save">
-    <UInput v-model="newName" class="w-full" placeholder="Bot name" autofocus />
+    <UInput v-model="newName" class="w-full" :placeholder="$t('bots.namePlaceholder')" autofocus />
 
     <div class="flex gap-1">
-      <UButton type="submit" color="neutral" title="Save" icon="mdi:check" />
+      <UButton type="submit" color="neutral" :title="$t('common.save')" icon="mdi:check" />
 
-      <UButton color="neutral" title="Cancel" @click="$emit('cancelled')" icon="mdi:close">
+      <UButton
+        color="neutral"
+        :title="$t('common.cancel')"
+        @click="$emit('cancelled')"
+        icon="mdi:close"
+      >
       </UButton>
     </div>
   </form>

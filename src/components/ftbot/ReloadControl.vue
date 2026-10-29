@@ -14,21 +14,21 @@ const autoRefreshLoc = computed({
 
 <template>
   <div class="flex items-center gap-1">
-    <UTooltip text="Refresh bot data automatically">
+    <UTooltip :text="$t('controls.autoRefresh')">
       <USwitch
         v-model="autoRefreshLoc"
         size="sm"
-        :label="showLabel ? 'Auto-refresh' : undefined"
-        aria-label="Auto-refresh all bots"
+        :label="showLabel ? $t('controls.autoRefreshShort') : undefined"
+        :aria-label="$t('controls.autoRefreshAll')"
         class="px-1"
       />
     </UTooltip>
-    <UTooltip text="Refresh now">
+    <UTooltip :text="$t('controls.refreshNow')">
       <UButton
         color="neutral"
         variant="ghost"
         icon="mdi:refresh"
-        aria-label="Refresh all bots now"
+        :aria-label="$t('controls.refreshAllNow')"
         @click="botStore.allRefreshFull"
       />
     </UTooltip>

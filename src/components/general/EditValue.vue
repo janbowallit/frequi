@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { t } from '@/i18n';
+
 const props = withDefaults(
   defineProps<{
     modelValue: string;
@@ -42,7 +44,7 @@ function abort() {
 }
 
 function duplicate() {
-  localName.value = localName.value + ' (copy)';
+  localName.value = t('general.copySuffix', { name: localName.value });
   mode.value = EditState.Duplicating;
 }
 
@@ -82,8 +84,8 @@ function saveNewName() {
         <UButton
           color="neutral"
           variant="ghost"
-          :title="`Rename this ${editableName}`"
-          :aria-label="`Rename this ${editableName}`"
+          :title="$t('general.renameThis', { name: editableName })"
+          :aria-label="$t('general.renameThis', { name: editableName })"
           icon="mdi:pencil"
           @click="mode = EditState.Editing"
         />
@@ -91,24 +93,24 @@ function saveNewName() {
           v-if="allowDuplicate"
           color="neutral"
           variant="ghost"
-          :title="`Duplicate this ${editableName}`"
-          :aria-label="`Duplicate this ${editableName}`"
+          :title="$t('general.duplicateThis', { name: editableName })"
+          :aria-label="$t('general.duplicateThis', { name: editableName })"
           icon="mdi:content-copy"
           @click="duplicate"
         />
         <UButton
           color="neutral"
           variant="ghost"
-          :title="`Delete this ${editableName}`"
-          :aria-label="`Delete this ${editableName}`"
+          :title="$t('general.deleteThis', { name: editableName })"
+          :aria-label="$t('general.deleteThis', { name: editableName })"
           icon="mdi:delete"
           @click="$emit('delete', modelValue)"
         />
       </template>
       <UButton
         v-if="allowAdd && mode === EditState.None"
-        :title="`New ${editableName}`"
-        :aria-label="`New ${editableName}`"
+        :title="$t('general.newThing', { name: editableName })"
+        :aria-label="$t('general.newThing', { name: editableName })"
         icon="mdi:plus"
         color="neutral"
         variant="ghost"
@@ -116,15 +118,15 @@ function saveNewName() {
       />
       <template v-if="mode !== EditState.None">
         <UButton
-          title="Save"
-          aria-label="Save"
+          :title="$t('common.save')"
+          :aria-label="$t('common.save')"
           icon="mdi:check"
           variant="solid"
           @click="saveNewName"
         />
         <UButton
-          title="Cancel"
-          aria-label="Cancel"
+          :title="$t('common.cancel')"
+          :aria-label="$t('common.cancel')"
           color="neutral"
           variant="ghost"
           icon="mdi:close"

@@ -48,17 +48,20 @@ function clickBacktest() {
 </script>
 
 <template>
-  <form class="flex flex-col gap-4 text-left" @submit.prevent="clickBacktest">
+  <form class="flex flex-col gap-4 text-start" @submit.prevent="clickBacktest">
     <fieldset :disabled="botStore.activeBot.backtestRunning" class="flex flex-col gap-4">
-      <UFormField label="Strategy" required>
+      <UFormField :label="$t('backtest.strategy')" required>
         <StrategySelect v-model="btStore.strategy" />
       </UFormField>
 
       <div class="grid grid-cols-2 gap-3">
-        <UFormField label="Timeframe">
+        <UFormField :label="$t('backtest.timeframe')">
           <TimeframeSelect v-model="btStore.selectedTimeframe" />
         </UFormField>
-        <UFormField label="Detail timeframe" help="Optional. Simulates moves inside each candle.">
+        <UFormField
+          :label="$t('backtest.detailTimeframe')"
+          :help="$t('backtest.detailTimeframeHelp')"
+        >
           <TimeframeSelect
             v-model="btStore.selectedDetailTimeframe"
             :below-timeframe="btStore.selectedTimeframe"
@@ -69,10 +72,10 @@ function clickBacktest() {
       <TimeRangeSelect v-model="btStore.timerange" />
 
       <div class="grid grid-cols-2 gap-3">
-        <UFormField label="Starting capital">
+        <UFormField :label="$t('backtest.startingCapital')">
           <UInputNumber
             v-model="btStore.startingCapital"
-            placeholder="From config"
+            :placeholder="$t('backtest.fromConfig')"
             :increment="false"
             :decrement="false"
             :step="10"
@@ -81,21 +84,21 @@ function clickBacktest() {
             :format-options="{ maximumFractionDigits: 5 }"
           />
         </UFormField>
-        <UFormField label="Max open trades">
+        <UFormField :label="$t('backtest.maxOpenTrades')">
           <UInputNumber
             v-model="btStore.maxOpenTrades"
-            placeholder="From strategy"
+            :placeholder="$t('backtest.fromStrategy')"
             :increment="false"
             :decrement="false"
           />
         </UFormField>
       </div>
 
-      <UFormField label="Stake per trade">
+      <UFormField :label="$t('backtest.stakePerTrade')">
         <div class="flex flex-col gap-2">
           <UInputNumber
             v-model="btStore.stakeAmount"
-            placeholder="From strategy"
+            :placeholder="$t('backtest.fromStrategy')"
             :step="10"
             :step-snapping="false"
             :format-options="{ maximumFractionDigits: 5 }"
@@ -105,7 +108,7 @@ function clickBacktest() {
             :disabled="btStore.stakeAmountUnlimited"
           />
           <BaseCheckbox v-model="btStore.stakeAmountUnlimited">
-            Unlimited (split the balance between trades)
+            {{ $t('backtest.unlimited') }}
           </BaseCheckbox>
         </div>
       </UFormField>
@@ -115,31 +118,36 @@ function clickBacktest() {
           color="neutral"
           variant="link"
           class="self-start px-0"
-          label="More options"
+          :label="$t('backtest.moreOptions')"
           trailing-icon="mdi:chevron-down"
           :ui="{ trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform' }"
         />
         <template #content>
           <div class="flex flex-col gap-3 pt-1">
-            <BaseCheckbox v-model="btStore.enableProtections">Use protections</BaseCheckbox>
+            <BaseCheckbox v-model="btStore.enableProtections">{{
+              $t('backtest.protections')
+            }}</BaseCheckbox>
             <BaseCheckbox
               v-if="botStore.activeBot.botFeatures.backtestFreqAI"
               v-model="btStore.allowCache"
             >
-              Reuse cached results
+              {{ $t('backtest.cache') }}
             </BaseCheckbox>
             <template v-if="botStore.activeBot.botFeatures.backtestFreqAI">
               <BaseCheckbox v-model="btStore.freqAI.enabled">
-                Use FreqAI
+                {{ $t('backtest.freqai') }}
                 <template #hint>
-                  Needs a FreqAI configuration and a FreqAI strategy, otherwise the run fails.
+                  {{ $t('backtest.freqaiHint') }}
                 </template>
               </BaseCheckbox>
               <template v-if="btStore.freqAI.enabled">
-                <UFormField label="FreqAI identifier">
-                  <UInput v-model="btStore.freqAI.identifier" placeholder="From config" />
+                <UFormField :label="$t('backtest.freqaiIdentifier')">
+                  <UInput
+                    v-model="btStore.freqAI.identifier"
+                    :placeholder="$t('backtest.fromConfig')"
+                  />
                 </UFormField>
-                <UFormField label="FreqAI model">
+                <UFormField :label="$t('backtest.freqaiModel')">
                   <FreqaiModelSelect v-model="btStore.freqAI.model" />
                 </UFormField>
               </template>
@@ -155,7 +163,7 @@ function clickBacktest() {
         type="submit"
         variant="solid"
         icon="mdi:play"
-        label="Start backtest"
+        :label="$t('backtest.start')"
         :disabled="!btStore.canRunBacktest || !botStore.activeBot.canRunBacktest"
       />
       <UButton
@@ -163,15 +171,15 @@ function clickBacktest() {
         color="error"
         variant="solid"
         icon="mdi:stop"
-        label="Stop backtest"
+        :label="$t('backtest.stop')"
         @click="botStore.activeBot.stopBacktest()"
       />
       <UButton
         color="neutral"
         variant="ghost"
         icon="mdi:refresh"
-        label="Fetch last result"
-        title="Load the result of the last backtest from the bot"
+        :label="$t('backtest.fetchLast')"
+        :title="$t('backtest.fetchLastHelp')"
         :disabled="botStore.activeBot.backtestRunning || !botStore.activeBot.canRunBacktest"
         @click="botStore.activeBot.pollBacktest()"
       />
@@ -179,8 +187,8 @@ function clickBacktest() {
         color="neutral"
         variant="ghost"
         icon="mdi:delete-outline"
-        label="Reset"
-        title="Clear the backtest state on the bot"
+        :label="$t('common.reset')"
+        :title="$t('backtest.resetHelp')"
         class="ms-auto"
         :disabled="botStore.activeBot.backtestRunning || !botStore.activeBot.canRunBacktest"
         @click="botStore.activeBot.removeBacktest()"

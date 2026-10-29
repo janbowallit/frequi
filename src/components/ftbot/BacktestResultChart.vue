@@ -46,25 +46,27 @@ onMounted(() => {
     <div class="flex flex-row mb-1 items-center">
       <div class="me-2">
         <UButton
-          aria-label="Close"
-          title="Pair Navigation"
+          :aria-label="$t('common.close')"
+          :title="$t('backtest.pairNavigation')"
           color="neutral"
           variant="outline"
           :icon="isBarVisible.left ? 'mdi:chevron-left' : 'mdi:chevron-right'"
+          :ui="{ leadingIcon: 'rtl:-scale-x-100' }"
           @click="isBarVisible.left = !isBarVisible.left"
         />
       </div>
       <span class="grow">
-        Graph will always show the latest values for the selected strategy. <br />
-        Timerange: {{ timerange }} - {{ strategy }}
+        {{ $t('backtest.graphHint') }} <br />
+        {{ $t('backtest.graphRange', { range: timerange, strategy }) }}
       </span>
       <div class="text-end">
         <UButton
-          aria-label="Close"
+          :aria-label="$t('common.close')"
           variant="outline"
-          title="Trade Navigation"
+          :title="$t('backtest.tradeNavigation')"
           color="neutral"
           :icon="isBarVisible.right ? 'mdi:chevron-right' : 'mdi:chevron-left'"
+          :ui="{ leadingIcon: 'rtl:-scale-x-100' }"
           @click="isBarVisible.right = !isBarVisible.right"
         />
       </div>
@@ -106,7 +108,7 @@ onMounted(() => {
         />
       </Transition>
     </div>
-    <PanelSection title="Single trades" class="mt-3 w-full">
+    <PanelSection :title="$t('backtest.singleTrades')" class="mt-3 w-full">
       <TradeList
         class="row trade-history mt-2 w-full"
         :trades="backtestResult.trades"

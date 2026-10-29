@@ -155,7 +155,7 @@ const singlePairSelection = computed({
       <div
         class="flex flex-wrap items-center gap-2 border-b border-default px-2 py-2"
         role="toolbar"
-        aria-label="Chart controls"
+        :aria-label="$t('chartControls.controls')"
       >
         <div class="flex min-w-0 grow items-center gap-2 sm:grow-0">
           <BaseStringMultiSelectMenu
@@ -163,8 +163,8 @@ const singlePairSelection = computed({
             v-model="botStore.activeBot.plotMultiPairs"
             class="w-full min-w-0 sm:w-72"
             :items="availablePairs"
-            placeholder="Select pairs to plot"
-            aria-label="Pairs to plot"
+            :placeholder="$t('chartControls.selectPairs')"
+            :aria-label="$t('chartControls.pairsToPlot')"
             virtualize
             size="md"
           />
@@ -173,14 +173,14 @@ const singlePairSelection = computed({
             v-model="singlePairSelection"
             class="w-full min-w-0 sm:w-56"
             :items="availablePairs"
-            aria-label="Pair"
+            :aria-label="$t('chartControls.pair')"
             size="md"
             virtualize
             @input="refresh"
           />
           <UButton
-            title="Reload chart data"
-            aria-label="Reload chart data"
+            :title="$t('chartControls.reload')"
+            :aria-label="$t('chartControls.reload')"
             color="neutral"
             variant="outline"
             :disabled="botStore.activeBot.plotMultiPairs.length === 0"
@@ -190,7 +190,7 @@ const singlePairSelection = computed({
         </div>
         <USwitch
           v-model="settingsStore.multiPairSelection"
-          label="Multi pair"
+          :label="$t('chartControls.multiPair')"
           size="sm"
           class="shrink-0"
         />
@@ -200,7 +200,7 @@ const singlePairSelection = computed({
             color="neutral"
             variant="subtle"
             class="hidden max-w-56 truncate md:inline-flex"
-            :title="`Strategy ${strategyName} on ${timeframe} candles`"
+            :title="$t('chartControls.strategyOn', { strategy: strategyName, timeframe })"
           >
             {{ strategyName }}<span v-if="timeframe" class="text-dimmed">· {{ timeframe }}</span>
           </UBadge>
@@ -209,26 +209,29 @@ const singlePairSelection = computed({
               color="neutral"
               variant="outline"
               icon="mdi:tune-variant"
-              label="Display"
-              aria-label="Chart display options"
+              :label="$t('chartControls.display')"
+              :aria-label="$t('chartControls.displayOptions')"
             />
             <template #content>
               <div class="flex w-72 flex-col gap-3 p-3 text-start">
-                <p class="text-sm font-medium text-muted">Candles</p>
-                <USwitch v-model="settingsStore.showMarkArea" label="Show chart areas" />
+                <p class="text-sm font-medium text-muted">{{ $t('chartControls.candles') }}</p>
+                <USwitch
+                  v-model="settingsStore.showMarkArea"
+                  :label="$t('chartControls.showAreas')"
+                />
                 <USwitch
                   v-model="settingsStore.useHeikinAshiCandles"
-                  label="Heikin Ashi candles"
-                  description="Smoothed candles - easier to read trends"
+                  :label="$t('chartControls.heikinAshi')"
+                  :description="$t('chartControls.heikinAshiHelp')"
                 />
                 <USeparator />
-                <p class="text-sm font-medium text-muted">Indicators</p>
+                <p class="text-sm font-medium text-muted">{{ $t('chartControls.indicators') }}</p>
                 <PlotConfigSelect class="w-full" />
                 <UButton
                   color="neutral"
                   variant="subtle"
                   icon="mdi:cog"
-                  label="Edit indicators"
+                  :label="$t('chartControls.editIndicators')"
                   block
                   @click="showConfigurator"
                 />
@@ -262,15 +265,15 @@ const singlePairSelection = computed({
         v-else
         class="h-full"
         icon="i-mdi-chart-line"
-        title="No pair selected"
-        description="Pick a pair above to load its chart."
+        :title="$t('chartControls.noPair')"
+        :description="$t('chartControls.noPairHelp')"
       />
     </div>
     <DraggableModal
       v-model:open="showPlotConfigModal"
-      title="Plot Configurator"
+      :title="$t('chartControls.configurator')"
       class="max-w-xl"
-      description="Configure chart plot indicators and subplots"
+      :description="$t('chartControls.configuratorHelp')"
       :overlay="false"
       :modal="false"
       :dismissible="false"

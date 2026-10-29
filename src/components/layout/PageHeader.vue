@@ -14,7 +14,7 @@ withDefaults(
 </script>
 
 <template>
-  <div class="flex flex-wrap items-end justify-between gap-3 text-left">
+  <div class="flex flex-wrap items-end justify-between gap-3 text-start">
     <div class="min-w-0">
       <h1 class="text-2xl font-semibold tracking-tight text-highlighted">{{ title }}</h1>
       <p v-if="description" class="mt-0.5 max-w-prose text-sm text-muted">{{ description }}</p>

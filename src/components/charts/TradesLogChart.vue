@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '@/i18n';
 import ECharts from 'vue-echarts';
 import type { EChartsOption } from 'echarts';
 
@@ -34,7 +35,7 @@ use([
 ]);
 
 // Define Column labels here to avoid typos
-const CHART_PROFIT = 'Profit %';
+const chartProfit = () => t('charts.profitPct');
 const CHART_COLOR = '#9be0a8';
 
 const props = withDefaults(
@@ -62,7 +63,7 @@ const chartData = computed(() => {
         trade.pair,
         trade.botName,
         timestampms(trade.close_timestamp),
-        trade.is_short === undefined || !trade.is_short ? 'Long' : 'Short',
+        trade.is_short === undefined || !trade.is_short ? t('trades.long') : t('trades.short'),
       ];
       res.push(entry);
     }
@@ -76,7 +77,7 @@ const chartOptions = computed((): EChartsOption => {
   const datazoomStart = chartData.value.length > 0 ? (1 - 50 / chartData.value.length) * 100 : 100;
   return {
     title: {
-      text: 'Trades log',
+      text: t('charts.tradesLog'),
       left: 'center',
       show: props.showTitle,
     },
@@ -109,7 +110,7 @@ const chartOptions = computed((): EChartsOption => {
     yAxis: [
       {
         type: 'value',
-        name: CHART_PROFIT,
+        name: chartProfit(),
         splitLine: {
           show: false,
         },
@@ -154,7 +155,7 @@ const chartOptions = computed((): EChartsOption => {
     series: [
       {
         type: 'bar',
-        name: CHART_PROFIT,
+        name: chartProfit(),
         barCategoryGap: '0%',
         animation: false,
         label: {
@@ -184,8 +185,8 @@ const chartOptions = computed((): EChartsOption => {
     v-if="!trades.some((t) => !t.is_open)"
     class="h-full"
     icon="i-mdi-chart-scatter-plot"
-    title="No closed trades yet"
-    description="Each closed trade is plotted here with its profit."
+    :title="$t('charts.noClosed')"
+    :description="$t('charts.tradesLogHelp')"
   />
   <ECharts v-else :option="chartOptions" autoresize :theme="settingsStore.chartTheme" />
 </template>

@@ -6,6 +6,7 @@ import mdiIcons from 'virtual:mdi-icons';
 
 import App from './App.vue';
 import router from './router';
+import { i18n } from './i18n';
 import './styles/tailwind.css';
 
 // Icons are bundled with the app instead of loaded from the Iconify API
@@ -18,6 +19,8 @@ pinia.use(piniaPluginPersistedstate);
 myApp.use(pinia);
 
 myApp.use(ui);
+
+myApp.use(i18n);
 
 myApp.use(router);
 

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { LogLine } from '@/types';
+import { t } from '@/i18n';
 
 type LevelFilter = 'all' | 'warning' | 'error';
 
@@ -43,9 +44,9 @@ const levelCounts = computed(() => {
 });
 
 const levelOptions = computed(() => [
-  { value: 'all' as const, label: 'All' },
-  { value: 'warning' as const, label: `Warnings (${levelCounts.value.warning})` },
-  { value: 'error' as const, label: `Errors (${levelCounts.value.error})` },
+  { value: 'all' as const, label: t('common.all') },
+  { value: 'warning' as const, label: t('logs.warnings', { n: levelCounts.value.warning }) },
+  { value: 'error' as const, label: t('logs.errors', { n: levelCounts.value.error }) },
 ]);
 
 const filteredLogs = computed(() => {
@@ -119,16 +120,16 @@ function scrollToBottom() {
 
 <template>
   <section
-    class="panel relative flex h-full flex-col overflow-hidden text-left"
-    aria-label="Bot logs"
+    class="panel relative flex h-full flex-col overflow-hidden text-start"
+    :aria-label="$t('logs.label')"
   >
     <div class="flex flex-wrap items-center gap-2 border-b border-default px-3 py-2">
       <UInput
         v-model="search"
         type="search"
         icon="mdi:magnify"
-        placeholder="Search messages"
-        aria-label="Search log messages"
+        :placeholder="$t('logs.search')"
+        :aria-label="$t('logs.searchLabel')"
         class="w-full sm:w-64"
       />
       <USegmentedControl
@@ -137,21 +138,21 @@ function scrollToBottom() {
         label-key="label"
         value-key="value"
         size="md"
-        aria-label="Filter by level"
+        :aria-label="$t('logs.levelFilter')"
       />
       <div class="ms-auto flex flex-wrap items-center gap-3">
         <USwitch
           v-model="hideRoutine"
-          label="Hide routine messages"
-          title="Hide heartbeats and the web server's connection messages (caused by this dashboard)"
+          :label="$t('logs.hideRoutine')"
+          :title="$t('logs.hideRoutineHelp')"
         />
-        <USwitch v-model="autoRefresh" label="Auto-refresh" />
+        <USwitch v-model="autoRefresh" :label="$t('logs.autoRefresh')" />
         <UButton
           id="refresh-logs"
           color="neutral"
           variant="outline"
           icon="mdi:refresh"
-          label="Refresh"
+          :label="$t('common.refresh')"
           :loading="loading"
           @click="refreshLogs"
         />
@@ -159,35 +160,40 @@ function scrollToBottom() {
     </div>
     <p class="border-b border-default px-3 py-1.5 text-xs text-muted" aria-live="polite">
       <template v-if="filteredLogs.length === botStore.activeBot.lastLogs.length">
-        {{ botStore.activeBot.lastLogs.length }} recent entries
+        {{ $t('logs.recent', { n: botStore.activeBot.lastLogs.length }) }}
       </template>
       <template v-else>
-        Showing {{ filteredLogs.length }} of {{ botStore.activeBot.lastLogs.length }} entries
+        {{
+          $t('logs.showing', {
+            shown: filteredLogs.length,
+            total: botStore.activeBot.lastLogs.length,
+          })
+        }}
       </template>
     </p>
     <div
       ref="scrollContainer"
       class="h-full w-full overflow-auto bg-muted/40 py-2 font-mono text-[13px] leading-relaxed"
       tabindex="0"
-      aria-label="Log entries"
+      :aria-label="$t('logs.entries')"
       @scroll.passive="onScroll"
     >
       <EmptyState
         v-if="botStore.activeBot.lastLogs.length === 0 && !loading"
-        title="No log entries yet"
+        :title="$t('logs.empty')"
         icon="mdi:text-box-outline"
       />
       <EmptyState
         v-else-if="filteredLogs.length === 0 && !loading"
-        title="No entries match"
-        description="Try a different search or level filter."
+        :title="$t('logs.noMatch')"
+        :description="$t('logs.noMatchHelp')"
         icon="mdi:magnify-close"
       >
         <UButton
           color="neutral"
           variant="outline"
           size="sm"
-          label="Clear filters"
+          :label="$t('logs.clearFilters')"
           @click="
             search = '';
             levelFilter = 'all';
@@ -223,7 +229,7 @@ function scrollToBottom() {
       variant="solid"
       size="sm"
       icon="mdi:arrow-down"
-      label="Jump to latest"
+      :label="$t('logs.jumpLatest')"
       @click="scrollToBottom"
     />
   </section>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ForceExitPayload, Trade } from '@/types';
 import { refDebounced } from '@vueuse/core';
+import { t } from '@/i18n';
 
 export interface ForceExitFormProps {
   trade: Trade;
@@ -59,18 +60,24 @@ const amountDebounced = refDebounced(amount, 250, { maxWait: 500 });
 
 const amountInBase = computed<string>(() => {
   return amountDebounced.value && props.trade.current_rate
-    ? `~${formatPriceCurrency(amountDebounced.value * props.trade.current_rate, props.trade.quote_currency || '', props.stakeCurrencyDecimals)} (Estimated value) `
+    ? t('forceTrade.estimated', {
+        value: formatPriceCurrency(
+          amountDebounced.value * props.trade.current_rate,
+          props.trade.quote_currency || '',
+          props.stakeCurrencyDecimals,
+        ),
+      })
     : '';
 });
-const orderTypeOptions = [
-  { value: 'market', text: 'Market' },
-  { value: 'limit', text: 'Limit' },
-];
+const orderTypeOptions = computed(() => [
+  { value: 'market', text: t('forceTrade.market') },
+  { value: 'limit', text: t('forceTrade.limit') },
+]);
 resetForm();
 </script>
 
 <template>
-  <UModal :title="`Force exiting a trade`" description="Configure and confirm a forced trade exit">
+  <UModal :title="$t('forceTrade.exitTitle')" :description="$t('forceTrade.exitDescription')">
     <template #body>
       <form ref="form" class="space-y-4" @submit.prevent="handleExit">
         <div class="mb-4">
@@ -82,7 +89,7 @@ resetForm();
         </div>
 
         <UFormField
-          :label="`Amount in ${trade.base_currency} [optional]`"
+          :label="$t('forceTrade.amountOptional', { currency: trade.base_currency ?? '' })"
           :description="amountInBase"
         >
           <div class="space-y-2">
@@ -106,9 +113,9 @@ resetForm();
           </div>
         </UFormField>
         <UFormField
-          label="Price"
+          :label="$t('forceTrade.price')"
           v-if="botStore.activeBot.botFeatures.forceExitWithPrice"
-          description="Only available with limit orders"
+          :description="$t('forceTrade.limitOnly')"
         >
           <UInputNumber
             id="price-input"
@@ -124,7 +131,7 @@ resetForm();
           />
         </UFormField>
 
-        <UFormField label="OrderType" required>
+        <UFormField :label="$t('forceTrade.orderType')" required>
           <USegmentedControl
             v-model="ordertype"
             :items="orderTypeOptions"
@@ -136,10 +143,10 @@ resetForm();
       </form>
     </template>
     <template #footer>
-      <UButton class="ms-auto" icon="mdi:close" color="neutral" @click="$emit('close', false)"
-        >Cancel</UButton
-      >
-      <UButton icon="mdi:exit-to-app" @click="handleExit">Exit Position</UButton>
+      <UButton class="ms-auto" icon="mdi:close" color="neutral" @click="$emit('close', false)">{{
+        $t('common.cancel')
+      }}</UButton>
+      <UButton icon="mdi:exit-to-app" @click="handleExit">{{ $t('forceTrade.exit') }}</UButton>
     </template>
   </UModal>
 </template>

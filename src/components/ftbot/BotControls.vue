@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ForceExitPayload } from '@/types';
 import { BotStates } from '@/types';
+import { t } from '@/i18n';
 
 // In a narrow panel the icons push the labels into an ellipsis - drop the icons there instead.
 const narrowButtonUi = { leadingIcon: 'hidden @[18rem]:inline-flex' };
@@ -19,31 +20,42 @@ const stateInfo = computed<{ label: string; description: string; dot: string }>(
   switch (botState.value) {
     case BotStates.RUNNING:
       return {
-        label: 'Running',
-        description: 'Entering and exiting trades',
+        label: t('controls.running'),
+        description: t('controls.runningHelp'),
         dot: 'bg-success',
       };
     case BotStates.PAUSED:
       return {
-        label: 'Paused',
-        description: 'Managing open trades, no new entries',
+        label: t('controls.paused'),
+        description: t('controls.pausedHelp'),
         dot: 'bg-warning',
       };
     case BotStates.STOPPED:
-      return { label: 'Stopped', description: 'Not trading', dot: 'bg-error' };
+      return {
+        label: t('controls.stopped'),
+        description: t('controls.stoppedHelp'),
+        dot: 'bg-error',
+      };
     case BotStates.RELOAD_CONFIG:
-      return { label: 'Reloading', description: 'Reloading configuration', dot: 'bg-info' };
+      return {
+        label: t('controls.reloading'),
+        description: t('controls.reloadingHelp'),
+        dot: 'bg-info',
+      };
     default:
-      return { label: 'Unknown', description: 'Waiting for the bot', dot: 'bg-neutral-400' };
+      return {
+        label: t('controls.unknown'),
+        description: t('controls.unknownHelp'),
+        dot: 'bg-neutral-400',
+      };
   }
 });
 
 async function handleStopBot() {
   const result = await confirm({
-    title: 'Stop trading?',
-    message:
-      'The bot stops completely - it will no longer enter new trades or manage open ones (no exits, no stoploss updates).',
-    confirmText: 'Stop trading',
+    title: t('controls.stopTitle'),
+    message: t('controls.stopMessage'),
+    confirmText: t('controls.stopConfirm'),
     danger: true,
   });
   if (result) {
@@ -54,10 +66,9 @@ async function handleStopBot() {
 async function handleStopBuy() {
   if (
     await confirm({
-      title: 'Pause new entries?',
-      message:
-        'The bot keeps managing open trades, but will not enter new trades or increase position sizes. Press Resume to continue.',
-      confirmText: 'Pause entries',
+      title: t('controls.pauseTitle'),
+      message: t('controls.pauseMessage'),
+      confirmText: t('controls.pauseConfirm'),
     })
   ) {
     botStore.activeBot.stopBuy();
@@ -67,9 +78,9 @@ async function handleStopBuy() {
 async function handleReloadConfig() {
   if (
     await confirm({
-      title: 'Reload configuration?',
-      message: 'Reloads the configuration file and the strategy. Open trades are kept.',
-      confirmText: 'Reload',
+      title: t('controls.reloadTitle'),
+      message: t('controls.reloadMessage'),
+      confirmText: t('common.reload'),
     })
   ) {
     botStore.activeBot.reloadConfig();
@@ -80,9 +91,9 @@ async function handleForceExit() {
   const count = botStore.activeBot.openTradeCount;
   if (
     await confirm({
-      title: 'Exit all open trades?',
-      message: `This sells ${count === 1 ? 'the 1 open trade' : `all ${count} open trades`} at market right now. This cannot be undone.`,
-      confirmText: 'Exit all trades',
+      title: t('controls.exitAllTitle'),
+      message: t('controls.exitAllMessage', { n: count }, count),
+      confirmText: t('controls.exitAllConfirm'),
       danger: true,
     })
   ) {
@@ -102,7 +113,11 @@ async function handleForceEntry() {
 </script>
 
 <template>
-  <div role="toolbar" aria-label="Bot controls" class="@container flex w-full flex-col gap-2">
+  <div
+    role="toolbar"
+    :aria-label="$t('controls.toolbar')"
+    class="@container flex w-full flex-col gap-2"
+  >
     <div class="flex items-center justify-between gap-2">
       <div class="flex min-w-0 flex-wrap items-center gap-x-2" role="status">
         <span class="size-2.5 shrink-0 rounded-full" :class="stateInfo.dot" aria-hidden="true" />
@@ -116,10 +131,10 @@ async function handleForceEntry() {
         :variant="isRunning ? 'outline' : 'solid'"
         class="justify-center"
         :disabled="!canTrade || isRunning"
-        :label="isPaused ? 'Resume' : 'Start'"
+        :label="isPaused ? $t('controls.resume') : $t('common.start')"
         icon="mdi:play"
         :ui="narrowButtonUi"
-        title="Start trading"
+        :title="$t('controls.startHelp')"
         @click="botStore.activeBot.startBot()"
       />
       <UButton
@@ -127,10 +142,10 @@ async function handleForceEntry() {
         variant="outline"
         class="justify-center"
         :disabled="!canTrade || !isRunning"
-        label="Pause"
+        :label="$t('controls.pause')"
         icon="mdi:pause"
         :ui="narrowButtonUi"
-        title="Keep managing open trades, but don't enter new ones"
+        :title="$t('controls.pauseHelp')"
         @click="handleStopBuy()"
       />
       <UButton
@@ -138,10 +153,10 @@ async function handleForceEntry() {
         variant="outline"
         class="justify-center"
         :disabled="!canTrade || !(isRunning || isPaused)"
-        label="Stop"
+        :label="$t('common.stop')"
         icon="mdi:stop"
         :ui="narrowButtonUi"
-        title="Stop trading - also stops handling open trades"
+        :title="$t('controls.stopHelp')"
         @click="handleStopBot()"
       />
     </div>
@@ -152,9 +167,9 @@ async function handleForceEntry() {
         variant="ghost"
         size="sm"
         :disabled="!canTrade || !isRunning"
-        label="Force entry"
+        :label="$t('controls.forceEntry')"
         icon="mdi:plus-box-outline"
-        title="Open a trade now; exits follow the strategy"
+        :title="$t('controls.forceEntryHelp')"
         @click="handleForceEntry"
       />
       <UButton
@@ -162,9 +177,9 @@ async function handleForceEntry() {
         variant="ghost"
         size="sm"
         :disabled="!canTrade"
-        label="Reload config"
+        :label="$t('controls.reloadConfig')"
         icon="mdi:reload"
-        title="Reload configuration and strategy"
+        :title="$t('controls.reloadConfigHelp')"
         @click="handleReloadConfig()"
       />
       <UButton
@@ -173,9 +188,9 @@ async function handleForceEntry() {
         size="sm"
         class="ms-auto"
         :disabled="!canTrade || botStore.activeBot.openTradeCount === 0"
-        label="Exit all"
+        :label="$t('controls.exitAll')"
         icon="mdi:close-box-multiple-outline"
-        title="Force exit all open trades at market"
+        :title="$t('controls.exitAllHelp')"
         @click="handleForceExit()"
       />
     </div>

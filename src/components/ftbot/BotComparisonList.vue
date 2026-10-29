@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ComparisonTableItems } from '@/types';
 import type { TableColumn } from '@nuxt/ui';
+import { t } from '@/i18n';
 
 const botStore = useBotStore();
 
@@ -17,7 +18,7 @@ const tableItems = computed<ComparisonTableItems[]>(() => {
   const val: ComparisonTableItems[] = [];
   const summary: ComparisonTableItems = {
     botId: undefined,
-    botName: 'Summary',
+    botName: t('summary.label'),
     profitClosed: 0,
     profitClosedRatio: undefined,
     profitOpen: 0,
@@ -80,9 +81,11 @@ const tableItems = computed<ComparisonTableItems[]>(() => {
             botStore.allBalance[k]?.total_bot ?? botStore.allBalance[k]?.total ?? 0;
           summary.stakeCurrencyDecimals = botStore.allBotState[k]?.stake_currency_decimals || 3;
           if (botStore.allSelectedBotsSameState) {
-            summary.balanceAppendix = botStore.allBotState[k]?.dry_run ? '(dry)' : '(live)';
+            summary.balanceAppendix = botStore.allBotState[k]?.dry_run
+              ? t('comparison.dry')
+              : t('comparison.live');
           } else {
-            summary.balanceAppendix = '(mixed dry and live)';
+            summary.balanceAppendix = t('comparison.mixed');
           }
         }
         // summary.decimals = this.allBotState[k]?.stake_currency_decimals || summary.decimals;
@@ -96,14 +99,14 @@ const tableItems = computed<ComparisonTableItems[]>(() => {
   return val;
 });
 
-const columns: TableColumn<ComparisonTableItems>[] = [
+const columns = computed<TableColumn<ComparisonTableItems>[]>(() => [
   { accessorKey: 'botName' },
-  { accessorKey: 'trades', header: 'Trades' },
-  { id: 'profitOpen', header: 'Open Profit' },
-  { id: 'profitClosed', header: 'Closed Profit' },
-  { accessorKey: 'balance', header: 'Balance' },
-  { id: 'winVsLoss', header: 'W/L' },
-];
+  { accessorKey: 'trades', header: t('comparison.trades') },
+  { id: 'profitOpen', header: t('comparison.openProfit') },
+  { id: 'profitClosed', header: t('comparison.closedProfit') },
+  { accessorKey: 'balance', header: t('comparison.balance') },
+  { id: 'winVsLoss', header: t('comparison.winLoss') },
+]);
 </script>
 
 <template>
@@ -114,13 +117,13 @@ const columns: TableColumn<ComparisonTableItems>[] = [
   >
     <template #botName-header>
       <div class="flex w-full flex-row items-center justify-between gap-2">
-        <span>Bot</span>
+        <span>{{ $t('comparison.bot') }}</span>
         <UButton
           v-if="botStore.botCount > 1"
           color="neutral"
           variant="soft"
           size="xs"
-          label="Select all"
+          :label="$t('comparison.selectAll')"
           @click="botStore.toggleBotsByState('all')"
         />
       </div>
@@ -134,13 +137,13 @@ const columns: TableColumn<ComparisonTableItems>[] = [
               botStore.botStores[(row.original as unknown as ComparisonTableItems).botId!]!
                 .isSelected
             "
-            title="Show this bot in Dashboard"
+            :title="$t('comparison.showInDashboard')"
             >{{ row.original.botName }}</BaseCheckbox
           >
           <BaseCheckbox
             v-if="!row.original.botId && botStore.botCount > 1"
             v-model="allToggled"
-            title="Toggle all bots"
+            :title="$t('comparison.toggleAll')"
             class="font-bold"
             >{{ row.original.botName }}</BaseCheckbox
           >
@@ -152,9 +155,9 @@ const columns: TableColumn<ComparisonTableItems>[] = [
           color="neutral"
           variant="soft"
           :class="{ 'cursor-pointer': botStore.botCount > 1 }"
-          title="Click to select all dry run bots"
+          :title="$t('comparison.selectDry')"
           @click="botStore.toggleBotsByState('dry')"
-          >Dry run</UBadge
+          >{{ $t('common.dryRun') }}</UBadge
         >
         <UBadge
           v-if="row.original.isOnline && !row.original.isDryRun"
@@ -162,11 +165,13 @@ const columns: TableColumn<ComparisonTableItems>[] = [
           color="warning"
           variant="soft"
           :class="{ 'cursor-pointer': botStore.botCount > 1 }"
-          title="Click to select all live bots"
+          :title="$t('comparison.selectLive')"
           @click="botStore.toggleBotsByState('live')"
-          >Live</UBadge
+          >{{ $t('comparison.liveBadge') }}</UBadge
         >
-        <UBadge v-if="row.original.isOnline === false" color="error" variant="soft">Offline</UBadge>
+        <UBadge v-if="row.original.isOnline === false" color="error" variant="soft">{{
+          $t('common.offline')
+        }}</UBadge>
       </div>
     </template>
     <template #profitOpen-cell="{ row }">

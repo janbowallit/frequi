@@ -21,7 +21,7 @@ withDefaults(
       {{ description }}
       <InfoBox v-if="help" :hint="help" class="self-center" />
     </span>
-    <span class="min-w-0 text-right text-highlighted tabular-nums" :class="classValue">
+    <span class="min-w-0 text-end text-highlighted tabular-nums" :class="classValue">
       <slot></slot>
     </span>
   </div>

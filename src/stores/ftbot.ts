@@ -1,3 +1,4 @@
+import { t } from '@/i18n';
 import type {
   AllProfitStats,
   AvailablePairPayload,
@@ -352,14 +353,14 @@ export function createBotSubStore(botId: string, botName: string) {
       async deleteLock(lockid: string) {
         try {
           const res = await api.delete<LockResponse>(`/locks/${lockid}`);
-          showAlert(`Deleted Lock ${lockid}.`);
+          showAlert(t('alerts.lockDeleted', { id: lockid }));
           this.currentLocks = res.data;
           return Promise.resolve(res);
         } catch (error) {
           if (axios.isAxiosError(error)) {
             console.error(error.response);
           }
-          showAlert(`Failed to delete lock ${lockid}`, 'error');
+          showAlert(t('alerts.lockDeleteFailed', { id: lockid }), 'error');
           return Promise.reject(error);
         }
       },
@@ -457,7 +458,7 @@ export function createBotSubStore(botId: string, botName: string) {
               const isTimeout = err.code === 'ECONNABORTED' || err.message?.includes('timeout');
               const errMsg = isTimeout
                 ? 'Timeout exceeded'
-                : (err.response?.data?.detail ?? 'Error fetching history');
+                : (err.response?.data?.detail ?? t('alerts.historyFailed'));
               showAlert(errMsg, 'error');
             }
 
@@ -521,7 +522,7 @@ export function createBotSubStore(botId: string, botName: string) {
           console.error(error);
           if (axios.isAxiosError(error)) {
             console.error(error.response);
-            const errMsg = error.response?.data?.detail ?? 'Error fetching history';
+            const errMsg = error.response?.data?.detail ?? t('alerts.historyFailed');
             showAlert(errMsg, 'warning');
           }
           return Promise.reject(error);
@@ -802,7 +803,7 @@ export function createBotSubStore(botId: string, botName: string) {
           if (axios.isAxiosError(error)) {
             console.error(error.response);
           }
-          showAlert('Error starting bot.', 'error');
+          showAlert(t('alerts.startFailed'), 'error');
           return Promise.reject(error);
         }
       },
@@ -818,7 +819,7 @@ export function createBotSubStore(botId: string, botName: string) {
           if (axios.isAxiosError(error)) {
             console.error(error.response);
           }
-          showAlert('Error stopping bot.', 'error');
+          showAlert(t('alerts.stopFailed'), 'error');
           return Promise.reject(error);
         }
       },
@@ -834,7 +835,7 @@ export function createBotSubStore(botId: string, botName: string) {
           if (axios.isAxiosError(error)) {
             console.error(error.response);
           }
-          showAlert('Error calling stopbuy.', 'error');
+          showAlert(t('alerts.stopBuyFailed'), 'error');
           return Promise.reject(error);
         }
       },
@@ -851,20 +852,22 @@ export function createBotSubStore(botId: string, botName: string) {
           if (axios.isAxiosError(error)) {
             console.error(error.response);
           }
-          showAlert('Error reloading.', 'error');
+          showAlert(t('alerts.reloadFailed'), 'error');
           return Promise.reject(error);
         }
       },
       async deleteTrade(tradeid: string) {
         try {
           const res = await api.delete<DeleteTradeResponse>(`/trades/${tradeid}`);
-          showAlert(res.data.result_msg ? res.data.result_msg : `Deleted Trade ${tradeid}`);
+          showAlert(
+            res.data.result_msg ? res.data.result_msg : t('alerts.tradeDeleted', { id: tradeid }),
+          );
           return Promise.resolve(res);
         } catch (error) {
           if (axios.isAxiosError(error)) {
             console.error(error.response);
           }
-          showAlert(`Failed to delete trade ${tradeid}`, 'error');
+          showAlert(t('alerts.tradeDeleteFailed', { id: tradeid }), 'error');
           return Promise.reject(error);
         }
       },
@@ -872,14 +875,14 @@ export function createBotSubStore(botId: string, botName: string) {
         try {
           const res = await api.delete<DeleteTradeResponse>(`/trades/${tradeid}/open-order`);
           showAlert(
-            res.data.result_msg ? res.data.result_msg : `Canceled open order for ${tradeid}`,
+            res.data.result_msg ? res.data.result_msg : t('alerts.orderCanceled', { id: tradeid }),
           );
           return Promise.resolve(res);
         } catch (error) {
           if (axios.isAxiosError(error)) {
             console.error(error.response);
           }
-          showAlert(`Failed to cancel open order ${tradeid}`, 'error');
+          showAlert(t('alerts.orderCancelFailed', { id: tradeid }), 'error');
           return Promise.reject(error);
         }
       },
@@ -891,7 +894,7 @@ export function createBotSubStore(botId: string, botName: string) {
           if (axios.isAxiosError(error)) {
             console.error(error.response);
           }
-          showAlert(`Failed to reload trade ${tradeid}`, 'error');
+          showAlert(t('alerts.tradeReloadFailed', { id: tradeid }), 'error');
           return Promise.reject(error);
         }
       },
@@ -905,7 +908,7 @@ export function createBotSubStore(botId: string, botName: string) {
           if (axios.isAxiosError(error)) {
             console.error(error.response);
           }
-          showAlert(`Failed to get custom data for trade ${tradeid}`, 'error');
+          showAlert(t('alerts.customDataFailed', { id: tradeid }), 'error');
           return Promise.reject(error);
         }
       },
@@ -923,13 +926,13 @@ export function createBotSubStore(botId: string, botName: string) {
             '/forcesell',
             payload,
           );
-          showAlert(`Exit order for ${payload.tradeid} created`, 'success');
+          showAlert(t('alerts.exitOrderCreated', { id: payload.tradeid }), 'success');
           return Promise.resolve(res);
         } catch (error) {
           if (axios.isAxiosError(error)) {
             console.error(error.response);
           }
-          showAlert(`Failed to create exit order for ${payload.tradeid}`, 'error');
+          showAlert(t('alerts.exitOrderFailed', { id: payload.tradeid }), 'error');
           return Promise.reject(error);
         }
       },
@@ -941,13 +944,16 @@ export function createBotSubStore(botId: string, botName: string) {
               ForceEnterPayload,
               AxiosResponse<StatusResponse | TradeResponse>
             >('/forcebuy', payload);
-            showAlert(`Order for ${payload.pair} created.`, 'success');
+            showAlert(t('alerts.orderCreated', { pair: payload.pair }), 'success');
 
             return Promise.resolve(res);
           } catch (error) {
             if (axios.isAxiosError(error)) {
               console.error(error.response);
-              showAlert(`Error occured entering: '${error.response?.data?.error}'`, 'error');
+              showAlert(
+                t('alerts.entryFailed', { error: String(error.response?.data?.error) }),
+                'error',
+              );
             }
             return Promise.reject(error);
           }
@@ -970,19 +976,19 @@ export function createBotSubStore(botId: string, botName: string) {
               const { errors } = result.data;
               Object.keys(errors).forEach((pair) => {
                 showAlert(
-                  `Error while adding pair ${pair} to Blacklist: ${errors[pair]?.error_msg}`,
+                  t('alerts.blacklistAddError', { pair, error: String(errors[pair]?.error_msg) }),
                   'error',
                 );
               });
             } else {
-              showAlert(`Pair ${payload.blacklist} added.`);
+              showAlert(t('alerts.blacklistAdded', { pair: String(payload.blacklist) }));
             }
             return Promise.resolve(result.data);
           } catch (error) {
             if (axios.isAxiosError(error)) {
               console.error(error.response);
               showAlert(
-                `Error occured while adding pairs to Blacklist: '${error.response?.data?.error}'`,
+                t('alerts.blacklistAddFailed', { error: String(error.response?.data?.error) }),
                 'error',
               );
             }
@@ -1016,19 +1022,22 @@ export function createBotSubStore(botId: string, botName: string) {
               const { errors } = result.data;
               Object.keys(errors).forEach((pair) => {
                 showAlert(
-                  `Error while removing pair ${pair} from Blacklist: ${errors[pair]?.error_msg}`,
+                  t('alerts.blacklistRemoveError', {
+                    pair,
+                    error: String(errors[pair]?.error_msg),
+                  }),
                   'error',
                 );
               });
             } else {
-              showAlert(`Pair ${blacklistPairs} removed.`);
+              showAlert(t('alerts.blacklistRemoved', { pair: String(blacklistPairs) }));
             }
             return Promise.resolve(result.data);
           } catch (error) {
             if (axios.isAxiosError(error)) {
               console.error(error.response);
               showAlert(
-                `Error occured while removing pairs from Blacklist: '${error.response?.data?.error}'`,
+                t('alerts.blacklistRemoveFailed', { error: String(error.response?.data?.error) }),
                 'error',
               );
             }
@@ -1060,7 +1069,7 @@ export function createBotSubStore(botId: string, botName: string) {
           this.updateBacktestResult(data.backtest_result);
         }
         if (data.status === 'error') {
-          showAlert(`Backtest failed: ${data.status_msg}.`, 'error');
+          showAlert(t('alerts.backtestFailed', { msg: data.status_msg }), 'error');
         }
       },
       async removeBacktest() {

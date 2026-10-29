@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '@/i18n';
 import ECharts from 'vue-echarts';
 import type { ClosedTrade } from '@/types';
 import type { EChartsOption } from 'echarts';
@@ -70,7 +71,7 @@ const losingTrades = computed(() => {
 const chartOptions = computed((): EChartsOption => {
   return {
     title: {
-      text: 'Trades durations',
+      text: t('charts.durations'),
       left: 'center',
       show: props.showTitle,
     },
@@ -89,11 +90,11 @@ const chartOptions = computed((): EChartsOption => {
           config: {
             itemNameFormatter: (params) => {
               if (params.value === 0) {
-                return 'All trades';
+                return t('charts.allTrades');
               } else if (params.value === 1) {
-                return 'Winning trades';
+                return t('charts.winning');
               } else if (params.value === 2) {
-                return 'Losing trades';
+                return t('charts.losing');
               }
             },
           },
@@ -113,7 +114,7 @@ const chartOptions = computed((): EChartsOption => {
     yAxis: [
       {
         type: 'value',
-        name: 'Trade duration',
+        name: t('charts.duration'),
         splitArea: {
           show: true,
         },
@@ -167,7 +168,7 @@ const chartOptions = computed((): EChartsOption => {
     ],
     series: [
       {
-        name: 'Trade durations',
+        name: t('charts.durations'),
         type: 'boxplot',
         datasetId: 'allTradesBoxplot',
         colorBy: 'data',

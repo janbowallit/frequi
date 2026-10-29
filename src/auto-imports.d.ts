@@ -21,6 +21,7 @@ declare global {
   const availableBacktestMetrics: typeof import('./utils/backtestMetrics').availableBacktestMetrics
   const binData: typeof import('./utils/charts/binCount').binData
   const calculateDiff: typeof import('./utils/charts/areaPlotDataset').calculateDiff
+  const chartSeriesLabel: typeof import('./composables/useCandleChartTooltip').chartSeriesLabel
   const computed: typeof import('vue').computed
   const computedAsync: typeof import('@vueuse/core').computedAsync
   const computedEager: typeof import('@vueuse/core').computedEager
@@ -89,6 +90,7 @@ declare global {
   const hasFeature: typeof import('./utils/features').hasFeature
   const heikinAshiDataset: typeof import('./utils/charts/heikinAshiDataset').heikinAshiDataset
   const humanizeDurationFromSeconds: typeof import('./utils/formatters/timeformat').humanizeDurationFromSeconds
+  const humanizeMs: typeof import('./utils/formatters/timeformat').humanizeMs
   const ignorableWatch: typeof import('@vueuse/core').ignorableWatch
   const initBots: typeof import('./stores/ftbotwrapper').initBots
   const inject: typeof import('vue').inject
@@ -462,6 +464,7 @@ declare module 'vue' {
     readonly availableBacktestMetrics: UnwrapRef<typeof import('./utils/backtestMetrics')['availableBacktestMetrics']>
     readonly binData: UnwrapRef<typeof import('./utils/charts/binCount')['binData']>
     readonly calculateDiff: UnwrapRef<typeof import('./utils/charts/areaPlotDataset')['calculateDiff']>
+    readonly chartSeriesLabel: UnwrapRef<typeof import('./composables/useCandleChartTooltip')['chartSeriesLabel']>
     readonly computed: UnwrapRef<typeof import('vue')['computed']>
     readonly computedAsync: UnwrapRef<typeof import('@vueuse/core')['computedAsync']>
     readonly computedEager: UnwrapRef<typeof import('@vueuse/core')['computedEager']>
@@ -528,6 +531,7 @@ declare module 'vue' {
     readonly hasFeature: UnwrapRef<typeof import('./utils/features')['hasFeature']>
     readonly heikinAshiDataset: UnwrapRef<typeof import('./utils/charts/heikinAshiDataset')['heikinAshiDataset']>
     readonly humanizeDurationFromSeconds: UnwrapRef<typeof import('./utils/formatters/timeformat')['humanizeDurationFromSeconds']>
+    readonly humanizeMs: UnwrapRef<typeof import('./utils/formatters/timeformat')['humanizeMs']>
     readonly ignorableWatch: UnwrapRef<typeof import('@vueuse/core')['ignorableWatch']>
     readonly initBots: UnwrapRef<typeof import('./stores/ftbotwrapper')['initBots']>
     readonly inject: UnwrapRef<typeof import('vue')['inject']>

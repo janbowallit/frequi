@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { t } from '@/i18n';
+
 const botStore = useBotStore();
 const loginDialog = useLoginDialog();
 
@@ -7,36 +9,36 @@ const quickLinks = computed(() =>
     {
       to: '/trade',
       icon: 'mdi:swap-horizontal-bold',
-      title: 'Trade',
-      description: 'Open trades, controls and live chart',
+      title: t('nav.trade'),
+      description: t('home.tradeHelp'),
       visible: !botStore.canRunBacktest,
     },
     {
       to: '/dashboard',
       icon: 'mdi:view-dashboard-outline',
-      title: 'Dashboard',
-      description: 'Profit, performance and history',
+      title: t('nav.dashboard'),
+      description: t('home.dashboardHelp'),
       visible: !botStore.canRunBacktest,
     },
     {
       to: '/backtest',
       icon: 'mdi:flask-outline',
-      title: 'Backtest',
-      description: 'Test strategies on historic data',
+      title: t('nav.backtest'),
+      description: t('home.backtestHelp'),
       visible: botStore.canRunBacktest,
     },
     {
       to: '/graph',
       icon: 'mdi:chart-line',
-      title: 'Chart',
-      description: 'Candles with entry and exit signals',
+      title: t('nav.chart'),
+      description: t('home.chartHelp'),
       visible: true,
     },
     {
       to: '/logs',
       icon: 'mdi:text-box-outline',
-      title: 'Logs',
-      description: 'What the bot is doing right now',
+      title: t('nav.logs'),
+      description: t('home.logsHelp'),
       visible: true,
     },
   ].filter((link) => link.visible),
@@ -44,21 +46,17 @@ const quickLinks = computed(() =>
 </script>
 
 <template>
-  <div class="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-6 text-left sm:py-10">
+  <div class="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-6 text-start sm:py-10">
     <PageHeader
-      title="Bots"
-      :description="
-        botStore.botCount > 0
-          ? 'The bots this browser is connected to.'
-          : 'Connect FreqUI to a running bot to see its trades and control it.'
-      "
+      :title="$t('home.bots')"
+      :description="botStore.botCount > 0 ? $t('home.connected') : $t('home.connectHint')"
     >
       <template v-if="botStore.botCount > 0" #actions>
         <UButton
           color="neutral"
           variant="outline"
           icon="mdi:plus"
-          label="Add bot"
+          :label="$t('home.addBot')"
           @click="loginDialog({})"
         />
       </template>
@@ -66,21 +64,21 @@ const quickLinks = computed(() =>
 
     <BotList v-if="botStore.botCount > 0" embedded />
     <div v-else class="rounded-(--app-panel-radius) border border-dashed border-accented">
-      <EmptyState title="No bot connected" icon="mdi:robot-outline">
+      <EmptyState :title="$t('home.noBot')" icon="mdi:robot-outline">
         <UButton
           class="mt-2"
           variant="solid"
           icon="mdi:login"
-          label="Connect a bot"
+          :label="$t('home.connect')"
           @click="loginDialog({})"
         />
       </EmptyState>
     </div>
 
     <nav v-if="botStore.botCount > 0" aria-labelledby="go-heading" class="flex flex-col gap-2">
-      <h2 id="go-heading" class="text-sm font-medium text-muted">Go to</h2>
+      <h2 id="go-heading" class="text-sm font-medium text-muted">{{ $t('home.goTo') }}</h2>
       <ul
-        class="panel grid grid-cols-1 divide-y divide-default sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-4 lg:divide-x"
+        class="panel grid grid-cols-1 divide-y divide-default sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-4 lg:divide-x rtl:lg:divide-x-reverse"
       >
         <li v-for="link in quickLinks" :key="link.to">
           <RouterLink :to="link.to" class="flex h-full flex-col gap-0.5 p-4 hover:bg-elevated/50">
@@ -94,15 +92,16 @@ const quickLinks = computed(() =>
       </ul>
     </nav>
 
-    <p class="text-sm text-muted">
-      Need help? Read the
-      <a
-        class="font-medium text-highlighted underline underline-offset-2 hover:text-primary"
-        href="https://www.freqtrade.io/en/stable/"
-        target="_blank"
-        rel="noopener noreferrer"
-        >Freqtrade documentation</a
-      >.
-    </p>
+    <I18nT keypath="home.help" tag="p" scope="global" class="text-sm text-muted">
+      <template #link>
+        <a
+          class="font-medium text-highlighted underline underline-offset-2 hover:text-primary"
+          href="https://www.freqtrade.io/en/stable/"
+          target="_blank"
+          rel="noopener noreferrer"
+          >{{ $t('home.docs') }}</a
+        >
+      </template>
+    </I18nT>
   </div>
 </template>

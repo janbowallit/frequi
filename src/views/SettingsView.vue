@@ -1,38 +1,48 @@
 <script setup lang="ts">
 import { FtWsMessageTypes } from '@/types/wsMessageTypes';
+import { LOCALES, metricLabel, t } from '@/i18n';
 
 const settingsStore = useSettingsStore();
 const colorStore = useColorStore();
 
-const sections = [
-  { id: 'settings-ui-section', label: 'Interface' },
-  { id: 'settings-chart-section', label: 'Charts' },
-  { id: 'settings-notifications-section', label: 'Notifications' },
-  { id: 'settings-backtest-section', label: 'Backtesting' },
-];
+const sections = computed(() => [
+  { id: 'settings-ui-section', label: t('settings.interface') },
+  { id: 'settings-chart-section', label: t('settings.charts') },
+  { id: 'settings-notifications-section', label: t('settings.notifications') },
+  { id: 'settings-backtest-section', label: t('settings.backtesting') },
+]);
 
+const metricItems = computed(() =>
+  availableBacktestMetrics.value.map((m) => ({ ...m, header: metricLabel(m.header) })),
+);
+const languageOptions = LOCALES.map((l) => ({ value: l.code, text: l.name }));
 const timezoneOptions = ['UTC', Intl.DateTimeFormat().resolvedOptions().timeZone];
-const openTradesOptions = [
-  { value: OpenTradeVizOptions.showPill, text: 'Count on the tab icon' },
-  { value: OpenTradeVizOptions.asTitle, text: 'Count in the tab title' },
-  { value: OpenTradeVizOptions.noOpenTrades, text: "Don't show" },
-];
-const colorPreferenceOptions = [
-  { value: ColorPreferences.GREEN_UP, text: 'Green up, red down' },
-  { value: ColorPreferences.RED_UP, text: 'Red up, green down' },
-];
+const openTradesOptions = computed(() => [
+  { value: OpenTradeVizOptions.showPill, text: t('settings.countOnIcon') },
+  { value: OpenTradeVizOptions.asTitle, text: t('settings.countInTitle') },
+  { value: OpenTradeVizOptions.noOpenTrades, text: t('settings.dontShow') },
+]);
+const colorPreferenceOptions = computed(() => [
+  { value: ColorPreferences.GREEN_UP, text: t('settings.greenUp') },
+  { value: ColorPreferences.RED_UP, text: t('settings.redUp') },
+]);
 </script>
 
 <template>
-  <div class="mx-auto flex w-full max-w-5xl flex-col gap-6 p-3 text-left md:p-6">
-    <PageHeader title="Settings" description="Preferences for this browser only.">
+  <div class="mx-auto flex w-full max-w-5xl flex-col gap-6 p-3 text-start md:p-6">
+    <PageHeader :title="$t('settings.title')" :description="$t('settings.description')">
       <template #actions>
-        <span class="text-sm text-muted tabular-nums">UI {{ settingsStore.uiVersion }}</span>
+        <span class="text-sm text-muted tabular-nums">
+          {{ $t('settings.uiVersion', { version: settingsStore.uiVersion }) }}
+        </span>
       </template>
     </PageHeader>
 
     <div class="grid items-start gap-6 md:grid-cols-[11rem_minmax(0,1fr)]">
-      <nav aria-label="Settings sections" class="sticky top-0 hidden flex-col gap-0.5 md:flex">
+      <nav
+        :aria-label="$t('settings.sections')"
+        class="sticky top-0 hidden flex-col gap-0.5 md:flex"
+      >
         <a
           v-for="section in sections"
           :key="section.id"
@@ -47,9 +57,21 @@ const colorPreferenceOptions = [
           id="settings-ui-section"
           aria-labelledby="settings-ui"
         >
-          <h2 id="settings-ui" class="text-base font-semibold text-highlighted">Interface</h2>
+          <h2 id="settings-ui" class="text-base font-semibold text-highlighted">
+            {{ $t('settings.interface') }}
+          </h2>
 
-          <UFormField label="Open trades in the browser tab">
+          <UFormField :label="$t('settings.language')" :help="$t('settings.languageHelp')">
+            <URadioGroup
+              v-model="settingsStore.locale"
+              :items="languageOptions"
+              label-key="text"
+              value-key="value"
+              orientation="horizontal"
+            />
+          </UFormField>
+
+          <UFormField :label="$t('settings.openTradesInTab')">
             <USelect
               v-model="settingsStore.openTradesInTitle"
               :items="openTradesOptions"
@@ -59,21 +81,18 @@ const colorPreferenceOptions = [
             />
           </UFormField>
 
-          <UFormField label="Timezone" help="UTC is recommended: exchanges usually work in UTC.">
+          <UFormField :label="$t('settings.timezone')" :help="$t('settings.timezoneHelp')">
             <USelect v-model="settingsStore.timezone" :items="timezoneOptions" class="w-full" />
           </UFormField>
 
           <BaseCheckbox v-model="settingsStore.backgroundSync">
-            Background sync
-            <template #hint>Keep syncing other bots while a different bot is selected.</template>
+            {{ $t('settings.backgroundSync') }}
+            <template #hint>{{ $t('settings.backgroundSyncHint') }}</template>
           </BaseCheckbox>
 
           <BaseCheckbox v-model="settingsStore.confirmDialog">
-            Confirm before force-exiting trades
-            <template #hint
-              >When off, force exits run immediately and a "No confirmations" warning shows in the
-              header.</template
-            >
+            {{ $t('settings.confirmExit') }}
+            <template #hint>{{ $t('settings.confirmExitHint') }}</template>
           </BaseCheckbox>
         </section>
 
@@ -82,36 +101,32 @@ const colorPreferenceOptions = [
           id="settings-chart-section"
           aria-labelledby="settings-chart"
         >
-          <h2 id="settings-chart" class="text-base font-semibold text-highlighted">Charts</h2>
+          <h2 id="settings-chart" class="text-base font-semibold text-highlighted">
+            {{ $t('settings.charts') }}
+          </h2>
 
-          <UFormField label="Price scale side">
+          <UFormField :label="$t('settings.priceScaleSide')">
             <URadioGroup
               v-model="settingsStore.chartLabelSide"
               :items="[
-                { label: 'Left', value: 'left' },
-                { label: 'Right', value: 'right' },
+                { label: $t('settings.left'), value: 'left' },
+                { label: $t('settings.right'), value: 'right' },
               ]"
               orientation="horizontal"
             />
           </UFormField>
 
           <BaseCheckbox v-model="settingsStore.useHeikinAshiCandles">
-            Heikin Ashi candles
-            <template #hint>Smoothed candles that make trends easier to see.</template>
+            {{ $t('settings.heikinAshi') }}
+            <template #hint>{{ $t('settings.heikinAshiHint') }}</template>
           </BaseCheckbox>
 
           <BaseCheckbox v-model="settingsStore.useReducedPairCalls">
-            Only request needed columns
-            <template #hint
-              >Smaller downloads for large dataframes. May need extra requests when the plot
-              configuration changes.</template
-            >
+            {{ $t('settings.reducedCalls') }}
+            <template #hint>{{ $t('settings.reducedCallsHint') }}</template>
           </BaseCheckbox>
 
-          <UFormField
-            label="Candles to show"
-            help="Default number of candles in charts (100-2000)."
-          >
+          <UFormField :label="$t('settings.candleCount')" :help="$t('settings.candleCountHelp')">
             <div class="flex w-full items-center gap-4">
               <USlider
                 v-model="settingsStore.chartDefaultCandleCount"
@@ -119,7 +134,7 @@ const colorPreferenceOptions = [
                 :step="50"
                 :min="100"
                 :max="2000"
-                aria-label="Candles to show"
+                :aria-label="$t('settings.candleCount')"
               />
               <UInputNumber
                 v-model="settingsStore.chartDefaultCandleCount"
@@ -127,12 +142,12 @@ const colorPreferenceOptions = [
                 :min="100"
                 :max="2000"
                 size="sm"
-                aria-label="Candles to show"
+                :aria-label="$t('settings.candleCount')"
               />
             </div>
           </UFormField>
 
-          <UFormField label="Candle colors">
+          <UFormField :label="$t('settings.candleColors')">
             <URadioGroup
               v-model="colorStore.colorPreference"
               :items="colorPreferenceOptions"
@@ -142,7 +157,7 @@ const colorPreferenceOptions = [
             >
               <template #label="{ item }">
                 <div class="flex items-center">
-                  <span class="mr-2">{{ item.text }}</span>
+                  <span class="me-2">{{ item.text }}</span>
                   <UIcon
                     :name="
                       item.value === ColorPreferences.GREEN_UP
@@ -154,7 +169,7 @@ const colorPreferenceOptions = [
                         ? colorStore.colorProfit
                         : colorStore.colorLoss
                     "
-                    class="-ml-2 size-5"
+                    class="-ms-2 size-5"
                   />
                   <UIcon
                     :name="
@@ -167,7 +182,7 @@ const colorPreferenceOptions = [
                         ? colorStore.colorLoss
                         : colorStore.colorProfit
                     "
-                    class="-ml-2 size-5"
+                    class="-ms-2 size-5"
                   />
                 </div>
               </template>
@@ -182,22 +197,22 @@ const colorPreferenceOptions = [
         >
           <div>
             <h2 id="settings-notifications" class="text-base font-semibold text-highlighted">
-              Notifications
+              {{ $t('settings.notifications') }}
             </h2>
-            <p class="text-sm text-muted">Pop-up messages when orders change.</p>
+            <p class="text-sm text-muted">{{ $t('settings.notificationsHelp') }}</p>
           </div>
           <div class="grid gap-3 sm:grid-cols-2">
             <BaseCheckbox v-model="settingsStore.notifications[FtWsMessageTypes.entryFill]">
-              Entry filled
+              {{ $t('settings.entryFilled') }}
             </BaseCheckbox>
             <BaseCheckbox v-model="settingsStore.notifications[FtWsMessageTypes.exitFill]">
-              Exit filled
+              {{ $t('settings.exitFilled') }}
             </BaseCheckbox>
             <BaseCheckbox v-model="settingsStore.notifications[FtWsMessageTypes.entryCancel]">
-              Entry cancelled
+              {{ $t('settings.entryCancelled') }}
             </BaseCheckbox>
             <BaseCheckbox v-model="settingsStore.notifications[FtWsMessageTypes.exitCancel]">
-              Exit cancelled
+              {{ $t('settings.exitCancelled') }}
             </BaseCheckbox>
           </div>
         </section>
@@ -208,17 +223,17 @@ const colorPreferenceOptions = [
           aria-labelledby="settings-backtest"
         >
           <h2 id="settings-backtest" class="text-base font-semibold text-highlighted">
-            Backtesting
+            {{ $t('settings.backtesting') }}
           </h2>
           <UFormField
-            label="Backtesting metrics"
-            help="Metrics shown in the per pair / per tag tables."
+            :label="$t('settings.backtestMetrics')"
+            :help="$t('settings.backtestMetricsHelp')"
           >
             <USelectMenu
               multiple
               id="backtestMetrics"
               v-model="settingsStore.backtestAdditionalMetrics"
-              :items="availableBacktestMetrics"
+              :items="metricItems"
               label-key="header"
               value-key="field"
               class="w-full"

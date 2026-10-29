@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '@/i18n';
 import type { BacktestHistoryEntry } from '@/types';
 import type { TableColumn } from '@nuxt/ui';
 
@@ -14,9 +15,9 @@ onMounted(() => {
 async function deleteBacktestResult(result: BacktestHistoryEntry) {
   if (
     await confirm({
-      title: 'Delete result?',
-      message: `Delete ${result.filename} from disk? This cannot be undone.`,
-      confirmText: 'Delete',
+      title: t('backtest.deleteTitle'),
+      message: t('backtest.deleteMessage', { file: result.filename }),
+      confirmText: t('common.delete'),
       danger: true,
     })
   ) {
@@ -31,19 +32,19 @@ const filteredList = computed(() =>
       r.strategy.toLowerCase().includes(filterTextDebounced.value.toLowerCase()),
   ),
 );
-const columns: TableColumn<BacktestHistoryEntry>[] = [
-  { accessorKey: 'strategy', header: 'Strategy' },
-  { accessorKey: 'timeframe', header: 'Details' },
-  { accessorKey: 'backtest_start_time', header: 'Run at' },
-  { accessorKey: 'filename', header: 'Filename' },
+const columns = computed<TableColumn<BacktestHistoryEntry>[]>(() => [
+  { accessorKey: 'strategy', header: t('backtest.strategy') },
+  { accessorKey: 'timeframe', header: t('backtest.details') },
+  { accessorKey: 'backtest_start_time', header: t('backtest.runAt') },
+  { accessorKey: 'filename', header: t('backtest.filename') },
   { id: 'actions', header: '' },
-];
+]);
 </script>
 
 <template>
-  <div class="flex flex-col gap-3 text-left">
+  <div class="flex flex-col gap-3 text-start">
     <p class="text-sm text-muted">
-      Results saved on the bot's disk. Click a row to load it; you can load several to compare.
+      {{ $t('backtest.savedHelp') }}
     </p>
     <div class="flex items-center gap-2">
       <UInput
@@ -51,13 +52,13 @@ const columns: TableColumn<BacktestHistoryEntry>[] = [
         v-model="filterText"
         type="search"
         icon="mdi:magnify"
-        placeholder="Filter by strategy or file"
-        aria-label="Filter results"
+        :placeholder="$t('backtest.filter')"
+        :aria-label="$t('backtest.filterLabel')"
         class="flex-1"
       />
       <UButton
-        title="Refresh"
-        aria-label="Refresh"
+        :title="$t('common.refresh')"
+        :aria-label="$t('common.refresh')"
         variant="outline"
         color="neutral"
         icon="mdi:refresh"
@@ -67,8 +68,8 @@ const columns: TableColumn<BacktestHistoryEntry>[] = [
     </div>
     <EmptyState
       v-if="botStore.activeBot.backtestHistoryList.length === 0"
-      title="No saved results"
-      description="Results appear here after a backtest finishes."
+      :title="$t('backtest.noSaved')"
+      :description="$t('backtest.noSavedHelp')"
       icon="mdi:history"
     />
     <UTable
@@ -103,8 +104,9 @@ const columns: TableColumn<BacktestHistoryEntry>[] = [
             class="ms-1"
             size="sm"
             variant="solid"
-            title="Load this Result."
+            :title="$t('backtest.loadThis')"
             icon="mdi:arrow-right"
+            :ui="{ leadingIcon: 'rtl:-scale-x-100' }"
             :disabled="row.original.run_id in botStore.activeBot.backtestHistory"
             @click.stop="botStore.activeBot.getBacktestHistoryResult(row.original)"
           />
@@ -113,7 +115,7 @@ const columns: TableColumn<BacktestHistoryEntry>[] = [
             class="ms-1"
             size="sm"
             color="neutral"
-            title="Delete this Result."
+            :title="$t('backtest.deleteThis')"
             icon="mdi:delete"
             :disabled="row.original.run_id in botStore.activeBot.backtestHistory"
             @click.stop="deleteBacktestResult(row.original)"

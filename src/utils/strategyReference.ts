@@ -7,6 +7,7 @@
  */
 export interface StrategyReference {
   /** What the backtest covered, in plain words */
+  /** Message key describing the backtest data */
   source: string;
   days: number;
   trades: number;
@@ -32,7 +33,7 @@ export interface StrategyReference {
 
 export const STRATEGY_REFERENCE: Record<string, StrategyReference> = {
   BitpinBreakout: {
-    source: 'Bitpin data, Jul 2025 to Oct 2026, same 7 pairs and 3 slots',
+    source: 'backtestCheck.sourceBitpin',
     days: 482,
     trades: 124,
     winRate: 0.274,

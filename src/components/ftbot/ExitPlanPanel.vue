@@ -6,11 +6,11 @@ const { loaded } = useNextEntry();
 </script>
 
 <template>
-  <div class="flex flex-col p-4 text-left">
+  <div class="flex flex-col p-4 text-start">
     <EmptyState
       v-if="plans.length === 0"
-      title="No open trades"
-      description="When the bot buys, this shows the prices where it will sell."
+      :title="$t('exitPlan.emptyTitle')"
+      :description="$t('exitPlan.emptyDetail')"
       icon="mdi:exit-run"
     />
     <template v-else>
@@ -19,7 +19,7 @@ const { loaded } = useNextEntry();
           <ExitPlanItem :plan="plan" @select="botStore.activeBot.setDetailTrade(plan.trade)" />
         </li>
       </ul>
-      <p v-if="!loaded" class="mt-3 text-xs text-muted">Loading exit levels…</p>
+      <p v-if="!loaded" class="mt-3 text-xs text-muted">{{ $t('exitPlan.loading') }}</p>
     </template>
   </div>
 </template>

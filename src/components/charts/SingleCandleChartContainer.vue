@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '@/i18n';
 import type { ChartSliderPosition, PairHistory, Trade } from '@/types';
 import { LoadingStatus } from '@/types';
 
@@ -59,15 +60,15 @@ const noDatasetText = computed((): string => {
 
   switch (status) {
     case LoadingStatus.not_loaded:
-      return 'Not loaded yet.';
+      return t('chartControls.notLoaded');
     case LoadingStatus.loading:
-      return 'Loading...';
+      return t('common.loading');
     case LoadingStatus.success:
-      return 'No data available';
+      return t('chartControls.noData');
     case LoadingStatus.error:
-      return 'Failed to load data';
+      return t('chartControls.loadFailed');
     default:
-      return 'Unknown';
+      return t('chartControls.unknown');
   }
 });
 
@@ -133,34 +134,44 @@ watch(
       <template v-if="dataset">
         <span
           class="inline-flex items-center gap-1.5 whitespace-nowrap"
-          title="Entry signals in the loaded candles"
+          :title="$t('chartControls.entrySignalsHelp')"
         >
           <span class="size-2 rounded-full bg-[var(--color-profit)]" aria-hidden="true" />
-          {{ dataset.enter_long_signals ?? dataset.buy_signals ?? 0 }} entry signals
+          {{
+            $t('chartControls.entrySignals', {
+              n: dataset.enter_long_signals ?? dataset.buy_signals ?? 0,
+            })
+          }}
         </span>
         <span
           class="inline-flex items-center gap-1.5 whitespace-nowrap"
-          title="Exit signals in the loaded candles"
+          :title="$t('chartControls.exitSignalsHelp')"
         >
           <span class="size-2 rounded-full bg-amber-400" aria-hidden="true" />
-          {{ dataset.exit_long_signals ?? dataset.sell_signals ?? 0 }} exit signals
+          {{
+            $t('chartControls.exitSignals', {
+              n: dataset.exit_long_signals ?? dataset.sell_signals ?? 0,
+            })
+          }}
         </span>
         <span v-if="dataset.enter_short_signals" class="whitespace-nowrap">
-          {{ dataset.enter_short_signals }} short entries
+          {{ $t('chartControls.shortEntries', { n: dataset.enter_short_signals }) }}
         </span>
         <span v-if="dataset.exit_short_signals" class="whitespace-nowrap">
-          {{ dataset.exit_short_signals }} short exits
+          {{ $t('chartControls.shortExits', { n: dataset.exit_short_signals }) }}
         </span>
       </template>
       <span v-if="isLoadingDataset" class="ms-auto inline-flex items-center gap-1.5" role="status">
         <UIcon name="mdi:loading" class="size-4 animate-spin" aria-hidden="true" />
-        Loading…
+        {{ $t('common.loading') }}
       </span>
     </div>
     <div class="flex min-h-0 flex-1">
-      <div class="min-w-0 w-full flex-1">
+      <!-- Charts keep left-to-right axes in the Persian UI; rebuilt when the language changes -->
+      <div class="min-w-0 w-full flex-1" dir="ltr">
         <CandleChart
           v-if="hasDataset"
+          :key="settingsStore.locale"
           :dataset="dataset"
           :trades="trades"
           :plot-config="plotStore.plotConfig"
@@ -177,11 +188,9 @@ watch(
         <div v-else class="flex h-full items-center justify-center">
           <EmptyState
             :icon="isLoadingDataset ? 'mdi:loading' : 'i-mdi-chart-line'"
-            :title="isLoadingDataset ? 'Loading chart…' : noDatasetText"
+            :title="isLoadingDataset ? $t('chartControls.loadingChart') : noDatasetText"
             :description="
-              botStore.activeBot.historyTakesLonger
-                ? 'This is taking longer than expected - hold on.'
-                : ''
+              botStore.activeBot.historyTakesLonger ? $t('chartControls.takingLonger') : ''
             "
           />
         </div>

@@ -1,5 +1,4 @@
 import type { ElementEvent } from 'echarts';
-import humanizeDuration from 'humanize-duration';
 import type ECharts from 'vue-echarts';
 import type { Ref } from 'vue';
 
@@ -122,7 +121,7 @@ export function usePercentageTool(
     const endTime = roundTF(Number(endValues[0]));
     const timeDiff = Math.abs(startTime - endTime);
     const xr = chartRef.value?.convertToPixel({ seriesIndex: 0 }, [endTime, 0])[0] ?? 0;
-    const timeElapsed = humanizeDuration(timeDiff, { units: ['d', 'h', 'm'] });
+    const timeElapsed = humanizeMs(timeDiff, { units: ['d', 'h', 'm'] });
     const pct = Math.abs(((startPrice - endPrice) / startPrice) * 100).toFixed(2);
 
     chartRef.value?.setOption({

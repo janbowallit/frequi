@@ -1,6 +1,7 @@
-import humanizeDuration from 'humanize-duration';
 import { BotStates } from '@/types';
 import type { PairHistory } from '@/types';
+import type { MessageSchema } from '@/i18n';
+import { intlLocale, joinAnd, joinList, ltr, t } from '@/i18n';
 
 /**
  * How close every whitelisted pair is to an entry, and the earliest time the next trade can
@@ -50,35 +51,31 @@ const EXIT_PREFIX = 'exit_target__';
 const REFRESH_MS = 60_000;
 const ACRONYMS = new Set(['btc', 'eth', 'ema', 'sma', 'rsi', 'macd', 'adx', 'atr', 'bb', 'vwap']);
 
+type NextEntryKey = keyof MessageSchema['nextEntry'];
+
 /**
- * Plain-language text for the conditions BitpinBreakout publishes. Other strategies fall back
- * to the column name. `waiting` is the headline while a market condition blocks every pair.
- * `market` marks a condition that is the same for every pair, even when one pair's copy of
- * the gap is a candle behind.
+ * Plain-language text (message keys in `nextEntry`) for the conditions BitpinBreakout
+ * publishes. Other strategies fall back to the column name. `waiting` is the headline while a
+ * market condition blocks every pair. `market` marks a condition that is the same for every
+ * pair, even when one pair's copy of the gap is a candle behind.
  */
-const KNOWN: Record<string, { label: string; help: string; waiting?: string; market?: true }> = {
+const KNOWN: Record<
+  string,
+  { label: NextEntryKey; help: NextEntryKey; waiting?: NextEntryKey; market?: true }
+> = {
   btc_trend: {
-    label: 'BTC trend',
+    label: 'btcTrend',
     market: true,
-    help: "BTC's daily close must be above its 50-day average. Checked once a day, at midnight UTC.",
-    waiting: 'No buys until BTC turns up',
+    help: 'btcTrendHelp',
+    waiting: 'btcTrendWaiting',
   },
-  uptrend: {
-    label: 'Uptrend',
-    help: 'The price must be above its 200-hour average, so the coin is going up overall.',
-  },
-  breakout: {
-    label: 'Breakout',
-    help: 'The candle must close higher than every close of the last 72 hours.',
-  },
-  volume_spike: {
-    label: 'Volume spike',
-    help: 'Trading volume must be at least 2x its average of the last 48 hours.',
-  },
+  uptrend: { label: 'uptrend', help: 'uptrendHelp' },
+  breakout: { label: 'breakout', help: 'breakoutHelp' },
+  volume_spike: { label: 'volumeSpike', help: 'volumeSpikeHelp' },
 };
 
 function label(key: string): string {
-  if (KNOWN[key]) return KNOWN[key].label;
+  if (KNOWN[key]) return t(`nextEntry.${KNOWN[key].label}`);
   const words = key.split('_').map((w) => (ACRONYMS.has(w) ? w.toUpperCase() : w));
   const text = words.join(' ');
   return text.charAt(0).toUpperCase() + text.slice(1);
@@ -93,17 +90,22 @@ function sameValue(a: number | null, b: number | null) {
 }
 
 export function fmtGap(gap: number): string {
-  return `${gap > 0 ? '+' : ''}${gap.toFixed(gap !== 0 && Math.abs(gap) < 1 ? 2 : 1)}%`;
+  return ltr(`${gap > 0 ? '+' : ''}${gap.toFixed(gap !== 0 && Math.abs(gap) < 1 ? 2 : 1)}%`);
 }
 
 export function fmtEntryPrice(value: number): string {
-  return Number(value.toPrecision(5)).toLocaleString(undefined, { maximumFractionDigits: 8 });
+  return ltr(Number(value.toPrecision(5)).toLocaleString(undefined, { maximumFractionDigits: 8 }));
 }
 
 export function needText(c: EntryCondition): string {
-  if (c.gap === null) return 'not met yet';
-  const target = c.target !== null ? ` (to ${fmtEntryPrice(c.target)})` : '';
-  return c.gap > 0 ? `needs a ${fmtGap(c.gap)} rise${target}` : `at the level${target}`;
+  if (c.gap === null) return t('nextEntry.notMetYet');
+  if (c.target === null) {
+    return c.gap > 0 ? t('nextEntry.needsRise', { gap: fmtGap(c.gap) }) : t('nextEntry.atLevel');
+  }
+  const price = fmtEntryPrice(c.target);
+  return c.gap > 0
+    ? t('nextEntry.needsRiseTo', { gap: fmtGap(c.gap), price })
+    : t('nextEntry.atLevelTo', { price });
 }
 
 export function unmetConditions(r: PairReadiness) {
@@ -111,7 +113,7 @@ export function unmetConditions(r: PairReadiness) {
 }
 
 export function durationText(ms: number): string {
-  return humanizeDuration(Math.max(ms, 0), { largest: 2, round: true, units: ['d', 'h', 'm'] });
+  return humanizeMs(Math.max(ms, 0), { largest: 2, round: true, units: ['d', 'h', 'm'] });
 }
 
 function useNextEntryState() {
@@ -138,8 +140,14 @@ function useNextEntryState() {
         const key = col.slice(PREFIX.length);
         return {
           key,
-          label: label(key),
-          help: KNOWN[key]?.help ?? null,
+          // Getters, so the text follows the UI language without a refetch
+          get label() {
+            return label(key);
+          },
+          get help() {
+            const known = KNOWN[key];
+            return known ? t(`nextEntry.${known.help}`) : null;
+          },
           met: row[col] === 1,
           gap: num(row[`entry_gap__${key}`]),
           target: num(row[`entry_target__${key}`]),
@@ -273,55 +281,69 @@ function useNextEntryState() {
     const st = state.value;
     if (st && st.state !== BotStates.RUNNING) {
       return {
-        title: st.state === BotStates.PAUSED ? 'New entries are paused' : `Bot is ${st.state}`,
-        detail: 'No new trades start until the bot is running.',
+        title:
+          st.state === BotStates.PAUSED
+            ? t('nextEntry.paused')
+            : t('nextEntry.botIs', { state: st.state }),
+        detail: t('nextEntry.notRunning'),
         tone: 'blocked',
       };
     }
     if (slotsFull.value) {
       return {
-        title: 'All trade slots in use',
-        detail: `${bot.value?.openTradeCount} of ${st?.max_open_trades} slots are taken. The next trade starts after one closes.`,
+        title: t('nextEntry.slotsFull'),
+        detail: t('nextEntry.slotsFullDetail', {
+          open: bot.value?.openTradeCount ?? 0,
+          max: st?.max_open_trades ?? 0,
+        }),
         tone: 'blocked',
       };
     }
     const ready = candidates.value.filter((r) => r.signal);
     if (ready.length) {
       return {
-        title: `Entry signal on ${ready.map((r) => r.pair).join(', ')}`,
-        detail: 'Every check is met on the latest candle. The bot should buy now.',
+        title: t('nextEntry.signalOn', { pairs: joinList(ready.map((r) => r.pair)) }),
+        detail: t('nextEntry.signalDetail'),
         tone: 'ready',
       };
     }
     if (blockers.value.length) {
       const first = blockers.value[0]!;
-      const what = blockers.value
-        .map(
-          (c) => `${c.label} ${needText(c)}${c.at ? ` by the next check at ${fmtTime(c.at)}` : ''}`,
-        )
-        .join(', ');
+      const what = joinList(
+        blockers.value.map((c) => {
+          const text = `${c.label} ${needText(c)}`;
+          return c.at ? t('nextEntry.byNextCheck', { what: text, time: fmtTime(c.at) }) : text;
+        }),
+      );
+      const waiting = KNOWN[first.key]?.waiting;
       return {
         title:
-          (blockers.value.length === 1 && KNOWN[first.key]?.waiting) ||
-          `Waiting for ${blockers.value.map((c) => c.label).join(' and ')}`,
-        detail: `${what}. Until then no coin is bought, whatever its own checks say.`,
+          blockers.value.length === 1 && waiting
+            ? t(`nextEntry.${waiting}`)
+            : t('nextEntry.waitingFor', { what: joinAnd(blockers.value.map((c) => c.label)) }),
+        detail: t('nextEntry.blockedDetail', { what }),
         tone: 'waiting',
       };
     }
     const closest = candidates.value[0];
     if (!closest) {
       return {
-        title: 'No free pair',
-        detail: 'Every pair already has an open trade.',
+        title: t('nextEntry.noFreePair'),
+        detail: t('nextEntry.noFreePairDetail'),
         tone: 'blocked',
       };
     }
     const missing = unmetConditions(closest);
     return {
-      title: `Closest: ${closest.pair}`,
-      detail: `${missing.length} check${missing.length === 1 ? '' : 's'} left: ${missing
-        .map((c) => `${c.label} ${needText(c)}`)
-        .join(', ')}.`,
+      title: t('nextEntry.closest', { pair: closest.pair }),
+      detail: t(
+        'nextEntry.checksLeft',
+        {
+          n: missing.length,
+          list: joinList(missing.map((c) => `${c.label} ${needText(c)}`)),
+        },
+        missing.length,
+      ),
       tone: 'waiting',
     };
   });
@@ -332,14 +354,16 @@ function useNextEntryState() {
 
   function fmtTime(ts: number): string {
     const d = new Date(ts);
-    const time = d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    const time = d.toLocaleTimeString(intlLocale(), { hour: '2-digit', minute: '2-digit' });
     const sameDay = d.toDateString() === now.value.toDateString();
-    return sameDay ? time : `${d.toLocaleDateString(undefined, { weekday: 'short' })} ${time}`;
+    return sameDay ? time : `${d.toLocaleDateString(intlLocale(), { weekday: 'short' })} ${time}`;
   }
 
   /** "in 7 hours, 31 minutes" / "now" */
   function untilText(ts: number): string {
-    return ts > now.value.getTime() ? `in ${durationText(ts - now.value.getTime())}` : 'now';
+    return ts > now.value.getTime()
+      ? t('nextEntry.in', { duration: durationText(ts - now.value.getTime()) })
+      : t('nextEntry.now');
   }
 
   return {
