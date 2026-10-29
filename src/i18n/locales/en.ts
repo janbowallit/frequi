@@ -72,6 +72,9 @@ export default {
     download: 'Download candles',
     downloadHelp: 'Fetch history for backtesting',
     needsWebserver: 'Needs the bot in webserver mode',
+    toolsHint:
+      'These only run on a bot started in webserver mode. A trading bot can’t backtest or download data.',
+    toolsHintLink: 'How to start one',
     noBot: 'No bot',
     noBotSelected: 'No bot selected',
     loginExpired: 'Login expired',

@@ -34,6 +34,7 @@ const toolItems = computed<NavigationMenuItem[]>(() => [
     tooltip: { text: l.description },
   })),
 ]);
+const toolsLocked = computed(() => botStore.hasBots && toolLinks.value.every((l) => l.disabled));
 
 const footerItems = computed<NavigationMenuItem[]>(() => [
   {
@@ -91,12 +92,31 @@ const footerItems = computed<NavigationMenuItem[]>(() => [
         tooltip
       />
 
-      <UNavigationMenu
-        :collapsed="collapsed"
-        :items="toolItems"
-        orientation="vertical"
-        :aria-label="$t('nav.tools')"
-      />
+      <div class="flex flex-col gap-1">
+        <UNavigationMenu
+          :collapsed="collapsed"
+          :items="toolItems"
+          orientation="vertical"
+          :aria-label="$t('nav.tools')"
+        />
+        <!-- Say why the tools are greyed out instead of hiding it in a hover tooltip -->
+        <p
+          v-if="!collapsed && toolsLocked"
+          class="flex gap-2 rounded-lg border border-dashed border-default px-2.5 py-2 text-start text-xs text-muted"
+        >
+          <UIcon name="i-lucide-info" class="mt-px size-3.5 shrink-0" aria-hidden="true" />
+          <span>
+            {{ $t('nav.toolsHint') }}
+            <a
+              href="https://www.freqtrade.io/en/stable/utils/#webserver-mode"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="font-medium text-highlighted underline underline-offset-2 hover:text-primary"
+              >{{ $t('nav.toolsHintLink') }}</a
+            >
+          </span>
+        </p>
+      </div>
     </template>
 
     <template #footer="{ collapsed }">
