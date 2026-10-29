@@ -86,7 +86,7 @@ function saveNewName() {
           variant="ghost"
           :title="$t('general.renameThis', { name: editableName })"
           :aria-label="$t('general.renameThis', { name: editableName })"
-          icon="mdi:pencil"
+          icon="lucide:pencil"
           @click="mode = EditState.Editing"
         />
         <UButton
@@ -95,7 +95,7 @@ function saveNewName() {
           variant="ghost"
           :title="$t('general.duplicateThis', { name: editableName })"
           :aria-label="$t('general.duplicateThis', { name: editableName })"
-          icon="mdi:content-copy"
+          icon="lucide:copy"
           @click="duplicate"
         />
         <UButton
@@ -103,7 +103,7 @@ function saveNewName() {
           variant="ghost"
           :title="$t('general.deleteThis', { name: editableName })"
           :aria-label="$t('general.deleteThis', { name: editableName })"
-          icon="mdi:delete"
+          icon="lucide:trash-2"
           @click="$emit('delete', modelValue)"
         />
       </template>
@@ -111,7 +111,7 @@ function saveNewName() {
         v-if="allowAdd && mode === EditState.None"
         :title="$t('general.newThing', { name: editableName })"
         :aria-label="$t('general.newThing', { name: editableName })"
-        icon="mdi:plus"
+        icon="lucide:plus"
         color="neutral"
         variant="ghost"
         @click="addNewClick"
@@ -120,7 +120,7 @@ function saveNewName() {
         <UButton
           :title="$t('common.save')"
           :aria-label="$t('common.save')"
-          icon="mdi:check"
+          icon="lucide:check"
           variant="solid"
           @click="saveNewName"
         />
@@ -129,7 +129,7 @@ function saveNewName() {
           :aria-label="$t('common.cancel')"
           color="neutral"
           variant="ghost"
-          icon="mdi:close"
+          icon="lucide:x"
           @click="abort"
         />
       </template>

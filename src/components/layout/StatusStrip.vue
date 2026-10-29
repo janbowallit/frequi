@@ -67,8 +67,8 @@ const maxTrades = computed(() => bot.value?.botState?.max_open_trades ?? 0);
     class="border-b text-sm transition-colors duration-300"
     :class="{
       'border-primary/30 bg-primary/8': status.tone === 'waiting',
-      'border-(--color-profit)/30 bg-(--color-profit)/8': status.tone === 'good',
-      'border-(--color-loss)/30 bg-(--color-loss)/8': status.tone === 'bad',
+      'border-profit/30 bg-profit/8': status.tone === 'good',
+      'border-loss/30 bg-loss/8': status.tone === 'bad',
     }"
   >
     <div class="flex min-h-10 items-center gap-x-4 gap-y-1 px-3 py-1.5 lg:px-4">
@@ -83,8 +83,8 @@ const maxTrades = computed(() => bot.value?.botState?.max_open_trades ?? 0);
             class="relative inline-flex size-2.5 rounded-full"
             :class="{
               'bg-primary': status.tone === 'waiting',
-              'bg-(--color-profit)': status.tone === 'good',
-              'bg-(--color-loss)': status.tone === 'bad',
+              'bg-profit': status.tone === 'good',
+              'bg-loss': status.tone === 'bad',
             }"
           />
         </span>
@@ -119,7 +119,7 @@ const maxTrades = computed(() => bot.value?.botState?.max_open_trades ?? 0);
           <span
             v-if="bot.openTradeCount > 0"
             class="ms-1 font-medium"
-            :class="openProfit >= 0 ? 'text-(--color-profit)' : 'text-(--color-loss)'"
+            :class="openProfit >= 0 ? 'text-profit' : 'text-loss'"
           >
             {{
               ltr(
@@ -147,7 +147,7 @@ const maxTrades = computed(() => bot.value?.botState?.max_open_trades ?? 0);
         color="neutral"
         variant="solid"
         size="xs"
-        icon="mdi:play"
+        icon="lucide:play"
         :label="$t('common.start')"
         @click="bot.startBot()"
       />

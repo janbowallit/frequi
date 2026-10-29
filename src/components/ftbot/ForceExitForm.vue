@@ -143,10 +143,10 @@ resetForm();
       </form>
     </template>
     <template #footer>
-      <UButton class="ms-auto" icon="mdi:close" color="neutral" @click="$emit('close', false)">{{
+      <UButton class="ms-auto" icon="lucide:x" color="neutral" @click="$emit('close', false)">{{
         $t('common.cancel')
       }}</UButton>
-      <UButton icon="mdi:exit-to-app" @click="handleExit">{{ $t('forceTrade.exit') }}</UButton>
+      <UButton icon="lucide:log-out" @click="handleExit">{{ $t('forceTrade.exit') }}</UButton>
     </template>
   </UModal>
 </template>

@@ -16,61 +16,60 @@ try {
   console.error('Failed to get commit hash. Running in this mode will not be supported.');
 }
 
-// Nuxt UI's built-in icons (close, chevrons, loading, ...), mapped from lucide to mdi so that
-// a single locally bundled icon set covers the whole UI.
+// Nuxt UI's built-in icons (its lucide defaults), listed so the icon bundler below picks them up
 const uiIcons = {
-  arrowDown: 'i-mdi-arrow-down',
-  arrowLeft: 'i-mdi-arrow-left',
-  arrowRight: 'i-mdi-arrow-right',
-  arrowUp: 'i-mdi-arrow-up',
-  caution: 'i-mdi-alert-circle-outline',
-  check: 'i-mdi-check',
-  chevronDoubleLeft: 'i-mdi-chevron-double-left',
-  chevronDoubleRight: 'i-mdi-chevron-double-right',
-  chevronDown: 'i-mdi-chevron-down',
-  chevronLeft: 'i-mdi-chevron-left',
-  chevronRight: 'i-mdi-chevron-right',
-  chevronUp: 'i-mdi-chevron-up',
-  close: 'i-mdi-close',
-  copy: 'i-mdi-content-copy',
-  copyCheck: 'i-mdi-check',
-  dark: 'i-mdi-weather-night',
-  drag: 'i-mdi-drag-vertical',
-  ellipsis: 'i-mdi-dots-horizontal',
-  error: 'i-mdi-close-circle-outline',
-  external: 'i-mdi-arrow-top-right',
-  eye: 'i-mdi-eye-outline',
-  eyeOff: 'i-mdi-eye-off-outline',
-  file: 'i-mdi-file-outline',
-  folder: 'i-mdi-folder-outline',
-  folderOpen: 'i-mdi-folder-open-outline',
-  hash: 'i-mdi-pound',
-  info: 'i-mdi-information-outline',
-  light: 'i-mdi-white-balance-sunny',
-  loading: 'i-mdi-loading',
-  menu: 'i-mdi-menu',
-  minus: 'i-mdi-minus',
-  panelClose: 'i-mdi-dock-left',
-  panelOpen: 'i-mdi-dock-left',
-  plus: 'i-mdi-plus',
-  reload: 'i-mdi-refresh',
-  search: 'i-mdi-magnify',
-  stop: 'i-mdi-stop',
-  success: 'i-mdi-check-circle-outline',
-  system: 'i-mdi-monitor',
-  tip: 'i-mdi-lightbulb-outline',
-  upload: 'i-mdi-upload',
-  warning: 'i-mdi-alert-outline',
+  arrowDown: 'i-lucide-arrow-down',
+  arrowLeft: 'i-lucide-arrow-left',
+  arrowRight: 'i-lucide-arrow-right',
+  arrowUp: 'i-lucide-arrow-up',
+  caution: 'i-lucide-circle-alert',
+  check: 'i-lucide-check',
+  chevronDoubleLeft: 'i-lucide-chevrons-left',
+  chevronDoubleRight: 'i-lucide-chevrons-right',
+  chevronDown: 'i-lucide-chevron-down',
+  chevronLeft: 'i-lucide-chevron-left',
+  chevronRight: 'i-lucide-chevron-right',
+  chevronUp: 'i-lucide-chevron-up',
+  close: 'i-lucide-x',
+  copy: 'i-lucide-copy',
+  copyCheck: 'i-lucide-copy-check',
+  dark: 'i-lucide-moon',
+  drag: 'i-lucide-grip-vertical',
+  ellipsis: 'i-lucide-ellipsis',
+  error: 'i-lucide-circle-x',
+  external: 'i-lucide-arrow-up-right',
+  eye: 'i-lucide-eye',
+  eyeOff: 'i-lucide-eye-off',
+  file: 'i-lucide-file',
+  folder: 'i-lucide-folder',
+  folderOpen: 'i-lucide-folder-open',
+  hash: 'i-lucide-hash',
+  info: 'i-lucide-info',
+  light: 'i-lucide-sun',
+  loading: 'i-lucide-loader-circle',
+  menu: 'i-lucide-menu',
+  minus: 'i-lucide-minus',
+  panelClose: 'i-lucide-panel-left-close',
+  panelOpen: 'i-lucide-panel-left-open',
+  plus: 'i-lucide-plus',
+  reload: 'i-lucide-rotate-ccw',
+  search: 'i-lucide-search',
+  stop: 'i-lucide-square',
+  success: 'i-lucide-circle-check',
+  system: 'i-lucide-monitor',
+  tip: 'i-lucide-lightbulb',
+  upload: 'i-lucide-upload',
+  warning: 'i-lucide-triangle-alert',
 };
 
 /**
- * Bundles the mdi icons referenced in the source (`i-mdi-name` / `mdi:name`) as
- * `virtual:mdi-icons`, so icons render instantly and without the Iconify web API.
+ * Bundles the lucide icons referenced in the source (`i-lucide-name` / `lucide:name`) as
+ * `virtual:lucide-icons`, so icons render instantly and without the Iconify web API.
  */
-function mdiSubset(): Plugin {
-  const virtualId = 'virtual:mdi-icons';
+function lucideSubset(): Plugin {
+  const virtualId = 'virtual:lucide-icons';
   const resolvedId = `\0${virtualId}`;
-  const iconPattern = /(?:i-mdi-|mdi:)([a-z0-9]+(?:-[a-z0-9]+)*)/g;
+  const iconPattern = /(?:i-lucide-|lucide:)([a-z0-9]+(?:-[a-z0-9]+)*)/g;
   const srcDir = resolve(__dirname, 'src');
   let names = new Set<string>();
 
@@ -94,28 +93,28 @@ function mdiSubset(): Plugin {
   }
 
   return {
-    name: 'mdi-subset',
+    name: 'lucide-subset',
     resolveId: (id) => (id === virtualId ? resolvedId : undefined),
     load(id) {
       if (id !== resolvedId) return;
       names = scan();
-      const mdi = JSON.parse(
-        readFileSync(resolve(__dirname, 'node_modules/@iconify-json/mdi/icons.json'), 'utf8'),
+      const lucide = JSON.parse(
+        readFileSync(resolve(__dirname, 'node_modules/@iconify-json/lucide/icons.json'), 'utf8'),
       );
       const icons: Record<string, unknown> = {};
       const aliases: Record<string, unknown> = {};
       for (const name of names) {
-        const alias = mdi.aliases?.[name];
+        const alias = lucide.aliases?.[name];
         if (alias) {
           aliases[name] = alias;
-          icons[alias.parent] = mdi.icons[alias.parent];
-        } else if (mdi.icons[name]) {
-          icons[name] = mdi.icons[name];
+          icons[alias.parent] = lucide.icons[alias.parent];
+        } else if (lucide.icons[name]) {
+          icons[name] = lucide.icons[name];
         } else {
-          this.warn(`Unknown mdi icon: ${name}`);
+          this.warn(`Unknown lucide icon: ${name}`);
         }
       }
-      const data = { prefix: 'mdi', width: mdi.width, height: mdi.height, icons, aliases };
+      const data = { prefix: 'lucide', width: lucide.width, height: lucide.height, icons, aliases };
       return `export default ${JSON.stringify(data)};`;
     },
     handleHotUpdate({ file, server }) {
@@ -145,9 +144,8 @@ export default defineConfig({
       ui: {
         icons: uiIcons,
         colors: {
-          primary: 'brass',
-          // Custom scale from tailwind.css - works at runtime, but the type only lists Tailwind's grays
-          neutral: 'graphite' as 'slate',
+          primary: 'amber',
+          neutral: 'zinc',
         },
         alert: {
           defaultVariants: {
@@ -199,7 +197,7 @@ export default defineConfig({
     Icons({
       compiler: 'vue3',
     }),
-    mdiSubset(),
+    lucideSubset(),
   ],
   resolve: {
     dedupe: ['vue'],

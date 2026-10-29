@@ -88,7 +88,7 @@ function labelShift(at: number) {
 
     <p
       v-if="plan.exitSignal"
-      class="rounded-md border-s-2 border-(--color-loss) bg-(--color-loss)/8 px-3 py-2 text-sm font-medium text-highlighted"
+      class="rounded-md border-s-2 border-loss bg-loss/8 px-3 py-2 text-sm font-medium text-highlighted"
     >
       {{ isShort ? $t('exitPlan.sellingAbove') : $t('exitPlan.sellingBelow') }}
     </p>
@@ -128,14 +128,14 @@ function labelShift(at: number) {
       />
       <span
         v-if="plan.stop"
-        class="absolute top-4 h-4 w-0.5 -translate-x-1/2 bg-(--color-loss)"
+        class="absolute top-4 h-4 w-0.5 -translate-x-1/2 bg-loss"
         :style="{ left: `${ruler.pos(plan.stop.price)}%` }"
         :title="$t('exitPlan.stoploss', { price: fmtEntryPrice(plan.stop.price) })"
       />
       <span
         v-for="l in plan.lines"
         :key="l.key"
-        class="absolute top-4 h-4 -translate-x-1/2 border-s-2 border-dashed border-(--color-loss)"
+        class="absolute top-4 h-4 -translate-x-1/2 border-s-2 border-dashed border-loss"
         :style="{ left: `${ruler.pos(l.price)}%` }"
         :title="`${l.label} ${fmtEntryPrice(l.price)}`"
       />
@@ -153,10 +153,7 @@ function labelShift(at: number) {
 
     <ul class="flex flex-col gap-2 text-sm">
       <li v-for="l in plan.lines" :key="l.key" class="flex gap-2.5">
-        <span
-          class="mt-1 h-3.5 shrink-0 border-s-2 border-dashed border-(--color-loss)"
-          aria-hidden="true"
-        />
+        <span class="mt-1 h-3.5 shrink-0 border-s-2 border-dashed border-loss" aria-hidden="true" />
         <div class="min-w-0">
           <p class="tabular-nums">
             <span class="font-medium text-highlighted"
@@ -180,7 +177,7 @@ function labelShift(at: number) {
         </div>
       </li>
       <li v-if="plan.stop" class="flex gap-2.5">
-        <span class="mt-1 h-3.5 w-0.5 shrink-0 bg-(--color-loss)" aria-hidden="true" />
+        <span class="mt-1 h-3.5 w-0.5 shrink-0 bg-loss" aria-hidden="true" />
         <div class="min-w-0">
           <p class="tabular-nums">
             <span class="font-medium text-highlighted">{{

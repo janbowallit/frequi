@@ -119,7 +119,7 @@ function clickBacktest() {
           variant="link"
           class="self-start px-0"
           :label="$t('backtest.moreOptions')"
-          trailing-icon="mdi:chevron-down"
+          trailing-icon="lucide:chevron-down"
           :ui="{ trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform' }"
         />
         <template #content>
@@ -162,7 +162,7 @@ function clickBacktest() {
         v-if="!botStore.activeBot.backtestRunning"
         type="submit"
         variant="solid"
-        icon="mdi:play"
+        icon="lucide:play"
         :label="$t('backtest.start')"
         :disabled="!btStore.canRunBacktest || !botStore.activeBot.canRunBacktest"
       />
@@ -170,14 +170,14 @@ function clickBacktest() {
         v-else
         color="error"
         variant="solid"
-        icon="mdi:stop"
+        icon="lucide:square"
         :label="$t('backtest.stop')"
         @click="botStore.activeBot.stopBacktest()"
       />
       <UButton
         color="neutral"
         variant="ghost"
-        icon="mdi:refresh"
+        icon="lucide:refresh-cw"
         :label="$t('backtest.fetchLast')"
         :title="$t('backtest.fetchLastHelp')"
         :disabled="botStore.activeBot.backtestRunning || !botStore.activeBot.canRunBacktest"
@@ -186,7 +186,7 @@ function clickBacktest() {
       <UButton
         color="neutral"
         variant="ghost"
-        icon="mdi:delete-outline"
+        icon="lucide:trash-2"
         :label="$t('common.reset')"
         :title="$t('backtest.resetHelp')"
         class="ms-auto"

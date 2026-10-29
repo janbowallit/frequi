@@ -153,17 +153,11 @@ const hourlyChartOptions = computed((): EChartsOption => {
 
 <template>
   <ECharts
+    class="w-full h-full min-h-[240px]"
+    dir="ltr"
     v-if="trades.length > 0"
     :option="hourlyChartOptions"
     autoresize
     :theme="settingsStore.chartTheme"
   />
 </template>
-
-<style scoped>
-.echarts {
-  width: 100%;
-  height: 100%;
-  min-height: 240px;
-}
-</style>

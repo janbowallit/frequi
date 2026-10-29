@@ -24,7 +24,7 @@ function toggleNight() {
     :aria-label="showText ? undefined : toggleLabel"
     color="neutral"
     :label="showText ? toggleLabel : ''"
-    :icon="isDark ? 'mdi:white-balance-sunny' : 'mdi:weather-night'"
+    :icon="isDark ? 'lucide:sun' : 'lucide:moon'"
     @click="toggleNight"
   />
 </template>

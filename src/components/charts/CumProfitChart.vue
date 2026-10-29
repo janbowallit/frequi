@@ -309,17 +309,16 @@ watch(
   <EmptyState
     v-if="trades.length === 0 && openTrades.length === 0"
     class="h-full"
-    icon="i-mdi-chart-areaspline"
+    icon="i-lucide-chart-area"
     :title="$t('charts.noProfitHistory')"
     :description="$t('charts.noProfitHistoryHelp')"
   />
-  <ECharts v-else :option="cumProfitChartOptions" :theme="settingsStore.chartTheme" autoresize />
+  <ECharts
+    class="w-full h-full min-h-[150px]"
+    dir="ltr"
+    v-else
+    :option="cumProfitChartOptions"
+    :theme="settingsStore.chartTheme"
+    autoresize
+  />
 </template>
-
-<style scoped>
-.echarts {
-  width: 100%;
-  height: 100%;
-  min-height: 150px;
-}
-</style>

@@ -109,7 +109,7 @@ onMounted(() => {
           <template #trailing>
             <UButton
               v-if="dateFromText"
-              icon="mdi:close"
+              icon="lucide:x"
               color="neutral"
               variant="ghost"
               size="xs"
@@ -117,7 +117,7 @@ onMounted(() => {
               @click="dateFromText = ''"
             />
             <UPopover v-model:open="popoverFromOpen">
-              <UButton icon="mdi:calendar-blank" color="neutral" variant="ghost" size="sm" />
+              <UButton icon="lucide:calendar" color="neutral" variant="ghost" size="sm" />
               <template #content>
                 <UCalendar
                   :model-value="dateFrom"
@@ -139,7 +139,7 @@ onMounted(() => {
           <template #trailing>
             <UButton
               v-if="dateToText"
-              icon="mdi:close"
+              icon="lucide:x"
               color="neutral"
               variant="ghost"
               size="xs"
@@ -147,7 +147,7 @@ onMounted(() => {
               @click="dateToText = ''"
             />
             <UPopover v-model:open="popoverToOpen">
-              <UButton icon="mdi:calendar-blank" color="neutral" variant="ghost" size="sm" />
+              <UButton icon="lucide:calendar" color="neutral" variant="ghost" size="sm" />
               <template #content>
                 <UCalendar
                   :model-value="dateTo"

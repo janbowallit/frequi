@@ -11,10 +11,10 @@ const { runningJobs, clearJobs } = useBackgroundJob();
         class="border p-1 pb-2 rounded-sm dark:border-neutral-700 border-neutral-300 flex gap-2 items-center"
         :title="key"
       >
-        <i-mdi-download-box-outline v-if="job.taskStatus?.job_category === 'download_data'" />
+        <ILucideHardDriveDownload v-if="job.taskStatus?.job_category === 'download_data'" />
         <span v-else>{{ job.taskStatus?.job_category }}</span>
         <div class="flex justify-between">
-          <i-mdi-check v-if="job.taskStatus?.status === 'success'" class="text-success" title="" />
+          <ILucideCheck v-if="job.taskStatus?.status === 'success'" class="text-success" title="" />
           <span v-else>{{ job.taskStatus?.status }} </span>
           <span v-if="job.taskStatus?.progress" class="w-25">{{ job.taskStatus?.progress }}</span>
         </div>
@@ -56,7 +56,7 @@ const { runningJobs, clearJobs } = useBackgroundJob();
       v-if="Object.keys(runningJobs).length > 0"
       color="neutral"
       class="ms-auto"
-      icon="mdi:delete"
+      icon="lucide:trash-2"
       @click="clearJobs"
     />
   </div>

@@ -157,6 +157,8 @@ const marketChangeOptions: ComputedRef<EChartsOption> = computed(() => {
 
 <template>
   <ECharts
+    class="h-full min-h-[240px]"
+    dir="ltr"
     v-if="marketChangeData?.data"
     ref="marketChangeChart"
     :option="marketChangeOptions"
@@ -164,10 +166,3 @@ const marketChangeOptions: ComputedRef<EChartsOption> = computed(() => {
     autoresize
   />
 </template>
-
-<style lang="css" scoped>
-.echarts {
-  min-height: 240px;
-  height: 100%;
-}
-</style>

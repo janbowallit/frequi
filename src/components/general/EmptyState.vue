@@ -7,7 +7,7 @@ withDefaults(
   }>(),
   {
     description: '',
-    icon: 'mdi:tray-remove',
+    icon: 'lucide:archive-x',
   },
 );
 </script>

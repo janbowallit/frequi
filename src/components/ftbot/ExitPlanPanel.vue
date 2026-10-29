@@ -11,7 +11,7 @@ const { loaded } = useNextEntry();
       v-if="plans.length === 0"
       :title="$t('exitPlan.emptyTitle')"
       :description="$t('exitPlan.emptyDetail')"
-      icon="mdi:exit-run"
+      icon="lucide:door-open"
     />
     <template v-else>
       <ul class="flex flex-col divide-y divide-default">

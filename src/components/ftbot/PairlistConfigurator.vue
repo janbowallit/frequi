@@ -108,7 +108,7 @@ if (pairlistStore.whitelist.length > 0) {
             :disabled="
               pairlistStore.config.pairlists.length === 0 && !pairlist.is_pairlist_generator
             "
-            icon="mdi:arrow-right"
+            icon="lucide:arrow-right"
             :ui="{ leadingIcon: 'rtl:-scale-x-100' }"
             :aria-label="$t('pairlistBuilder.addFilter', { name: pairlist.name })"
             :title="$t('pairlistBuilder.addFilter', { name: pairlist.name })"
@@ -142,24 +142,32 @@ if (pairlistStore.whitelist.length > 0) {
             pairlistStore.config.pairlists.length > 0 && !pairlistStore.firstPairlistIsGenerator
           "
           color="warning"
-          icon="mdi:alert-outline"
+          icon="lucide:triangle-alert"
           :title="$t('pairlistBuilder.needsGenerator')"
           :description="$t('pairlistBuilder.needsGeneratorHelp')"
         />
         <div class="flex flex-col gap-1.5">
           <h3 class="text-sm font-medium text-muted">{{ $t('pairlistBuilder.steps') }}</h3>
-          <div
-            ref="pairlistConfigsEl"
-            class="relative flex min-h-32 flex-col gap-2 rounded-md border border-dashed border-default p-2"
-            :class="{ empty: configEmpty }"
-          >
-            <PairlistConfigItem
-              v-for="(pairlist, i) in pairlistStore.config.pairlists"
-              :key="pairlist.id"
-              v-model="pairlistStore.config.pairlists[i]!"
-              :index="i"
-              @remove="pairlistStore.removeFromConfig"
-            />
+          <div class="relative">
+            <div
+              ref="pairlistConfigsEl"
+              class="flex min-h-32 flex-col gap-2 rounded-md border border-dashed border-default p-2"
+            >
+              <PairlistConfigItem
+                v-for="(pairlist, i) in pairlistStore.config.pairlists"
+                :key="pairlist.id"
+                v-model="pairlistStore.config.pairlists[i]!"
+                :index="i"
+                @remove="pairlistStore.removeFromConfig"
+              />
+            </div>
+            <p
+              v-if="configEmpty"
+              class="pointer-events-none absolute inset-0 flex items-center justify-center gap-2 text-sm text-muted"
+            >
+              <UIcon name="i-lucide-mouse-pointer-2" class="size-4" aria-hidden="true" />
+              {{ $t('pairlistBuilder.dropHint') }}
+            </p>
           </div>
         </div>
       </PanelSection>
@@ -207,16 +215,3 @@ if (pairlistStore.whitelist.length > 0) {
     </PanelSection>
   </div>
 </template>
-
-<style lang="scss" scoped>
-.empty::after {
-  content: 'Drag a filter here to start your pairlist';
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--ui-text-muted);
-  font-size: 0.875rem;
-}
-</style>

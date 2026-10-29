@@ -85,7 +85,7 @@ const showIndicatorMapping = ref(false);
       <UButton
         :title="$t('plotConfig.abort')"
         color="neutral"
-        icon="mdi:close"
+        icon="lucide:x"
         @click="visible = false"
       />
       <UButton
@@ -95,7 +95,7 @@ const showIndicatorMapping = ref(false);
         :label="$t('plotConfig.useTemplate')"
         class="w-40"
         variant="solid"
-        icon="mdi:check"
+        icon="lucide:check"
         @click="clickStartUseTemplate"
       />
       <UButton
@@ -104,7 +104,7 @@ const showIndicatorMapping = ref(false);
         :title="$t('plotConfig.applyTemplate')"
         class="w-40"
         variant="solid"
-        icon="mdi:check"
+        icon="lucide:check"
         @click="fromTemplateApply"
         :label="$t('plotConfig.applyTemplate')"
       />

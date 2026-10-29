@@ -84,7 +84,7 @@ function toggleFilteredItems() {
           variant="ghost"
           :disabled="filteredItems.length === 0"
           @click.stop="toggleFilteredItems"
-          icon="mdi:check"
+          icon="lucide:check"
           :aria-label="t('general.selectAllMatching')"
         />
       </div>

@@ -64,7 +64,7 @@ onMounted(() => {
           color="neutral"
           variant="ghost"
           size="sm"
-          icon="mdi:refresh"
+          icon="lucide:refresh-cw"
           :title="$t('common.refresh')"
           :aria-label="$t('pairs.refreshPairlist')"
           :loading="loading"
@@ -116,7 +116,7 @@ onMounted(() => {
           color="error"
           variant="soft"
           size="xs"
-          icon="mdi:delete"
+          icon="lucide:trash-2"
           :label="$t('pairs.removeN', { n: blacklistSelect.length })"
           @click="deletePairs"
         />
@@ -125,7 +125,7 @@ onMounted(() => {
             color="neutral"
             variant="outline"
             size="xs"
-            icon="mdi:plus"
+            icon="lucide:plus"
             :label="$t('common.add')"
           />
           <template #content>
@@ -157,7 +157,7 @@ onMounted(() => {
               size="xs"
               :color="blacklistSelect.includes(key) ? 'error' : 'neutral'"
               :variant="blacklistSelect.includes(key) ? 'soft' : 'outline'"
-              :icon="blacklistSelect.includes(key) ? 'mdi:check-circle' : undefined"
+              :icon="blacklistSelect.includes(key) ? 'lucide:circle-check' : undefined"
               :label="pair"
               :aria-pressed="blacklistSelect.includes(key)"
               :disabled="!botStore.activeBot.botFeatures.botBlacklistModify"

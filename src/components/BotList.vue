@@ -67,7 +67,10 @@ function stopEditBot(botId: string) {
     <h3 v-if="!small && !embedded" class="mb-2 text-lg font-semibold">
       {{ $t('bots.available') }}
     </h3>
-    <ul ref="sortContainer" class="panel flex flex-col divide-y divide-default overflow-hidden">
+    <ul
+      ref="sortContainer"
+      class="rounded-xl border border-default bg-default flex flex-col divide-y divide-default overflow-hidden"
+    >
       <li
         v-for="bot in botListComp"
         :key="bot.botId"
@@ -84,7 +87,7 @@ function stopEditBot(botId: string) {
         @click="botStore.selectBot(bot.botId)"
         @keydown.enter="botStore.selectBot(bot.botId)"
       >
-        <i-mdi-drag-vertical
+        <ILucideGripVertical
           v-if="!small"
           class="handle size-5 shrink-0 cursor-grab text-dimmed"
           aria-hidden="true"
@@ -112,7 +115,7 @@ function stopEditBot(botId: string) {
       variant="outline"
       class="mt-3"
       @click="loginDialog({})"
-      icon="mdi:plus"
+      icon="lucide:plus"
       :label="$t('bots.addNew')"
     />
   </div>

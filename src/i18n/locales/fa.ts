@@ -83,6 +83,17 @@ const fa: MessageSchema = {
     account: 'حساب و تنظیمات',
     menu: 'منو',
     openMenu: 'باز کردن منو',
+    search: 'جستجو',
+    searchPlaceholder: 'رفتن به صفحه، جفت‌ارز یا کار…',
+    pages: 'صفحه‌ها',
+    actions: 'کارها',
+    pairs: 'جفت‌ارزها',
+    switchBot: 'ربات‌ها',
+    live: 'واقعی',
+    refreshAll: 'به‌روزرسانی همه ربات‌ها',
+    autoRefresh: 'به‌روزرسانی خودکار',
+    appearance: 'ظاهر',
+    theme: 'پوسته',
   },
   status: {
     signedOut: 'خارج شده',
@@ -120,6 +131,10 @@ const fa: MessageSchema = {
     docs: 'مستندات Freqtrade',
   },
   login: {
+    brandTitle: 'ربات معاملاتی شما، در یک نگاه',
+    featureStatus: 'وضعیت زنده، معاملات باز و ورود بعدی',
+    featureControl: 'شروع، توقف و خروج امن از معاملات',
+    featurePrivate: 'فقط با ربات خودتان ارتباط دارد',
     pageTitle: 'ورود',
     title: 'ورود به ربات',
     subtitle: 'نشانی سرور API و اطلاعات ورود را از پیکربندی ربات وارد کنید.',
@@ -1174,6 +1189,7 @@ const fa: MessageSchema = {
     summary: '{pairs} جفت‌ارز، {timeframes} تایم‌فریم',
   },
   pairlistBuilder: {
+    dropHint: 'یک فیلتر را برای شروع فهرست به اینجا بکشید',
     title: 'سازنده فهرست جفت‌ارز',
     description:
       'فیلترها را در یک فهرست جفت‌ارز ترکیب کنید، روی صرافی آزمایش کنید و پیکربندی را کپی کنید.',

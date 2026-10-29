@@ -184,17 +184,16 @@ const chartOptions = computed((): EChartsOption => {
   <EmptyState
     v-if="!trades.some((t) => !t.is_open)"
     class="h-full"
-    icon="i-mdi-chart-scatter-plot"
+    icon="i-lucide-chart-scatter"
     :title="$t('charts.noClosed')"
     :description="$t('charts.tradesLogHelp')"
   />
-  <ECharts v-else :option="chartOptions" autoresize :theme="settingsStore.chartTheme" />
+  <ECharts
+    class="w-full h-full min-h-[150px]"
+    dir="ltr"
+    v-else
+    :option="chartOptions"
+    autoresize
+    :theme="settingsStore.chartTheme"
+  />
 </template>
-
-<style scoped>
-.echarts {
-  width: 100%;
-  height: 100%;
-  min-height: 150px;
-}
-</style>

@@ -28,7 +28,7 @@ defineOptions({
       color="neutral"
       variant="ghost"
       class="group font-bold"
-      trailing-icon="mdi:chevron-down"
+      trailing-icon="lucide:chevron-down"
       :ui="{
         trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200',
       }"

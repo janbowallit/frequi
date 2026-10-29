@@ -125,7 +125,7 @@ const combinedPairList = computed(() => {
       id="trade-filter"
       v-model="filterText"
       type="search"
-      icon="mdi:magnify"
+      icon="lucide:search"
       :placeholder="$t('pairs.filter')"
       :aria-label="$t('pairs.filter')"
       class="w-full"
@@ -134,7 +134,7 @@ const combinedPairList = computed(() => {
     <EmptyState
       v-if="combinedPairList.length === 0"
       :title="filterText ? $t('pairs.noMatch') : $t('pairs.noWhitelist')"
-      icon="mdi:magnify-close"
+      icon="lucide:search-x"
     />
     <ul v-else class="flex flex-col gap-0.5" :aria-label="$t('pairs.label')">
       <li v-for="comb in combinedPairList" :key="comb.pair">
@@ -167,7 +167,7 @@ const combinedPairList = computed(() => {
               :text="$t('pairs.lockedUntil', { reason: comb.lockReason })"
             >
               <UIcon
-                name="mdi:lock"
+                name="lucide:lock"
                 class="size-4 shrink-0 text-warning"
                 :aria-label="$t('pairs.locked')"
               />
@@ -197,7 +197,7 @@ const combinedPairList = computed(() => {
               v-for="i in readiness.get(comb.pair)!.total"
               :key="i"
               class="flex-1 rounded-full"
-              :class="i <= readiness.get(comb.pair)!.met ? 'bg-(--color-profit)' : 'bg-accented'"
+              :class="i <= readiness.get(comb.pair)!.met ? 'bg-profit' : 'bg-accented'"
             />
           </span>
           <ProfitPill

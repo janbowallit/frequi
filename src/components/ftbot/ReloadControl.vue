@@ -27,7 +27,7 @@ const autoRefreshLoc = computed({
       <UButton
         color="neutral"
         variant="ghost"
-        icon="mdi:refresh"
+        icon="lucide:refresh-cw"
         :aria-label="$t('controls.refreshAllNow')"
         @click="botStore.allRefreshFull"
       />

@@ -12,7 +12,7 @@ describe('ProfitPill.vue', () => {
         stakeCurrency: 'USDT',
       },
     });
-    expect(wrapper.find('div').classes()).toContain('profit-pill-profit');
+    expect(wrapper.find('div').classes()).toContain('text-profit');
     expect(wrapper.find('div').text()).toContain('5.10%');
     expect(wrapper.find('div').text()).toContain('(0.1)');
     expect(wrapper.find('span').element.title).toBe('USDT');
@@ -27,8 +27,8 @@ describe('ProfitPill.vue', () => {
       },
     });
 
-    expect(wrapper.get('div').classes()).not.toContain('profit-pill-profit');
-    expect(wrapper.get('div').classes()).toContain('profit-pill');
+    expect(wrapper.get('div').classes()).not.toContain('text-profit');
+    expect(wrapper.get('div').classes()).toContain('text-loss');
     expect(wrapper.get('div').text()).toContain('-10.00%');
     expect(wrapper.get('div').text()).toContain('(-0.1)');
     expect(wrapper.get('span').element.title).toBe('USDT');
@@ -43,7 +43,7 @@ describe('ProfitPill.vue', () => {
       },
     });
 
-    expect(wrapper.get('div').classes()).toContain('profit-pill');
+    expect(wrapper.get('div').classes()).toContain('text-loss');
     expect(wrapper.get('div').text()).toContain('0.00%');
     expect(wrapper.get('div').text()).toContain('(0)');
     expect(wrapper.get('span').element.title).toBe('BTC');
@@ -58,7 +58,7 @@ describe('ProfitPill.vue', () => {
       },
     });
 
-    expect(wrapper.get('div').classes()).toContain('profit-pill-profit');
+    expect(wrapper.get('div').classes()).toContain('text-profit');
     expect(wrapper.get('div').text()).not.toContain('%');
     expect(wrapper.get('div').text()).toContain('223');
     expect(wrapper.get('span').element.title).toBe('USDT');
@@ -73,7 +73,7 @@ describe('ProfitPill.vue', () => {
       },
     });
 
-    expect(wrapper.get('div').classes()).toContain('border-neutral-500');
+    expect(wrapper.get('div').classes()).toContain('border-default');
     expect(wrapper.get('div').text()).not.toContain('%');
   });
 });

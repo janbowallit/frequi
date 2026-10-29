@@ -162,7 +162,7 @@ watch(
         </span>
       </template>
       <span v-if="isLoadingDataset" class="ms-auto inline-flex items-center gap-1.5" role="status">
-        <UIcon name="mdi:loading" class="size-4 animate-spin" aria-hidden="true" />
+        <UIcon name="lucide:loader-circle" class="size-4 animate-spin" aria-hidden="true" />
         {{ $t('common.loading') }}
       </span>
     </div>
@@ -187,7 +187,7 @@ watch(
         />
         <div v-else class="flex h-full items-center justify-center">
           <EmptyState
-            :icon="isLoadingDataset ? 'mdi:loading' : 'i-mdi-chart-line'"
+            :icon="isLoadingDataset ? 'lucide:loader-circle' : 'i-lucide-chart-line'"
             :title="isLoadingDataset ? $t('chartControls.loadingChart') : noDatasetText"
             :description="
               botStore.activeBot.historyTakesLonger ? $t('chartControls.takingLonger') : ''

@@ -30,7 +30,7 @@ const colorPreferenceOptions = computed(() => [
 
 <template>
   <div class="mx-auto flex w-full max-w-5xl flex-col gap-6 p-3 text-start md:p-6">
-    <PageHeader :title="$t('settings.title')" :description="$t('settings.description')">
+    <PageHeader :description="$t('settings.description')">
       <template #actions>
         <span class="text-sm text-muted tabular-nums">
           {{ $t('settings.uiVersion', { version: settingsStore.uiVersion }) }}
@@ -53,7 +53,7 @@ const colorPreferenceOptions = computed(() => [
       </nav>
       <div class="flex min-w-0 flex-col gap-4">
         <section
-          class="panel flex scroll-mt-4 flex-col gap-5 p-5"
+          class="rounded-xl border border-default bg-default flex scroll-mt-4 flex-col gap-5 p-5"
           id="settings-ui-section"
           aria-labelledby="settings-ui"
         >
@@ -97,7 +97,7 @@ const colorPreferenceOptions = computed(() => [
         </section>
 
         <section
-          class="panel flex scroll-mt-4 flex-col gap-5 p-5"
+          class="rounded-xl border border-default bg-default flex scroll-mt-4 flex-col gap-5 p-5"
           id="settings-chart-section"
           aria-labelledby="settings-chart"
         >
@@ -161,8 +161,8 @@ const colorPreferenceOptions = computed(() => [
                   <UIcon
                     :name="
                       item.value === ColorPreferences.GREEN_UP
-                        ? 'mdi:arrow-up-thin'
-                        : 'mdi:arrow-down-thin'
+                        ? 'lucide:arrow-up'
+                        : 'lucide:arrow-down'
                     "
                     :color="
                       item.value === ColorPreferences.GREEN_UP
@@ -174,8 +174,8 @@ const colorPreferenceOptions = computed(() => [
                   <UIcon
                     :name="
                       item.value === ColorPreferences.GREEN_UP
-                        ? 'mdi:arrow-down-thin'
-                        : 'mdi:arrow-up-thin'
+                        ? 'lucide:arrow-down'
+                        : 'lucide:arrow-up'
                     "
                     :color="
                       item.value === ColorPreferences.GREEN_UP
@@ -191,7 +191,7 @@ const colorPreferenceOptions = computed(() => [
         </section>
 
         <section
-          class="panel flex scroll-mt-4 flex-col gap-5 p-5"
+          class="rounded-xl border border-default bg-default flex scroll-mt-4 flex-col gap-5 p-5"
           id="settings-notifications-section"
           aria-labelledby="settings-notifications"
         >
@@ -218,7 +218,7 @@ const colorPreferenceOptions = computed(() => [
         </section>
 
         <section
-          class="panel flex scroll-mt-4 flex-col gap-5 p-5"
+          class="rounded-xl border border-default bg-default flex scroll-mt-4 flex-col gap-5 p-5"
           id="settings-backtest-section"
           aria-labelledby="settings-backtest"
         >

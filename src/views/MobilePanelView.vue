@@ -7,7 +7,7 @@ defineProps<{
 
 <template>
   <div class="mx-auto flex w-full max-w-3xl flex-col p-3">
-    <div class="panel overflow-hidden">
+    <div class="rounded-xl border border-default bg-default overflow-hidden">
       <BotBalance v-if="panel === 'balance'" />
       <PairListLive v-else />
     </div>

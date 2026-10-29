@@ -27,7 +27,7 @@ withDefaults(
           variant="outline"
           :title="$t('general.deleteValue')"
           class="flex align-items-center justify-content-center"
-          icon="mdi:delete"
+          icon="lucide:trash-2"
           @click="values.splice(idx, 1)"
         />
       </div>
@@ -36,7 +36,7 @@ withDefaults(
       :title="$t('general.addValue')"
       color="neutral"
       class="mt-auto flex align-items-center justify-content-center"
-      icon="mdi:plus-box-outline"
+      icon="lucide:square-plus"
       @click="values.push('')"
     />
   </div>

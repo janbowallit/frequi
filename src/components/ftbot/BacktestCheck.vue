@@ -247,7 +247,7 @@ const statusBadge = computed<
       :class="{
         'border-accented': verdict.tone === 'ok',
         'border-primary': verdict.tone === 'watch',
-        'border-(--color-loss)': verdict.tone === 'bad',
+        'border-loss': verdict.tone === 'bad',
       }"
     >
       <p class="text-base font-semibold text-highlighted">{{ verdict.title }}</p>

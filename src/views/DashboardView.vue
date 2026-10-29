@@ -23,9 +23,52 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="mx-auto flex w-full max-w-[1400px] flex-col gap-4 p-3 text-start sm:p-4 lg:p-6">
+  <div
+    class="mx-auto flex w-full max-w-[1600px] flex-col gap-4 p-3 text-start sm:p-4 lg:gap-5 lg:p-6"
+  >
     <BotSummaryStats />
 
+    <!-- Money over time -->
+    <div class="grid gap-4 lg:gap-5 xl:grid-cols-3">
+      <PanelSection
+        :title="multiBot ? $t('dashboard.profitOverTimeAll') : $t('dashboard.profitOverTime')"
+        class="h-96 xl:col-span-2"
+        body-class="overflow-hidden"
+      >
+        <PeriodBreakdown multi-bot-view />
+      </PanelSection>
+      <PanelSection v-if="multiBot" :title="$t('dashboard.botComparison')" class="h-96">
+        <BotComparisonList />
+      </PanelSection>
+      <section v-else class="h-96 overflow-auto rounded-xl border border-default bg-default">
+        <BotBalance />
+      </section>
+    </div>
+
+    <!-- What is open now -->
+    <PanelSection
+      :title="$t('dashboard.openTrades')"
+      :info="multiBot ? $t('dashboard.openTradesAll') : undefined"
+      body-class=""
+    >
+      <TradeList
+        active-trades
+        :trades="botStore.allOpenTradesSelectedBots"
+        :multi-bot-view="multiBot"
+        :empty-text="$t('dashboard.noOpenTrades')"
+      />
+    </PanelSection>
+
+    <PanelSection
+      v-if="botStore.activeBot.openTradeCount > 0"
+      :title="forBot($t('dashboard.exitPlan'))"
+      :info="$t('dashboard.exitPlanInfo')"
+      body-class=""
+    >
+      <ExitPlanPanel />
+    </PanelSection>
+
+    <!-- What comes next -->
     <PanelSection
       :title="forBot($t('dashboard.nextEntry'))"
       :info="$t('dashboard.nextEntryInfo')"
@@ -43,44 +86,7 @@ onMounted(async () => {
       <BacktestCheck />
     </PanelSection>
 
-    <div class="grid gap-4 lg:grid-cols-3">
-      <PanelSection
-        :title="multiBot ? $t('dashboard.profitOverTimeAll') : $t('dashboard.profitOverTime')"
-        class="h-96 lg:col-span-2"
-        body-class="overflow-hidden"
-      >
-        <PeriodBreakdown multi-bot-view />
-      </PanelSection>
-      <PanelSection v-if="multiBot" :title="$t('dashboard.botComparison')" class="h-96">
-        <BotComparisonList />
-      </PanelSection>
-      <section v-else class="panel h-96 overflow-auto">
-        <BotBalance />
-      </section>
-    </div>
-
-    <PanelSection
-      v-if="botStore.activeBot.openTradeCount > 0"
-      :title="forBot($t('dashboard.exitPlan'))"
-      :info="$t('dashboard.exitPlanInfo')"
-      body-class=""
-    >
-      <ExitPlanPanel />
-    </PanelSection>
-
-    <PanelSection
-      :title="$t('dashboard.openTrades')"
-      :info="multiBot ? $t('dashboard.openTradesAll') : undefined"
-      body-class=""
-    >
-      <TradeList
-        active-trades
-        :trades="botStore.allOpenTradesSelectedBots"
-        :multi-bot-view="multiBot"
-        :empty-text="$t('dashboard.noOpenTrades')"
-      />
-    </PanelSection>
-
+    <!-- History -->
     <PanelSection :title="$t('dashboard.closedTrades')" body-class="">
       <TradeList
         :active-trades="false"
@@ -91,7 +97,7 @@ onMounted(async () => {
       />
     </PanelSection>
 
-    <div v-if="hasClosedTrades" class="grid gap-4 lg:grid-cols-2">
+    <div v-if="hasClosedTrades" class="grid gap-4 lg:grid-cols-2 lg:gap-5">
       <PanelSection :title="$t('dashboard.cumProfit')" class="h-80" body-class="overflow-hidden">
         <CumProfitChart
           :trades="botStore.allTradesSelectedBots"
@@ -119,9 +125,9 @@ onMounted(async () => {
     </div>
     <p
       v-else
-      class="flex items-center gap-2 rounded-(--app-panel-radius) border border-dashed border-default px-4 py-3 text-sm text-muted"
+      class="flex items-center gap-2 rounded-xl border border-dashed border-accented px-4 py-3 text-sm text-muted"
     >
-      <UIcon name="mdi:chart-areaspline" class="size-4 shrink-0" aria-hidden="true" />
+      <UIcon name="i-lucide-chart-area" class="size-4 shrink-0" aria-hidden="true" />
       {{ $t('dashboard.chartsAfterFirst') }}
     </p>
   </div>

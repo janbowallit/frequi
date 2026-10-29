@@ -194,8 +194,8 @@ resetForm();
     </template>
     <template #footer>
       <div class="ms-auto flex justify-end gap-2">
-        <UButton color="neutral" @click="$emit('close', false)" icon="mdi:close"> Cancel </UButton>
-        <UButton @click="handleEntry" icon="mdi:check">{{ $t('forceTrade.enter') }}</UButton>
+        <UButton color="neutral" @click="$emit('close', false)" icon="lucide:x"> Cancel </UButton>
+        <UButton @click="handleEntry" icon="lucide:check">{{ $t('forceTrade.enter') }}</UButton>
       </div>
     </template>
   </UModal>

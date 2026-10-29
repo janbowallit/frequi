@@ -90,6 +90,8 @@ const balanceChartOptions = computed((): EChartsOption => {
 
 <template>
   <ECharts
+    class="min-h-[20px]"
+    dir="ltr"
     v-if="currencies"
     ref="balanceChart"
     :option="balanceChartOptions"
@@ -98,9 +100,3 @@ const balanceChartOptions = computed((): EChartsOption => {
     autoresize
   />
 </template>
-
-<style lang="css" scoped>
-.echarts {
-  min-height: 20px;
-}
-</style>

@@ -82,10 +82,10 @@ function selectPair(pair: string) {
       v-else-if="whitelist.length === 0"
       :title="$t('nextEntry.noPairs')"
       :description="$t('nextEntry.noPairsDetail')"
-      icon="mdi:format-list-bulleted"
+      icon="lucide:list"
     />
 
-    <EmptyState v-else-if="!supported" :title="$t('nextEntry.unsupported')" icon="mdi:radar">
+    <EmptyState v-else-if="!supported" :title="$t('nextEntry.unsupported')" icon="lucide:radar">
       <I18nT
         keypath="nextEntry.unsupportedDetail"
         tag="p"
@@ -107,7 +107,7 @@ function selectPair(pair: string) {
         role="status"
         class="flex flex-col gap-2 border-s-2 ps-3 @md:flex-row @md:items-start @md:justify-between"
         :class="{
-          'border-(--color-profit)': verdict.tone === 'ready',
+          'border-profit': verdict.tone === 'ready',
           'border-primary': verdict.tone === 'waiting',
           'border-accented': verdict.tone === 'blocked',
         }"
@@ -147,7 +147,7 @@ function selectPair(pair: string) {
               class="self-start"
               :color="c.met ? 'success' : c.gap === null ? 'neutral' : 'primary'"
               variant="subtle"
-              :icon="c.met ? 'mdi:lock-open-variant-outline' : 'mdi:lock-outline'"
+              :icon="c.met ? 'lucide:lock-open' : 'lucide:lock'"
               :label="
                 c.met ? $t('nextEntry.gateOpen', { label: c.label }) : `${c.label} ${needText(c)}`
               "
@@ -224,9 +224,7 @@ function selectPair(pair: string) {
                     :key="i"
                     class="flex-1 rounded-full"
                     :class="
-                      i <= metCount(pairConditions(r.conditions))
-                        ? 'bg-(--color-profit)'
-                        : 'bg-accented'
+                      i <= metCount(pairConditions(r.conditions)) ? 'bg-profit' : 'bg-accented'
                     "
                   />
                 </span>
@@ -235,7 +233,7 @@ function selectPair(pair: string) {
                     gateClosed &&
                     metCount(pairConditions(r.conditions)) === pairConditions(r.conditions).length
                   "
-                  name="mdi:lock-outline"
+                  name="lucide:lock"
                   class="size-3.5 shrink-0 text-primary"
                 />
               </span>
@@ -247,7 +245,7 @@ function selectPair(pair: string) {
                   :color="c.met ? 'success' : 'neutral'"
                   variant="subtle"
                   size="sm"
-                  :icon="c.met ? 'mdi:check' : undefined"
+                  :icon="c.met ? 'lucide:check' : undefined"
                   :label="badgeLabel(c)"
                   :title="
                     c.help ??
@@ -275,7 +273,7 @@ function selectPair(pair: string) {
         v-if="failedPairs.length"
         color="warning"
         variant="subtle"
-        icon="mdi:alert-circle-outline"
+        icon="lucide:circle-alert"
         :title="$t('nextEntry.loadFailed', { pairs: joinList(failedPairs) })"
       />
 
@@ -285,7 +283,11 @@ function selectPair(pair: string) {
             ? $t('nextEntry.footnoteLatest', { timeframe, time: timestampms(latestCandleTs) })
             : $t('nextEntry.footnote', { timeframe })
         }}
-        <UIcon v-if="loading" name="mdi:loading" class="ms-1 size-3 animate-spin align-middle" />
+        <UIcon
+          v-if="loading"
+          name="lucide:loader-circle"
+          class="ms-1 size-3 animate-spin align-middle"
+        />
       </p>
     </template>
   </div>

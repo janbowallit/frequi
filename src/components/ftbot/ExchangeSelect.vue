@@ -84,7 +84,7 @@ onMounted(() => {
       color="neutral"
       variant="outline"
       class="ms-2 no-min-w"
-      icon="mdi:refresh"
+      icon="lucide:refresh-cw"
       @click="botStore.activeBot.getExchangeList()"
     />
   </div>

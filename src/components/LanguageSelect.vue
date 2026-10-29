@@ -28,7 +28,7 @@ const items = computed<DropdownMenuItem[]>(() =>
     <UButton
       variant="ghost"
       color="neutral"
-      icon="mdi:translate"
+      icon="lucide:languages"
       :title="$t('language.choose')"
       :aria-label="showText ? undefined : $t('language.choose')"
       :label="showText ? current.name : ''"

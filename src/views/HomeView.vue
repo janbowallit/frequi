@@ -8,35 +8,35 @@ const quickLinks = computed(() =>
   [
     {
       to: '/trade',
-      icon: 'mdi:swap-horizontal-bold',
+      icon: 'i-lucide-chart-candlestick',
       title: t('nav.trade'),
       description: t('home.tradeHelp'),
       visible: !botStore.canRunBacktest,
     },
     {
       to: '/dashboard',
-      icon: 'mdi:view-dashboard-outline',
+      icon: 'lucide:layout-dashboard',
       title: t('nav.dashboard'),
       description: t('home.dashboardHelp'),
       visible: !botStore.canRunBacktest,
     },
     {
       to: '/backtest',
-      icon: 'mdi:flask-outline',
+      icon: 'lucide:flask-conical',
       title: t('nav.backtest'),
       description: t('home.backtestHelp'),
       visible: botStore.canRunBacktest,
     },
     {
       to: '/graph',
-      icon: 'mdi:chart-line',
+      icon: 'lucide:chart-line',
       title: t('nav.chart'),
       description: t('home.chartHelp'),
       visible: true,
     },
     {
       to: '/logs',
-      icon: 'mdi:text-box-outline',
+      icon: 'lucide:scroll-text',
       title: t('nav.logs'),
       description: t('home.logsHelp'),
       visible: true,
@@ -46,16 +46,15 @@ const quickLinks = computed(() =>
 </script>
 
 <template>
-  <div class="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-6 text-start sm:py-10">
+  <div class="mx-auto flex w-full max-w-4xl flex-col gap-6 p-4 text-start sm:py-8 lg:p-8">
     <PageHeader
-      :title="$t('home.bots')"
       :description="botStore.botCount > 0 ? $t('home.connected') : $t('home.connectHint')"
     >
       <template v-if="botStore.botCount > 0" #actions>
         <UButton
           color="neutral"
           variant="outline"
-          icon="mdi:plus"
+          icon="lucide:plus"
           :label="$t('home.addBot')"
           @click="loginDialog({})"
         />
@@ -63,30 +62,40 @@ const quickLinks = computed(() =>
     </PageHeader>
 
     <BotList v-if="botStore.botCount > 0" embedded />
-    <div v-else class="rounded-(--app-panel-radius) border border-dashed border-accented">
-      <EmptyState :title="$t('home.noBot')" icon="mdi:robot-outline">
+    <div v-else class="rounded-xl border border-dashed border-accented">
+      <EmptyState :title="$t('home.noBot')" icon="lucide:bot">
         <UButton
           class="mt-2"
           variant="solid"
-          icon="mdi:login"
+          icon="lucide:log-in"
           :label="$t('home.connect')"
           @click="loginDialog({})"
         />
       </EmptyState>
     </div>
 
-    <nav v-if="botStore.botCount > 0" aria-labelledby="go-heading" class="flex flex-col gap-2">
+    <nav v-if="botStore.botCount > 0" aria-labelledby="go-heading" class="flex flex-col gap-3">
       <h2 id="go-heading" class="text-sm font-medium text-muted">{{ $t('home.goTo') }}</h2>
-      <ul
-        class="panel grid grid-cols-1 divide-y divide-default sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-4 lg:divide-x rtl:lg:divide-x-reverse"
-      >
+      <ul class="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <li v-for="link in quickLinks" :key="link.to">
-          <RouterLink :to="link.to" class="flex h-full flex-col gap-0.5 p-4 hover:bg-elevated/50">
-            <span class="flex items-center gap-2 font-semibold text-highlighted">
-              <UIcon :name="link.icon" class="size-4 text-muted" aria-hidden="true" />
-              {{ link.title }}
+          <RouterLink
+            :to="link.to"
+            class="group flex h-full items-start gap-3 rounded-xl border border-default bg-default p-4 transition-colors hover:border-accented hover:bg-elevated/40 focus-visible:outline-2 focus-visible:outline-primary"
+          >
+            <span
+              class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary ring ring-primary/20 ring-inset"
+            >
+              <UIcon :name="link.icon" class="size-4.5" aria-hidden="true" />
             </span>
-            <span class="text-sm text-muted">{{ link.description }}</span>
+            <span class="flex min-w-0 flex-col gap-0.5">
+              <span class="font-semibold text-highlighted">{{ link.title }}</span>
+              <span class="text-sm text-muted">{{ link.description }}</span>
+            </span>
+            <UIcon
+              name="i-lucide-arrow-right"
+              class="ms-auto size-4 shrink-0 self-center text-dimmed transition-transform group-hover:translate-x-0.5 group-hover:text-muted rtl:-scale-x-100"
+              aria-hidden="true"
+            />
           </RouterLink>
         </li>
       </ul>

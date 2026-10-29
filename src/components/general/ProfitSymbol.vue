@@ -12,31 +12,14 @@ const isProfitable = computed<boolean | null>(() => {
 </script>
 
 <template>
-  <div class="d-inline-block">
-    <div
-      class="triangle"
-      :class="{
-        'triangle-up': isProfitable === true,
-        'triangle-down': isProfitable === false,
-        'border-transparent border-t-neutral-500': isProfitable === null,
-      }"
-    ></div>
-  </div>
+  <UIcon
+    name="i-lucide-triangle"
+    class="size-3.5 shrink-0"
+    :class="{
+      'fill-current text-profit': isProfitable === true,
+      'rotate-180 fill-current text-loss': isProfitable === false,
+      'text-dimmed': isProfitable === null,
+    }"
+    aria-hidden="true"
+  />
 </template>
-
-<style scoped lang="css">
-.triangle {
-  width: 0;
-  height: 0;
-  border-style: solid;
-  border-width: 0.7rem 0.45rem 0 0.45rem;
-}
-.triangle-up {
-  border-width: 0 0.45rem 0.7rem 0.45rem;
-  border-color: transparent transparent var(--color-profit) transparent;
-}
-.triangle-down {
-  border-width: 0.7rem 0.45rem 0 0.45rem;
-  border-color: var(--color-loss) transparent transparent transparent;
-}
-</style>

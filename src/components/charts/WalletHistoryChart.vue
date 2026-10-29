@@ -342,6 +342,8 @@ const walletHistoryOptions: ComputedRef<EChartsOption> = computed(() => {
 
 <template>
   <ECharts
+    class="w-full h-full min-h-[150px]"
+    dir="ltr"
     v-if="hasWalletData"
     :option="walletHistoryOptions"
     :theme="settingsStore.chartTheme"
@@ -355,11 +357,3 @@ const walletHistoryOptions: ComputedRef<EChartsOption> = computed(() => {
     </p>
   </div>
 </template>
-
-<style lang="css" scoped>
-.echarts {
-  min-height: 150px;
-  height: 100%;
-  width: 100%;
-}
-</style>

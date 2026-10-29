@@ -1,163 +1,44 @@
 @import 'tailwindcss';
 @import '@nuxt/ui';
-@import '@fontsource-variable/instrument-sans/wdth.css';
+@import '@fontsource-variable/inter';
 @import '@fontsource-variable/vazirmatn/index.css';
 @import '@fontsource/jetbrains-mono/400.css';
-@import '@fontsource/jetbrains-mono/500.css';
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 /*
-  "Trading desk" palette.
-  Brass is the only accent and means "waiting / needs attention / selected".
-  Green and coral are reserved for money (see --color-profit / --color-loss).
+  Amber (Nuxt UI `primary`) is the one accent: selection, focus and "waiting".
+  Profit / loss are reserved for money and follow the theme.
 */
-@theme static {
-  --color-brass-50: #fbf6ea;
-  --color-brass-100: #f6eacb;
-  --color-brass-200: #eed497;
-  --color-brass-300: #e5bc66;
-  --color-brass-400: #d9a441;
-  --color-brass-500: #bf8a2a;
-  --color-brass-600: #9a6b12;
-  --color-brass-700: #7a5410;
-  --color-brass-800: #5c3f0e;
-  --color-brass-900: #3f2b0b;
-  --color-brass-950: #241806;
-
-  --color-graphite-50: #f6f7f9;
-  --color-graphite-100: #eef0f3;
-  --color-graphite-200: #d9dde3;
-  --color-graphite-300: #b8bfc9;
-  --color-graphite-400: #8c95a3;
-  --color-graphite-500: #687180;
-  --color-graphite-600: #4d5562;
-  --color-graphite-700: #3a414d;
-  --color-graphite-800: #262c37;
-  --color-graphite-900: #1d222b;
-  --color-graphite-950: #15181d;
-
+@theme {
   /* Vazirmatn draws Persian; it only downloads when Persian text is on screen */
-  --font-sans:
-    'Instrument Sans Variable', 'Vazirmatn Variable', ui-sans-serif, system-ui, -apple-system,
-    'Segoe UI', sans-serif;
+  --font-sans: 'Inter Variable', 'Vazirmatn Variable', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  --color-profit: #059669;
+  --color-loss: #dc2626;
 }
 
-/*
-  The default border color has changed to `currentColor` in Tailwind CSS v4,
-  so we've added these compatibility styles to make sure everything still
-  looks the same as it did with Tailwind CSS v3.
-*/
+:root {
+  --ui-radius: 0.5rem;
+  --ui-primary: var(--ui-color-primary-600);
+}
+
+.dark {
+  --color-profit: #34d399;
+  --color-loss: #f87171;
+  --ui-primary: var(--ui-color-primary-400);
+}
+
 @layer base {
+  /* Tailwind v4 borders default to currentColor - use the theme border instead */
   *,
   ::after,
   ::before,
   ::backdrop,
   ::file-selector-button {
-    /* Theme-aware default border (gray-200 was far too bright in dark mode) */
     border-color: var(--ui-border, currentColor);
+    scrollbar-width: thin;
+    scrollbar-color: var(--ui-border-accented) transparent;
   }
-
-  /* Cursor pointer for Buttons - workaround for Tailwind v4 change */
-  button,
-  [role='button'] {
-    cursor: pointer;
-  }
-
-  h1,
-  h2,
-  h3 {
-    text-wrap: balance;
-  }
-}
-
-/* Light theme */
-:root {
-  --color-profit: #138a5e;
-  --color-loss: #c8402f;
-
-  --ui-radius: 0.375rem;
-  --ui-primary: var(--ui-color-primary-600);
-
-  /* Page background - one step behind the panels so they stand out */
-  --app-canvas: var(--ui-color-neutral-100);
-  --app-panel-radius: 0.625rem;
-  --app-font: var(--font-sans);
-}
-
-/* Dark theme */
-.dark {
-  --color-profit: #3cc48f;
-  --color-loss: #f0685a;
-
-  --ui-primary: var(--ui-color-primary-400);
-  --ui-border: #2f3643;
-  --ui-border-muted: #2f3643;
-  --ui-border-accented: var(--ui-color-neutral-700);
-
-  --app-canvas: var(--ui-color-neutral-950);
-}
-
-html {
-  /*  Set the default font size to 14px */
-  font-size: 14px;
-}
-
-body {
-  font-family: var(--app-font);
-  background-color: var(--app-canvas);
-  color: var(--ui-text);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Numbers line up in columns */
-.tabular-nums,
-table td,
-table th {
-  font-variant-numeric: tabular-nums;
-}
-
-/* Slim, theme-aware scrollbars */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--ui-border-accented) transparent;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-body.ft-theme-transition,
-body.ft-theme-transition *,
-body.ft-theme-transition *:before,
-body.ft-theme-transition *:after {
-  transition:
-    background 750ms ease-in-out,
-    border-color 750ms ease-in-out,
-    background-color 750ms ease-in-out;
-  transition-delay: 0 !important;
-}
-
-/* Dropdowns, popovers and tooltips must sit above sticky page chrome */
-[data-reka-popper-content-wrapper] {
-  z-index: 60 !important;
-}
-
-/* A page panel: one surface step above the canvas, hairline border, no shadow */
-@utility panel {
-  background-color: var(--ui-bg);
-  border: 1px solid var(--ui-border);
-  border-radius: var(--app-panel-radius);
-}
-
-/* Charts keep left-to-right axes and labels in the Persian (right-to-left) UI */
-[dir='rtl'] .echarts {
-  direction: ltr;
 }

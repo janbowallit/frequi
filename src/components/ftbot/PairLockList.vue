@@ -40,7 +40,7 @@ function removePairLock(item: Lock) {
           color="neutral"
           variant="ghost"
           size="sm"
-          icon="mdi:refresh"
+          icon="lucide:refresh-cw"
           :title="$t('common.refresh')"
           :aria-label="$t('pairs.refreshLocks')"
           :loading="loading"
@@ -52,7 +52,7 @@ function removePairLock(item: Lock) {
       v-if="botStore.activeBot.activeLocks.length === 0"
       :title="$t('pairs.noLocks')"
       :description="$t('pairs.noLocksHelp')"
-      icon="mdi:lock-open-variant-outline"
+      icon="lucide:lock-open"
     />
     <UTable
       v-else
@@ -68,7 +68,7 @@ function removePairLock(item: Lock) {
           size="sm"
           color="neutral"
           variant="ghost"
-          icon="mdi:delete"
+          icon="lucide:trash-2"
           :title="$t('pairs.deleteLock', { pair: row.original.pair })"
           :aria-label="$t('pairs.deleteLock', { pair: row.original.pair })"
           @click="removePairLock(row.original)"

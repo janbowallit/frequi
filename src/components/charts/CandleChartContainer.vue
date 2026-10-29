@@ -184,7 +184,7 @@ const singlePairSelection = computed({
             color="neutral"
             variant="outline"
             :disabled="botStore.activeBot.plotMultiPairs.length === 0"
-            icon="mdi:refresh"
+            icon="lucide:refresh-cw"
             @click="refresh"
           />
         </div>
@@ -208,7 +208,7 @@ const singlePairSelection = computed({
             <UButton
               color="neutral"
               variant="outline"
-              icon="mdi:tune-variant"
+              icon="lucide:sliders-horizontal"
               :label="$t('chartControls.display')"
               :aria-label="$t('chartControls.displayOptions')"
             />
@@ -230,7 +230,7 @@ const singlePairSelection = computed({
                 <UButton
                   color="neutral"
                   variant="subtle"
-                  icon="mdi:cog"
+                  icon="lucide:settings"
                   :label="$t('chartControls.editIndicators')"
                   block
                   @click="showConfigurator"
@@ -264,7 +264,7 @@ const singlePairSelection = computed({
       <EmptyState
         v-else
         class="h-full"
-        icon="i-mdi-chart-line"
+        icon="i-lucide-chart-line"
         :title="$t('chartControls.noPair')"
         :description="$t('chartControls.noPairHelp')"
       />

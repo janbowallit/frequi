@@ -26,7 +26,7 @@ const { state: customData, execute } = useAsyncState(
 
     <UButton
       @click="execute()"
-      icon="mdi:reload"
+      icon="lucide:rotate-cw"
       :label="$t('tradeActions.reloadCustomData')"
       class="mt-2"
     />

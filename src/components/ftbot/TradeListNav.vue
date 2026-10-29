@@ -63,7 +63,7 @@ watch(
         class="w-full justify-center"
         :title="$t('trades.navigation')"
         @click="sortDescendingOrder = !sortDescendingOrder"
-        :trailing-icon="sortDescendingOrder ? 'mdi:arrow-down' : 'mdi:arrow-up'"
+        :trailing-icon="sortDescendingOrder ? 'lucide:arrow-down' : 'lucide:arrow-up'"
         >{{ $t('trades.navigation') }}
       </UButton>
       <li
@@ -97,7 +97,7 @@ watch(
             variant="outline"
             color="neutral"
             @click="ordersVisible[i] = !ordersVisible[i]"
-            :icon="ordersVisible[i] ? 'mdi:chevron-down' : 'mdi:chevron-right'"
+            :icon="ordersVisible[i] ? 'lucide:chevron-down' : 'lucide:chevron-right'"
             :ui="{ leadingIcon: 'rtl:-scale-x-100' }"
           />
         </div>
@@ -121,14 +121,8 @@ watch(
         </Transition>
       </li>
       <li v-if="trades.length === 0" class="list-none">
-        <EmptyState :title="$t('trades.empty')" icon="mdi:history" />
+        <EmptyState :title="$t('trades.empty')" icon="lucide:history" />
       </li>
     </ul>
   </div>
 </template>
-
-<style scoped>
-.list-group {
-  text-align: left;
-}
-</style>

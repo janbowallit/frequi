@@ -261,12 +261,7 @@ onMounted(() => {
       role="alert"
       class="rounded-lg focus:outline-none"
     >
-      <UAlert
-        color="error"
-        variant="subtle"
-        icon="mdi:alert-circle-outline"
-        :title="formError.title"
-      >
+      <UAlert color="error" variant="subtle" icon="lucide:circle-alert" :title="formError.title">
         <template #description>
           <p>{{ formError.description }}</p>
           <p v-if="formError.kind === 'connection'" class="mt-2 flex flex-wrap gap-x-4 gap-y-1">
@@ -300,7 +295,7 @@ onMounted(() => {
         autocomplete="username"
         autocapitalize="none"
         :spellcheck="false"
-        icon="mdi:account-outline"
+        icon="lucide:user"
         size="xl"
         class="w-full"
         :ui="{ base: 'h-[44px]' }"
@@ -319,7 +314,7 @@ onMounted(() => {
         name="password"
         :type="showPassword ? 'text' : 'password'"
         autocomplete="current-password"
-        icon="mdi:lock-outline"
+        icon="lucide:lock"
         size="xl"
         class="w-full"
         :ui="{ base: 'h-[44px]', trailing: 'pe-0.5' }"
@@ -334,7 +329,7 @@ onMounted(() => {
             variant="link"
             size="md"
             class="size-[40px] justify-center"
-            :icon="showPassword ? 'mdi:eye-off-outline' : 'mdi:eye-outline'"
+            :icon="showPassword ? 'lucide:eye-off' : 'lucide:eye'"
             :aria-label="showPassword ? $t('loginForm.hidePassword') : $t('loginForm.showPassword')"
             :aria-pressed="showPassword"
             aria-controls="password-input"
@@ -351,7 +346,7 @@ onMounted(() => {
         variant="link"
         size="md"
         class="group -ms-2.5 px-2.5"
-        trailing-icon="mdi:chevron-down"
+        trailing-icon="lucide:chevron-down"
         :ui="{
           trailingIcon:
             'group-data-[state=open]:rotate-180 transition-transform duration-200 motion-reduce:transition-none',
@@ -379,7 +374,7 @@ onMounted(() => {
               autocomplete="url"
               autocapitalize="none"
               :spellcheck="false"
-              icon="mdi:link-variant"
+              icon="lucide:link"
               size="xl"
               class="w-full"
               :ui="{ base: 'h-[44px]' }"
@@ -390,7 +385,7 @@ onMounted(() => {
             v-if="urlDuplicate"
             color="warning"
             variant="subtle"
-            icon="mdi:alert-outline"
+            icon="lucide:triangle-alert"
             :title="$t('loginForm.duplicate')"
           />
           <UFormField
@@ -405,7 +400,7 @@ onMounted(() => {
               name="botName"
               :placeholder="$t('loginForm.displayNamePlaceholder')"
               autocomplete="off"
-              icon="mdi:robot-outline"
+              icon="lucide:bot"
               size="xl"
               class="w-full"
               :ui="{ base: 'h-[44px]' }"
@@ -433,9 +428,9 @@ onMounted(() => {
         size="xl"
         :loading="submitting"
         :block="!inModal"
-        trailing-icon="mdi:arrow-right"
+        trailing-icon="lucide:arrow-right"
         :ui="{ trailingIcon: 'ms-0 rtl:-scale-x-100' }"
-        class="h-[44px] justify-center font-semibold text-white bg-brand-600 hover:bg-brand-700 dark:bg-brand-400 dark:hover:bg-brand-300 dark:text-brand-950 transition-colors duration-200 motion-reduce:transition-none"
+        class="h-[44px] justify-center font-semibold"
       />
     </div>
   </form>

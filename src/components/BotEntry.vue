@@ -79,7 +79,7 @@ const autoRefreshLoc = computed({
         </span>
       </span>
       <span v-else class="flex items-center gap-1 text-xs font-medium text-error">
-        <i-mdi-cancel aria-hidden="true" />
+        <ILucideBan aria-hidden="true" />
         <span :class="{ 'sr-only': noText }">{{ $t('nav.loginExpired') }}</span>
       </span>
 
@@ -90,7 +90,7 @@ const autoRefreshLoc = computed({
           variant="ghost"
           :aria-label="$t('bots.rename')"
           :title="$t('bots.rename')"
-          icon="mdi:pencil-outline"
+          icon="lucide:pencil"
           @click.stop="$emit('edit', bot.botId)"
         />
         <UButton
@@ -98,7 +98,7 @@ const autoRefreshLoc = computed({
           variant="soft"
           color="error"
           :label="$t('bots.logInAgain')"
-          icon="mdi:login"
+          icon="lucide:log-in"
           @click.stop="$emit('editLogin', bot.botId)"
         />
         <UButton
@@ -107,7 +107,7 @@ const autoRefreshLoc = computed({
           color="error"
           :aria-label="$t('bots.remove')"
           :title="$t('bots.remove')"
-          icon="mdi:delete-outline"
+          icon="lucide:trash-2"
           @click.stop="removeBotQuestion"
         />
       </div>

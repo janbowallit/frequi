@@ -109,7 +109,7 @@ watchDebounced(
             </template>
           </UPopover>
           <UInput v-model="selColor" class="grow"> </UInput>
-          <UButton icon="mdi:dice-multiple" @click="newColor" />
+          <UButton icon="lucide:dices" @click="newColor" />
         </UFieldGroup>
       </UFormField>
     </div>

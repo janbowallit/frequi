@@ -50,7 +50,7 @@ onMounted(() => {
           :title="$t('backtest.pairNavigation')"
           color="neutral"
           variant="outline"
-          :icon="isBarVisible.left ? 'mdi:chevron-left' : 'mdi:chevron-right'"
+          :icon="isBarVisible.left ? 'lucide:chevron-left' : 'lucide:chevron-right'"
           :ui="{ leadingIcon: 'rtl:-scale-x-100' }"
           @click="isBarVisible.left = !isBarVisible.left"
         />
@@ -65,18 +65,22 @@ onMounted(() => {
           variant="outline"
           :title="$t('backtest.tradeNavigation')"
           color="neutral"
-          :icon="isBarVisible.right ? 'mdi:chevron-right' : 'mdi:chevron-left'"
+          :icon="isBarVisible.right ? 'lucide:chevron-right' : 'lucide:chevron-left'"
           :ui="{ leadingIcon: 'rtl:-scale-x-100' }"
           @click="isBarVisible.right = !isBarVisible.right"
         />
       </div>
     </div>
     <div class="text-center flex flex-row h-full items-stretch overflow-x-clip">
-      <Transition name="fadeleft">
+      <Transition
+        enter-active-class="transition duration-200 ease-out"
+        leave-active-class="transition duration-150 ease-in"
+        enter-from-class="-translate-x-6 opacity-0 rtl:translate-x-6"
+        leave-to-class="-translate-x-6 opacity-0 rtl:translate-x-6"
+      >
         <PairSummary
           v-if="isBarVisible.left"
-          class="overflow-y-auto overflow-x-hidden"
-          style="max-height: calc(100vh - 200px)"
+          class="max-h-[calc(100dvh-200px)] overflow-x-hidden overflow-y-auto"
           :pairlist="backtestResult.pairlist"
           :trades="backtestResult.trades"
           :starting-balance="backtestResult.starting_balance"
@@ -92,17 +96,21 @@ onMounted(() => {
         :timerange="timerange"
         :strategy="strategy"
         :trades="backtestResult.trades"
-        class="flex-1 candle-chart-container px-0 h-full align-self-stretch min-w-0 overflow-y-auto"
+        class="h-[calc(100dvh-250px)] min-w-0 flex-1 self-stretch overflow-y-auto"
         :slider-position="sliderPosition"
         :freqai-model="freqaiModel"
         @refresh-data="refreshOHLCV"
       >
       </CandleChartContainer>
-      <Transition name="fade">
+      <Transition
+        enter-active-class="transition duration-200 ease-out"
+        leave-active-class="transition duration-150 ease-in"
+        enter-from-class="translate-x-6 opacity-0 rtl:-translate-x-6"
+        leave-to-class="translate-x-6 opacity-0 rtl:-translate-x-6"
+      >
         <TradeListNav
           v-if="isBarVisible.right"
-          class="overflow-y-auto overflow-x-visible min-w-56"
-          style="max-height: calc(100vh - 200px)"
+          class="max-h-[calc(100dvh-200px)] min-w-56 overflow-x-visible overflow-y-auto"
           :trades="backtestResult.trades.filter((t) => t.pair === botStore.activeBot.selectedPair)"
           @trade-select="navigateChartToTrade"
         />
@@ -117,32 +125,3 @@ onMounted(() => {
     </PanelSection>
   </div>
 </template>
-
-<style lang="css" scoped>
-.candle-chart-container {
-  /* TODO: Rough estimate - still to fix correctly
-   Applies to all "calc" usages in this file. */
-  height: calc(100vh - 250px) !important;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: all 0.2s;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-  transform: translateX(30px);
-}
-.fadeleft-enter-active,
-.fadeleft-leave-active {
-  transition: all 0.2s;
-}
-
-.fadeleft-enter-from,
-.fadeleft-leave-to {
-  opacity: 0;
-  transform: translateX(-30px);
-}
-</style>

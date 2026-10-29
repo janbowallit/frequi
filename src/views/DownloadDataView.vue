@@ -4,7 +4,7 @@ const botStore = useBotStore();
 
 <template>
   <div class="mx-auto flex w-full max-w-3xl flex-col gap-4 p-3 md:p-6">
-    <PageHeader :title="$t('download.title')" :description="$t('download.description')" />
+    <PageHeader :description="$t('download.description')" />
     <WebserverOnlyNotice
       v-if="!botStore.activeBot.isWebserverMode"
       :feature="$t('general.featureDownload')"

@@ -30,7 +30,7 @@ const pairlistStore = usePairlistConfigStore();
       <UButton
         color="neutral"
         variant="outline"
-        icon="mdi:content-save-outline"
+        icon="lucide:save"
         :label="$t('common.save')"
         @click="pairlistStore.saveConfig(pairlistStore.config.name)"
       />
@@ -39,7 +39,7 @@ const pairlistStore = usePairlistConfigStore();
         variant="solid"
         :loading="pairlistStore.evaluating"
         :label="$t('pairlistBuilder.evaluate')"
-        icon="mdi:play"
+        icon="lucide:play"
         :title="$t('pairlistBuilder.evaluateHelp')"
         @click="pairlistStore.startPairlistEvaluation()"
       />

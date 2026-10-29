@@ -26,13 +26,13 @@ const save = () => {
     <UInput v-model="newName" class="w-full" :placeholder="$t('bots.namePlaceholder')" autofocus />
 
     <div class="flex gap-1">
-      <UButton type="submit" color="neutral" :title="$t('common.save')" icon="mdi:check" />
+      <UButton type="submit" color="neutral" :title="$t('common.save')" icon="lucide:check" />
 
       <UButton
         color="neutral"
         :title="$t('common.cancel')"
         @click="$emit('cancelled')"
-        icon="mdi:close"
+        icon="lucide:x"
       >
       </UButton>
     </div>

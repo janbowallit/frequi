@@ -122,7 +122,7 @@ watch(
           color="neutral"
           variant="ghost"
           size="sm"
-          icon="mdi:refresh"
+          icon="lucide:refresh-cw"
           :title="$t('common.refresh')"
           :aria-label="$t('period.refresh')"
           @click="refreshSummary"
@@ -169,7 +169,7 @@ watch(
     <EmptyState
       v-if="!hasTrades"
       class="flex-1"
-      icon="i-mdi-chart-bar"
+      icon="i-lucide-chart-bar"
       :title="$t('period.empty')"
       :description="emptyText"
     />
@@ -191,7 +191,7 @@ watch(
     <EmptyState
       v-else
       class="flex-1"
-      icon="i-mdi-percent"
+      icon="i-lucide-percent"
       :title="$t('period.singleBot')"
       :description="$t('period.singleBotHelp')"
     />

@@ -53,7 +53,7 @@ const tradeClick = (trade) => {
     <EmptyState
       v-if="trades.length === 0"
       :title="emptyText ?? $t('trades.empty')"
-      :icon="activeTrades ? 'mdi:swap-horizontal' : 'mdi:history'"
+      :icon="activeTrades ? 'lucide:arrow-left-right' : 'lucide:history'"
     />
 
     <div

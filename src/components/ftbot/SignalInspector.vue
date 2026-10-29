@@ -358,9 +358,9 @@ function formatValue(value: unknown): string {
 }
 
 const statusIcon: Record<CheckStatus, string> = {
-  pass: 'mdi:check-circle',
-  fail: 'mdi:close-circle',
-  warn: 'mdi:alert-circle',
+  pass: 'lucide:circle-check',
+  fail: 'lucide:circle-x',
+  warn: 'lucide:circle-alert',
 };
 const statusColor: Record<CheckStatus, string> = {
   pass: 'text-success',
@@ -382,7 +382,7 @@ const statusColor: Record<CheckStatus, string> = {
       <UButton
         color="neutral"
         variant="outline"
-        icon="mdi:refresh"
+        icon="lucide:refresh-cw"
         :aria-label="$t('signals.recheck')"
         :title="$t('signals.recheck')"
         :loading="loading"
@@ -395,9 +395,9 @@ const statusColor: Record<CheckStatus, string> = {
       v-if="!pair"
       :title="$t('signals.pickPair')"
       :description="$t('signals.pickPairHelp')"
-      icon="mdi:radar"
+      icon="lucide:radar"
     />
-    <UAlert v-else-if="error" color="error" icon="mdi:alert-circle-outline" :title="error" />
+    <UAlert v-else-if="error" color="error" icon="lucide:circle-alert" :title="error" />
     <div v-else-if="!analysis && loading" class="flex flex-col gap-2" aria-busy="true">
       <USkeleton class="h-16 w-full" />
       <USkeleton v-for="i in 5" :key="i" class="h-8 w-full" />
@@ -468,9 +468,9 @@ const statusColor: Record<CheckStatus, string> = {
               candle.enter && candle.exit
                 ? 'bg-warning'
                 : candle.enter
-                  ? 'bg-(--color-profit)'
+                  ? 'bg-profit'
                   : candle.exit
-                    ? 'bg-(--color-loss)'
+                    ? 'bg-loss'
                     : 'bg-elevated'
             "
             :title="candle.label"
@@ -480,12 +480,10 @@ const statusColor: Record<CheckStatus, string> = {
           <span>{{ $t('signals.candlesAgo', { n: timeline.length }) }}</span>
           <span class="flex items-center gap-3">
             <span class="flex items-center gap-1"
-              ><span class="size-2 rounded-[2px] bg-(--color-profit)" />{{
-                $t('signals.entry')
-              }}</span
+              ><span class="size-2 rounded-[2px] bg-profit" />{{ $t('signals.entry') }}</span
             >
             <span class="flex items-center gap-1"
-              ><span class="size-2 rounded-[2px] bg-(--color-loss)" />{{ $t('signals.exit') }}</span
+              ><span class="size-2 rounded-[2px] bg-loss" />{{ $t('signals.exit') }}</span
             >
           </span>
           <span>{{ $t('signals.latest') }}</span>
@@ -526,7 +524,7 @@ const statusColor: Record<CheckStatus, string> = {
           <UInput
             v-model="indicatorFilter"
             type="search"
-            icon="mdi:magnify"
+            icon="lucide:search"
             size="sm"
             :placeholder="$t('signals.filterIndicators')"
             :aria-label="$t('signals.filterIndicators')"
@@ -546,7 +544,7 @@ const statusColor: Record<CheckStatus, string> = {
                 {{ ind.value }}
                 <UIcon
                   v-if="ind.change !== 0"
-                  :name="ind.change > 0 ? 'mdi:arrow-up' : 'mdi:arrow-down'"
+                  :name="ind.change > 0 ? 'lucide:arrow-up' : 'lucide:arrow-down'"
                   class="size-3.5 text-muted"
                   :aria-label="ind.change > 0 ? $t('signals.up') : $t('signals.down')"
                 />

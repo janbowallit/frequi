@@ -22,7 +22,7 @@ const { copy, isSupported, copied } = useClipboard();
     >
       <span v-if="copied" class="text-sm">{{ $t('general.copied') }}</span>
       <UIcon
-        :name="isSupported && copied ? 'mdi-check-circle' : 'mdi-content-copy'"
+        :name="isSupported && copied ? 'i-lucide-circle-check' : 'i-lucide-copy'"
         v-if="isSupported && isValid"
       />
     </div>

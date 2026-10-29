@@ -41,7 +41,7 @@ onMounted(() => {
         <UButton
           color="neutral"
           variant="outline"
-          icon="mdi:refresh"
+          icon="lucide:refresh-cw"
           @click="botStore.activeBot.getStrategyList()"
         />
       </div>

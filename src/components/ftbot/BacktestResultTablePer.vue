@@ -134,7 +134,7 @@ const tableColumns = computed(() => {
         :aria-label="$t('backtest.columnsLabel')"
         size="sm"
         class="w-48"
-        icon="mdi:table-column"
+        icon="lucide:columns-3"
       />
     </template>
     <UTable :data="tableItems" :columns="tableColumns" />

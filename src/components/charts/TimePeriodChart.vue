@@ -228,6 +228,8 @@ const dailyChartOptions: ComputedRef<EChartsOption> = computed(() => {
 
 <template>
   <ECharts
+    class="h-full min-h-[240px]"
+    dir="ltr"
     v-if="dailyStats.data"
     ref="dailyChart"
     :option="dailyChartOptions"
@@ -236,10 +238,3 @@ const dailyChartOptions: ComputedRef<EChartsOption> = computed(() => {
     autoresize
   />
 </template>
-
-<style lang="css" scoped>
-.echarts {
-  min-height: 240px;
-  height: 100%;
-}
-</style>

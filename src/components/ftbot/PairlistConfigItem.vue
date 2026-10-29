@@ -24,7 +24,7 @@ function toggleVisible() {
       class="flex w-full text-start items-center bg-neutral-200 dark:bg-neutral-700 p-2 border-b border-neutral-300 dark:border-neutral-600"
     >
       <div class="flex grow items-center">
-        <i-mdi-reorder-horizontal
+        <ILucideGripHorizontal
           role="button"
           class="handle me-2 ms-2 flex-auto shrink"
           width="24"
@@ -39,21 +39,21 @@ function toggleVisible() {
           <span class="text-sm">{{ pairlist.description }}</span>
         </div>
       </div>
-      <i-mdi-close
+      <ILucideX
         role="button"
         width="24"
         height="24"
         class="mx-2"
         @click="pairlistStore.removeFromConfig(index)"
       />
-      <i-mdi-chevron-down
+      <ILucideChevronDown
         v-if="!pairlist.showParameters"
         :class="hasParameters && !pairlist.showParameters ? 'visible' : 'invisible'"
         role="button"
         class="fs-4"
         @click="toggleVisible"
       />
-      <i-mdi-chevron-up
+      <ILucideChevronUp
         v-if="pairlist.showParameters"
         :class="hasParameters && pairlist.showParameters ? 'visible' : 'invisible'"
         role="button"

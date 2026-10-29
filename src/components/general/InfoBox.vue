@@ -9,7 +9,7 @@ defineProps<{ hint: string }>();
       class="inline-flex shrink-0 rounded-full text-dimmed hover:text-muted"
       :aria-label="hint"
     >
-      <UIcon name="mdi:information-outline" class="size-4" />
+      <UIcon name="lucide:info" class="size-4" />
     </button>
   </UTooltip>
 </template>

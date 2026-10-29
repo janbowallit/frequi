@@ -141,7 +141,7 @@ watch(selectedOption, () => {
           color="neutral"
           variant="ghost"
           size="sm"
-          icon="mdi:refresh"
+          icon="lucide:refresh-cw"
           :title="$t('common.refresh')"
           :aria-label="$t('performance.refresh')"
           :loading="loading"
@@ -162,7 +162,7 @@ watch(selectedOption, () => {
       v-if="!performanceData?.length"
       :title="$t('performance.empty')"
       :description="emptyText"
-      icon="mdi:chart-line"
+      icon="lucide:chart-line"
     />
     <UTable
       v-else

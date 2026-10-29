@@ -7,6 +7,7 @@ const routes: Array<RouteRecordRaw> = [
     name: 'Home',
     component: () => import('@/views/HomeView.vue'),
     meta: {
+      title: 'home.bots',
       allowAnonymous: true,
     },
   },
@@ -37,22 +38,26 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/balance',
+    meta: { title: 'trade.balance' },
     name: 'Freqtrade Balance',
     component: () => import('@/views/MobilePanelView.vue'),
     props: { panel: 'balance' },
   },
   {
     path: '/open_trades',
+    meta: { title: 'trade.openTrades' },
     component: () => import('@/views/MobileTradesListView.vue'),
   },
 
   {
     path: '/trade_history',
+    meta: { title: 'trade.closedTrades' },
     component: () => import('@/views/MobileTradesListView.vue'),
     props: { history: true },
   },
   {
     path: '/pairlist',
+    meta: { title: 'trade.pairlist' },
     component: () => import('@/views/MobilePanelView.vue'),
     props: { panel: 'pairlist' },
   },

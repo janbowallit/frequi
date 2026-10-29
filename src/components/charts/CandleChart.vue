@@ -755,6 +755,8 @@ watch(
 <template>
   <div class="h-full w-full">
     <ECharts
+      class="w-full h-full min-h-[200px]"
+      dir="ltr"
       v-if="hasData"
       :key="theme"
       ref="candleChart"
@@ -764,13 +766,3 @@ watch(
     />
   </div>
 </template>
-
-<style scoped lang="css">
-.echarts {
-  width: 100%;
-  min-height: 200px;
-  /* TODO: height calculation is not working correctly - uses min-height for now */
-  /* height: 600px; */
-  height: 100%;
-}
-</style>

@@ -22,14 +22,9 @@ withDefaults(
     </p>
     <p class="text-xs text-muted tabular-nums">
       {{ $t('backtest.tradesCount', { n: backtestResult.strategy.total_trades }) }}
-      <span
-        :class="
-          backtestResult.strategy.profit_total >= 0
-            ? 'text-(--color-profit)'
-            : 'text-(--color-loss)'
-        "
-        >{{ formatPercent(backtestResult.strategy.profit_total) }}</span
-      >
+      <span :class="backtestResult.strategy.profit_total >= 0 ? 'text-profit' : 'text-loss'">{{
+        formatPercent(backtestResult.strategy.profit_total)
+      }}</span>
     </p>
     <p
       v-if="canUseModify && backtestResult.metadata.notes"

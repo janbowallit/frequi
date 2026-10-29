@@ -29,7 +29,7 @@ defineEmits<{
       color="neutral"
       :title="$t('tradeActions.forceExit')"
       :label="$t('tradeActions.forceExit')"
-      icon="mdi:close-box"
+      icon="lucide:square-x"
       @click="$emit('forceExit', trade)"
     />
     <UButton
@@ -38,7 +38,7 @@ defineEmits<{
       color="neutral"
       :title="$t('tradeActions.forceExitLimit')"
       :label="$t('tradeActions.forceExitLimit')"
-      icon="mdi:close-box"
+      icon="lucide:square-x"
       @click="$emit('forceExit', trade, 'limit')"
     />
     <UButton
@@ -47,7 +47,7 @@ defineEmits<{
       color="neutral"
       :title="$t('tradeActions.forceExitMarket')"
       :label="$t('tradeActions.forceExitMarket')"
-      icon="mdi:close-box"
+      icon="lucide:square-x"
       @click="$emit('forceExit', trade, 'market')"
     />
     <UButton
@@ -56,7 +56,7 @@ defineEmits<{
       color="neutral"
       :title="$t('tradeActions.forceExitPartial')"
       :label="$t('tradeActions.forceExitPartial')"
-      icon="mdi:close-box-multiple"
+      icon="lucide:copy-x"
       @click="$emit('forceExitPartial', trade)"
     />
     <UButton
@@ -65,7 +65,7 @@ defineEmits<{
       color="neutral"
       :title="$t('tradeActions.cancelOrders')"
       :label="$t('tradeActions.cancelOrders')"
-      icon="mdi:cancel"
+      icon="lucide:ban"
       @click="$emit('cancelOpenOrder', trade)"
     />
     <UButton
@@ -74,7 +74,7 @@ defineEmits<{
       color="neutral"
       :title="$t('tradeActions.increase')"
       :label="$t('tradeActions.increase')"
-      icon="mdi:plus-box-multiple-outline"
+      icon="lucide:copy-plus"
       @click="$emit('forceEntry', trade)"
     />
     <UButton
@@ -83,7 +83,7 @@ defineEmits<{
       color="neutral"
       :title="$t('tradeActions.reload')"
       :label="$t('tradeActions.reload')"
-      icon="mdi:reload-alert"
+      icon="lucide:refresh-ccw-dot"
       @click="$emit('reloadTrade', trade)"
     />
     <UButton
@@ -91,7 +91,7 @@ defineEmits<{
       color="neutral"
       :title="$t('tradeActions.delete')"
       :label="$t('tradeActions.delete')"
-      icon="mdi:delete"
+      icon="lucide:trash-2"
       @click="$emit('deleteTrade', trade)"
     />
   </div>

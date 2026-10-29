@@ -36,7 +36,7 @@ function abort() {
       :title="$t('plotConfig.abort')"
       class="ms-1 mt-auto"
       color="neutral"
-      icon="mdi:close"
+      icon="lucide:x"
       @click="abort"
     />
   </div>

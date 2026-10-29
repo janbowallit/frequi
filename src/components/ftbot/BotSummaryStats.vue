@@ -8,6 +8,7 @@ interface StatCard {
   label: string;
   value: string;
   detail: string;
+  icon: string;
   /** Sign of the value - colors it as profit / loss */
   sign?: number;
 }
@@ -69,6 +70,7 @@ const cards = computed<StatCard[]>(() => {
   return [
     {
       label: t('summary.realized'),
+      icon: 'i-lucide-badge-dollar-sign',
       value: signed(s.closedProfit),
       detail:
         s.closedRatio !== undefined && s.closedTrades > 0
@@ -78,6 +80,7 @@ const cards = computed<StatCard[]>(() => {
     },
     {
       label: t('summary.openProfit'),
+      icon: 'i-lucide-trending-up',
       value: signed(s.openProfit),
       detail: s.maxOpenTrades
         ? t('summary.slotsInUse', { open: s.openTrades, max: s.maxOpenTrades })
@@ -86,6 +89,7 @@ const cards = computed<StatCard[]>(() => {
     },
     {
       label: t('summary.balance'),
+      icon: 'i-lucide-wallet',
       value: money(s.balance),
       detail: s.isDryRun
         ? t('summary.dryRunFunds')
@@ -95,6 +99,7 @@ const cards = computed<StatCard[]>(() => {
     },
     {
       label: t('summary.winRate'),
+      icon: 'i-lucide-target',
       value: decided ? formatPercent(s.wins / decided, 0) : '–',
       detail: decided
         ? t('summary.wonLost', { won: s.wins, lost: s.losses })
@@ -107,22 +112,38 @@ const cards = computed<StatCard[]>(() => {
 <template>
   <section
     :aria-label="$t('summary.label')"
-    class="panel grid grid-cols-2 text-start lg:grid-cols-4 [&>*]:border-default max-lg:[&>*:nth-child(-n+2)]:border-b max-lg:[&>*:nth-child(odd)]:border-e lg:[&>*:not(:last-child)]:border-e"
+    class="grid grid-cols-2 gap-3 text-start xl:grid-cols-4"
   >
-    <div v-for="card in cards" :key="card.label" class="min-w-0 px-4 py-3 lg:px-5 lg:py-4">
-      <p class="text-sm text-muted">{{ card.label }}</p>
+    <div
+      v-for="card in cards"
+      :key="card.label"
+      class="relative min-w-0 overflow-hidden rounded-xl border border-default bg-default p-4"
+    >
+      <div class="flex items-center justify-between gap-2">
+        <p class="truncate text-sm font-medium text-muted">{{ card.label }}</p>
+        <span
+          class="flex size-8 shrink-0 items-center justify-center rounded-lg ring ring-inset"
+          :class="{
+            'bg-elevated text-muted ring-default': !card.sign,
+            'bg-profit/10 text-profit ring-profit/20': card.sign === 1,
+            'bg-loss/10 text-loss ring-loss/20': card.sign === -1,
+          }"
+        >
+          <UIcon :name="card.icon" class="size-4" aria-hidden="true" />
+        </span>
+      </div>
       <p
-        class="mt-0.5 truncate text-xl font-semibold tracking-tight tabular-nums lg:text-[1.75rem] lg:leading-9"
+        class="mt-2 truncate text-2xl font-semibold tracking-tight tabular-nums lg:text-[1.75rem] lg:leading-9"
         :class="{
           'text-highlighted': !card.sign,
-          'text-(--color-profit)': card.sign === 1,
-          'text-(--color-loss)': card.sign === -1,
+          'text-profit': card.sign === 1,
+          'text-loss': card.sign === -1,
         }"
         :title="card.value"
       >
         {{ card.value }}
       </p>
-      <p class="truncate text-xs text-muted" :title="card.detail">{{ card.detail }}</p>
+      <p class="mt-0.5 truncate text-xs text-muted" :title="card.detail">{{ card.detail }}</p>
     </div>
   </section>
 </template>

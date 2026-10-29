@@ -131,13 +131,20 @@ const chartOptions = computed((): EChartsOption => {
   <EmptyState
     v-if="!trades.some((t) => !t.is_open)"
     class="h-full"
-    icon="i-mdi-chart-histogram"
+    icon="i-lucide-chart-column"
     :title="$t('charts.noClosed')"
     :description="$t('charts.distributionHelp')"
   />
   <div v-else class="flex flex-col h-full relative">
     <div class="grow mb-2">
-      <ECharts v-if="trades" :option="chartOptions" autoresize :theme="settingsStore.chartTheme" />
+      <ECharts
+        class="w-full h-full min-h-[150px]"
+        dir="ltr"
+        v-if="trades"
+        :option="chartOptions"
+        autoresize
+        :theme="settingsStore.chartTheme"
+      />
     </div>
     <UFormField
       class="z-2 absolute fixed-top flex items-center gap-10 ms-2 mt-1"
@@ -154,11 +161,3 @@ const chartOptions = computed((): EChartsOption => {
     </UFormField>
   </div>
 </template>
-
-<style scoped>
-.echarts {
-  width: 100%;
-  height: 100%;
-  min-height: 150px;
-}
-</style>

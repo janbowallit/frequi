@@ -51,7 +51,7 @@ const columns = computed<TableColumn<BacktestHistoryEntry>[]>(() => [
         v-if="botStore.activeBot.backtestHistoryList.length > 0"
         v-model="filterText"
         type="search"
-        icon="mdi:magnify"
+        icon="lucide:search"
         :placeholder="$t('backtest.filter')"
         :aria-label="$t('backtest.filterLabel')"
         class="flex-1"
@@ -61,7 +61,7 @@ const columns = computed<TableColumn<BacktestHistoryEntry>[]>(() => [
         :aria-label="$t('common.refresh')"
         variant="outline"
         color="neutral"
-        icon="mdi:refresh"
+        icon="lucide:refresh-cw"
         class="ms-auto"
         @click="botStore.activeBot.getBacktestHistory"
       />
@@ -70,7 +70,7 @@ const columns = computed<TableColumn<BacktestHistoryEntry>[]>(() => [
       v-if="botStore.activeBot.backtestHistoryList.length === 0"
       :title="$t('backtest.noSaved')"
       :description="$t('backtest.noSavedHelp')"
-      icon="mdi:history"
+      icon="lucide:history"
     />
     <UTable
       v-if="botStore.activeBot.backtestHistoryList.length > 0"
@@ -105,7 +105,7 @@ const columns = computed<TableColumn<BacktestHistoryEntry>[]>(() => [
             size="sm"
             variant="solid"
             :title="$t('backtest.loadThis')"
-            icon="mdi:arrow-right"
+            icon="lucide:arrow-right"
             :ui="{ leadingIcon: 'rtl:-scale-x-100' }"
             :disabled="row.original.run_id in botStore.activeBot.backtestHistory"
             @click.stop="botStore.activeBot.getBacktestHistoryResult(row.original)"
@@ -116,7 +116,7 @@ const columns = computed<TableColumn<BacktestHistoryEntry>[]>(() => [
             size="sm"
             color="neutral"
             :title="$t('backtest.deleteThis')"
-            icon="mdi:delete"
+            icon="lucide:trash-2"
             :disabled="row.original.run_id in botStore.activeBot.backtestHistory"
             @click.stop="deleteBacktestResult(row.original)"
           />

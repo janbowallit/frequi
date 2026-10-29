@@ -99,7 +99,10 @@ async function startDownload() {
   <div class="flex w-full flex-col gap-4 text-start">
     <BackgroundJobTracking />
 
-    <form class="panel flex flex-col divide-y divide-default" @submit.prevent="startDownload">
+    <form
+      class="rounded-xl border border-default bg-default flex flex-col divide-y divide-default"
+      @submit.prevent="startDownload"
+    >
       <!-- Pairs -->
       <section class="flex flex-col gap-3 p-5" aria-labelledby="dl-pairs">
         <div>
@@ -115,7 +118,7 @@ async function startDownload() {
             color="neutral"
             variant="outline"
             size="sm"
-            icon="mdi:plus"
+            icon="lucide:plus"
             :title="pt.pairs.join('\n')"
             :label="pt.description"
             @click="addPairs(pt.pairs)"
@@ -124,7 +127,7 @@ async function startDownload() {
             color="neutral"
             variant="outline"
             size="sm"
-            icon="mdi:format-list-numbered"
+            icon="lucide:list-ordered"
             :label="$t('download.fromBuilder')"
             :disabled="pairlistStore.whitelist.length === 0"
             :title="$t('download.fromBuilderHelp')"
@@ -217,7 +220,12 @@ async function startDownload() {
             })
           }}
         </span>
-        <UButton type="submit" variant="solid" icon="mdi:download" :label="$t('download.title')" />
+        <UButton
+          type="submit"
+          variant="solid"
+          icon="lucide:download"
+          :label="$t('download.title')"
+        />
       </div>
     </form>
   </div>

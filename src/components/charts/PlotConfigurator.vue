@@ -319,7 +319,7 @@ const markAreaZIndex = computed({
         class="col"
         @click="removeIndicator"
         :label="$t('plotConfig.removeIndicator')"
-        icon="mdi:minus-box-outline"
+        icon="lucide:square-minus"
       />
 
       <UButton
@@ -327,12 +327,12 @@ const markAreaZIndex = computed({
         :title="$t('plotConfig.fromTemplateHelp')"
         @click="fromPlotTemplateVisible = !fromPlotTemplateVisible"
         :label="$t('plotConfig.fromTemplate')"
-        icon="mdi:folder-arrow-down-outline"
+        icon="lucide:folder-down"
       />
 
       <UButton
         :title="$t('plotConfig.addIndicatorHelp')"
-        icon="mdi:plus-box-outline"
+        icon="lucide:square-plus"
         class="col"
         :disabled="addNewIndicator"
         @click="clickAddNewIndicator"
@@ -365,7 +365,7 @@ const markAreaZIndex = computed({
         :title="$t('plotConfig.resetHelp')"
         @click="loadPlotConfig"
         :label="$t('common.reset')"
-        icon="mdi:restore"
+        icon="lucide:rotate-ccw"
       />
 
       <!--
@@ -387,7 +387,7 @@ const markAreaZIndex = computed({
         "
         color="neutral"
         :label="$t('plotConfig.fromStrategy')"
-        icon="mdi:download"
+        icon="lucide:download"
         @click="loadPlotConfigFromStrategy"
       />
 
@@ -397,7 +397,7 @@ const markAreaZIndex = computed({
         :disabled="addNewIndicator"
         :title="$t('plotConfig.showConfigHelp')"
         @click="showConfig = !showConfig"
-        :icon="showConfig ? 'mdi:eye-off' : 'mdi:eye'"
+        :icon="showConfig ? 'lucide:eye-off' : 'lucide:eye'"
         :label="showConfig ? $t('common.hide') : $t('common.show')"
       />
 
@@ -408,7 +408,7 @@ const markAreaZIndex = computed({
         @click="savePlotConfig"
         :label="$t('common.save')"
         variant="solid"
-        icon="mdi:content-save"
+        icon="lucide:save"
       />
     </div>
     <UButton
@@ -418,7 +418,7 @@ const markAreaZIndex = computed({
       size="sm"
       :title="$t('plotConfig.loadStringHelp')"
       @click="loadConfigFromString"
-      icon="mdi:upload"
+      icon="lucide:upload"
       >{{ $t('plotConfig.loadString') }}</UButton
     >
     <div v-if="showConfig" class="w-full ms-1 mt-2">

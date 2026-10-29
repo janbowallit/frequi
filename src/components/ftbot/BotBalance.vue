@@ -145,7 +145,7 @@ onMounted(() => {
           color="neutral"
           variant="ghost"
           size="sm"
-          :icon="showBotOnly ? 'mdi:bank' : 'mdi:robot'"
+          :icon="showBotOnly ? 'lucide:landmark' : 'lucide:bot'"
           :title="showBotOnly ? $t('balance.showAccount') : $t('balance.showBot')"
           :aria-label="showBotOnly ? $t('balance.showAccount') : $t('balance.showBot')"
           @click="showBotOnly = !showBotOnly"
@@ -154,7 +154,7 @@ onMounted(() => {
           color="neutral"
           variant="ghost"
           size="sm"
-          :icon="hideSmallBalances ? 'mdi:eye' : 'mdi:eye-off'"
+          :icon="hideSmallBalances ? 'lucide:eye' : 'lucide:eye-off'"
           :title="hideSmallBalances ? $t('balance.showSmall') : $t('balance.hideSmall')"
           :aria-label="hideSmallBalances ? $t('balance.showSmall') : $t('balance.hideSmall')"
           :aria-pressed="!hideSmallBalances"
@@ -164,7 +164,7 @@ onMounted(() => {
           color="neutral"
           variant="ghost"
           size="sm"
-          icon="mdi:refresh"
+          icon="lucide:refresh-cw"
           :title="$t('common.refresh')"
           :aria-label="$t('balance.refresh')"
           :loading="loading"
@@ -176,7 +176,7 @@ onMounted(() => {
       v-if="balanceCurrencies.length === 0"
       :title="$t('balance.empty')"
       :description="hideSmallBalances ? $t('balance.smallHidden') : undefined"
-      icon="mdi:wallet-outline"
+      icon="lucide:wallet"
     />
     <template v-else>
       <!-- A pie of a single currency says nothing -->

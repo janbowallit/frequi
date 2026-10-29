@@ -4,8 +4,10 @@ defineProps<{ feature: string }>();
 </script>
 
 <template>
-  <div class="panel flex flex-col items-start gap-3 p-6 text-start">
-    <UIcon name="mdi:server-network-outline" class="size-6 text-muted" aria-hidden="true" />
+  <div
+    class="rounded-xl border border-default bg-default flex flex-col items-start gap-3 p-6 text-start"
+  >
+    <UIcon name="lucide:server" class="size-6 text-muted" aria-hidden="true" />
     <div class="flex max-w-prose flex-col gap-1">
       <h2 class="text-base font-semibold text-highlighted">
         {{ $t('general.webserverTitle', { feature }) }}
@@ -19,7 +21,7 @@ defineProps<{ feature: string }>();
     <UButton
       color="neutral"
       variant="outline"
-      icon="mdi:open-in-new"
+      icon="lucide:external-link"
       :label="$t('general.webserverDocs')"
       to="https://www.freqtrade.io/en/stable/utils/#webserver-mode"
       target="_blank"

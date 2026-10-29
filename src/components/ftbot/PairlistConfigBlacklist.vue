@@ -16,7 +16,7 @@ const configNames = computed(() =>
           :title="$t('pairlistBuilder.copy')"
           size="sm"
           color="neutral"
-          icon="mdi:content-copy"
+          icon="lucide:copy"
           @click="pairlistStore.duplicateBlacklist(copyFromConfig)"
         />
       </div>
@@ -33,14 +33,14 @@ const configNames = computed(() =>
             <UButton
               size="sm"
               color="neutral"
-              icon="mdi:close"
+              icon="lucide:x"
               @click="pairlistStore.removeFromBlacklist(i)"
             />
           </span>
         </div>
       </div>
       <UButton
-        icon="mdi:plus"
+        icon="lucide:plus"
         variant="solid"
         :label="$t('common.add')"
         @click="pairlistStore.addToBlacklist()"

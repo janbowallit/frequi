@@ -120,14 +120,14 @@ function scrollToBottom() {
 
 <template>
   <section
-    class="panel relative flex h-full flex-col overflow-hidden text-start"
+    class="rounded-xl border border-default bg-default relative flex h-full flex-col overflow-hidden text-start"
     :aria-label="$t('logs.label')"
   >
     <div class="flex flex-wrap items-center gap-2 border-b border-default px-3 py-2">
       <UInput
         v-model="search"
         type="search"
-        icon="mdi:magnify"
+        icon="lucide:search"
         :placeholder="$t('logs.search')"
         :aria-label="$t('logs.searchLabel')"
         class="w-full sm:w-64"
@@ -151,7 +151,7 @@ function scrollToBottom() {
           id="refresh-logs"
           color="neutral"
           variant="outline"
-          icon="mdi:refresh"
+          icon="lucide:refresh-cw"
           :label="$t('common.refresh')"
           :loading="loading"
           @click="refreshLogs"
@@ -181,13 +181,13 @@ function scrollToBottom() {
       <EmptyState
         v-if="botStore.activeBot.lastLogs.length === 0 && !loading"
         :title="$t('logs.empty')"
-        icon="mdi:text-box-outline"
+        icon="lucide:scroll-text"
       />
       <EmptyState
         v-else-if="filteredLogs.length === 0 && !loading"
         :title="$t('logs.noMatch')"
         :description="$t('logs.noMatchHelp')"
-        icon="mdi:magnify-close"
+        icon="lucide:search-x"
       >
         <UButton
           color="neutral"
@@ -228,7 +228,7 @@ function scrollToBottom() {
       color="primary"
       variant="solid"
       size="sm"
-      icon="mdi:arrow-down"
+      icon="lucide:arrow-down"
       :label="$t('logs.jumpLatest')"
       @click="scrollToBottom"
     />

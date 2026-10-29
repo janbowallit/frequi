@@ -31,11 +31,11 @@ const profitString = computed((): string => {
 
 <template>
   <div
-    class="flex justify-between items-center ps-2 pe-1 rounded-sm border-2 border-solid"
+    class="flex items-center justify-between gap-1 rounded-md border ps-2 pe-1 tabular-nums"
     :class="{
-      'profit-pill-profit': isProfitable === true,
-      'profit-pill': isProfitable === false,
-      'border-neutral-500': isProfitable === null,
+      'border-profit/50 bg-profit/8 text-profit': isProfitable === true,
+      'border-loss/50 bg-loss/8 text-loss': isProfitable === false,
+      'border-default': isProfitable === null,
     }"
     :title="profitDesc"
   >
@@ -46,19 +46,10 @@ const profitString = computed((): string => {
       <span
         v-if="profitString"
         class="ms-1"
-        :class="profitRatio ? 'small' : ''"
+        :class="profitRatio ? 'text-xs opacity-80' : ''"
         :title="stakeCurrency"
         >{{ profitString }}</span
       >
     </div>
   </div>
 </template>
-
-<style scoped lang="css">
-.profit-pill {
-  border-color: var(--color-loss);
-}
-.profit-pill-profit {
-  border-color: var(--color-profit);
-}
-</style>

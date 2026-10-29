@@ -64,7 +64,7 @@ function handleForceEntry(item: Trade) {
         size="sm"
         color="neutral"
         :title="$t('tradeActions.actions')"
-        icon="mdi:gesture-tap"
+        icon="lucide:pointer"
       />
       <template #content>
         <div class="p-2">
@@ -83,7 +83,7 @@ function handleForceEntry(item: Trade) {
             class="mt-1 w-full text-start"
             color="neutral"
             :label="$t('tradeActions.closeMenu')"
-            icon="mdi:cancel"
+            icon="lucide:ban"
             @click="popoverOpen = false"
           />
         </div>

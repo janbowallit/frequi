@@ -203,7 +203,7 @@ const rowSelection = computed({
     <div v-if="showFilter && trades.length > 0" class="flex justify-end px-3 pt-3">
       <UInput
         v-model="filterText"
-        icon="mdi:magnify"
+        icon="lucide:search"
         :placeholder="$t('trades.filter')"
         :aria-label="$t('trades.filterLabel')"
         class="w-full sm:w-64"
@@ -212,7 +212,7 @@ const rowSelection = computed({
     <EmptyState
       v-if="filteredTrades.length === 0"
       :title="filterText ? $t('trades.noMatch') : (emptyText ?? $t('trades.empty'))"
-      :icon="activeTrades ? 'mdi:swap-horizontal' : 'mdi:history'"
+      :icon="activeTrades ? 'lucide:arrow-left-right' : 'lucide:history'"
       :description="
         filterText
           ? $t('trades.noMatchHelp')

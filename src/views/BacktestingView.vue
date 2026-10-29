@@ -83,13 +83,13 @@ const resultTabs = computed(() => [
 
 <template>
   <div class="mx-auto flex w-full max-w-[1600px] flex-col gap-4 p-3 text-start md:p-6">
-    <PageHeader :title="$t('backtest.title')" :description="$t('backtest.description')">
+    <PageHeader :description="$t('backtest.description')">
       <template #actions>
         <UBadge
           v-if="botStore.activeBot.backtestRunning"
           color="primary"
           variant="subtle"
-          icon="mdi:loading"
+          icon="lucide:loader-circle"
           :ui="{ leadingIcon: 'animate-spin' }"
           :label="`${botStore.activeBot.backtestStep} ${formatPercent(botStore.activeBot.backtestProgress, 0)}`"
         />
@@ -97,7 +97,7 @@ const resultTabs = computed(() => [
           v-if="botStore.activeBot.canRunBacktest && botStore.activeBot.botFeatures.backtestHistory"
           color="neutral"
           variant="outline"
-          icon="mdi:folder-open-outline"
+          icon="lucide:folder-open"
           :label="$t('backtest.loadSaved')"
           @click="showSavedResults = true"
         />
@@ -126,11 +126,14 @@ const resultTabs = computed(() => [
         </PanelSection>
       </div>
 
-      <section class="panel min-w-0 overflow-hidden" :aria-label="$t('backtest.result')">
+      <section
+        class="rounded-xl border border-default bg-default min-w-0 overflow-hidden"
+        :aria-label="$t('backtest.result')"
+      >
         <EmptyState
           v-if="!hasBacktestResult || !botStore.activeBot.selectedBacktestResult"
           class="py-24"
-          icon="mdi:chart-box-outline"
+          icon="lucide:chart-column-big"
           :title="$t('backtest.noResult')"
           :description="$t('backtest.noResultHelp')"
         />

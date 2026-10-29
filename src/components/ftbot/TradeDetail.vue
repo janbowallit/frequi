@@ -265,7 +265,7 @@ const exitPlan = computed(() => plans.value.find((p) => p.trade.trade_id === pro
       variant="outline"
       color="neutral"
       :label="$t('tradeDetail.showCustomData')"
-      icon="mdi:database-search"
+      icon="lucide:database-zap"
       @click="showTradeCustomData({ tradeId: trade.trade_id })"
     />
   </div>

@@ -64,7 +64,7 @@ function confirmInput(run_id: string, result: BacktestResultInMemory) {
             variant="ghost"
             :title="$t('backtest.editNotes')"
             :aria-label="$t('backtest.editNotes')"
-            icon="mdi:pencil-outline"
+            icon="lucide:pencil"
             @click.stop="result.metadata.editing = !result.metadata.editing"
           />
           <UButton
@@ -73,7 +73,7 @@ function confirmInput(run_id: string, result: BacktestResultInMemory) {
             variant="ghost"
             :title="$t('backtest.removeFromList')"
             :aria-label="$t('backtest.removeFromList')"
-            icon="mdi:close"
+            icon="lucide:x"
             @click.stop="$emit('removeResult', key)"
           />
         </div>
@@ -91,7 +91,7 @@ function confirmInput(run_id: string, result: BacktestResultInMemory) {
           :title="$t('backtest.saveNotes')"
           :aria-label="$t('backtest.saveNotes')"
           variant="solid"
-          icon="mdi:check"
+          icon="lucide:check"
           @click.stop="confirmInput(key, result)"
         />
       </template>
