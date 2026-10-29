@@ -122,7 +122,7 @@ const cards = computed<StatCard[]>(() => {
       <div class="flex items-center justify-between gap-2">
         <p class="truncate text-sm font-medium text-muted">{{ card.label }}</p>
         <span
-          class="flex size-8 shrink-0 items-center justify-center rounded-lg ring ring-inset"
+          class="hidden size-8 shrink-0 items-center justify-center rounded-lg ring ring-inset sm:flex"
           :class="{
             'bg-elevated text-muted ring-default': !card.sign,
             'bg-profit/10 text-profit ring-profit/20': card.sign === 1,
@@ -133,7 +133,7 @@ const cards = computed<StatCard[]>(() => {
         </span>
       </div>
       <p
-        class="mt-2 truncate text-2xl font-semibold tracking-tight tabular-nums lg:text-[1.75rem] lg:leading-9"
+        class="mt-2 truncate text-2xl font-semibold tracking-tight tabular-nums lg:text-3xl"
         :class="{
           'text-highlighted': !card.sign,
           'text-profit': card.sign === 1,

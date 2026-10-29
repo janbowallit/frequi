@@ -48,7 +48,7 @@ const showIndicatorMapping = ref(false);
     <UFormField
       v-if="!showIndicatorMapping"
       :label="$t('plotConfig.selectTemplate')"
-      class="text-md"
+      class="text-sm"
     >
       <UListbox
         id="selectTemplate"
@@ -65,7 +65,7 @@ const showIndicatorMapping = ref(false);
       </UListbox>
     </UFormField>
     <div v-else>
-      <h5 class="mt-1 text-center text-md mb-1">{{ $t('plotConfig.remap') }}</h5>
+      <h5 class="mt-1 text-center text-sm mb-1">{{ $t('plotConfig.remap') }}</h5>
       <div
         v-for="indicator in Object.keys(indicatorMap)"
         :key="indicator"

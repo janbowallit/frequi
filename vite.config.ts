@@ -147,6 +147,23 @@ export default defineConfig({
           primary: 'amber',
           neutral: 'zinc',
         },
+        // Keep the smallest text at 12px (Nuxt UI's small badges and key hints go down to 8-11px)
+        badge: {
+          variants: {
+            size: {
+              xs: { base: 'text-xs/4 px-1 py-0 gap-1 rounded-sm' },
+              sm: { base: 'text-xs/4 px-1.5 py-0.5 gap-1 rounded-sm' },
+            },
+          },
+        },
+        kbd: {
+          variants: {
+            size: {
+              sm: 'h-4 min-w-4 text-xs',
+              md: 'h-5 min-w-5 text-xs',
+            },
+          },
+        },
         alert: {
           defaultVariants: {
             variant: 'subtle',
@@ -160,8 +177,8 @@ export default defineConfig({
         table: {
           slots: {
             thead: 'bg-muted',
-            th: 'px-3 py-2 text-[13px] font-medium text-muted text-left whitespace-nowrap',
-            td: 'px-3 py-2 text-default text-md text-left tabular-nums',
+            th: 'px-3 py-2 text-xs font-medium text-muted text-left whitespace-nowrap',
+            td: 'px-3 py-2 text-sm text-default text-left tabular-nums',
             tr: 'hover:bg-elevated/50',
             empty: 'py-2 text-center text-muted',
           },

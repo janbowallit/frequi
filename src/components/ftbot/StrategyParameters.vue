@@ -27,7 +27,7 @@ const sortedParamsBySpace = computed<Record<string, typeof props.strategy.params
 <template>
   <div v-if="strategy.params && strategy.params.length > 0" class="text-start">
     <div v-for="(params, space) in sortedParamsBySpace" :key="space" class="mb-4">
-      <h3 class="text-md font-bold underline mb-2" :title="$t('strategyParams.space', { space })">
+      <h3 class="mb-2 text-base font-semibold" :title="$t('strategyParams.space', { space })">
         {{ space }}
       </h3>
       <div

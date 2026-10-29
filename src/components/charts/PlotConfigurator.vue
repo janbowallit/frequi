@@ -266,7 +266,7 @@ const markAreaZIndex = computed({
 
 <template>
   <div v-if="columns">
-    <UFormField :label="$t('plotConfig.name')" class="text-md">
+    <UFormField :label="$t('plotConfig.name')" class="text-sm">
       <PlotConfigSelect allow-edit></PlotConfigSelect>
     </UFormField>
     <USeparator class="my-2" />
@@ -282,7 +282,7 @@ const markAreaZIndex = computed({
     </div>
     <USeparator class="my-2" />
 
-    <UFormField :label="$t('plotConfig.targetPlot')" class="text-md">
+    <UFormField :label="$t('plotConfig.targetPlot')" class="text-sm">
       <EditValue
         v-model="selSubPlot"
         :allow-edit="!isMainPlot"
@@ -308,7 +308,7 @@ const markAreaZIndex = computed({
       </EditValue>
     </UFormField>
     <USeparator class="my-2" />
-    <UFormField :label="$t('plotConfig.indicatorsInPlot')" class="text-md">
+    <UFormField :label="$t('plotConfig.indicatorsInPlot')" class="text-sm">
       <UListbox v-model="selIndicatorName" value-key="value" :items="usedColumns"> </UListbox>
     </UFormField>
     <div class="flex flex-row mt-1 gap-1">

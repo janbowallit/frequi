@@ -96,7 +96,7 @@ function labelShift(at: number) {
     <!-- Ruler -->
     <div
       v-if="plan.current"
-      class="relative mx-1 h-12 text-[11px] text-muted"
+      class="relative mx-1 h-12 text-xs text-muted"
       role="img"
       dir="ltr"
       :aria-label="$t('exitPlan.rulerLabel', { pair: plan.trade.pair })"

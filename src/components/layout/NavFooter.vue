@@ -15,7 +15,7 @@ const tabs = computed(() => [...mainLinks.value, settingsLink.value].slice(0, 5)
       <li v-for="tab in tabs" :key="tab.to">
         <RouterLink
           :to="tab.to"
-          class="group flex min-h-14 flex-col items-center justify-center gap-1 text-[11px] font-medium text-muted transition-colors"
+          class="group flex min-h-14 flex-col items-center justify-center gap-1 text-xs font-medium text-muted transition-colors"
           active-class="is-active text-highlighted"
         >
           <span
@@ -24,7 +24,7 @@ const tabs = computed(() => [...mainLinks.value, settingsLink.value].slice(0, 5)
             <UIcon :name="tab.icon" class="size-5" aria-hidden="true" />
             <span
               v-if="tab.badge"
-              class="absolute -top-1 end-1 min-w-4 rounded-full bg-primary px-1 text-center text-[10px] leading-4 font-semibold text-inverted tabular-nums"
+              class="absolute -top-1 end-1 min-w-4 rounded-full bg-primary px-1 text-center text-xs leading-4 font-semibold text-inverted tabular-nums"
             >
               {{ tab.badge }}
             </span>

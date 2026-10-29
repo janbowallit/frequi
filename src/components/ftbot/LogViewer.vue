@@ -173,7 +173,7 @@ function scrollToBottom() {
     </p>
     <div
       ref="scrollContainer"
-      class="h-full w-full overflow-auto bg-muted/40 py-2 font-mono text-[13px] leading-relaxed"
+      class="h-full w-full overflow-auto bg-muted/40 py-2 font-mono text-sm leading-relaxed"
       tabindex="0"
       :aria-label="$t('logs.entries')"
       @scroll.passive="onScroll"
@@ -209,7 +209,7 @@ function scrollToBottom() {
         <span class="flex shrink-0 items-center gap-3">
           <span class="whitespace-nowrap text-dimmed tabular-nums">{{ log[0] }}</span>
           <span
-            class="h-fit w-16 shrink-0 rounded px-1.5 text-center text-[11px] font-semibold"
+            class="h-fit w-16 shrink-0 rounded px-1.5 text-center text-xs font-semibold"
             :class="levelClass(log[3])"
             >{{ log[3] }}</span
           >
