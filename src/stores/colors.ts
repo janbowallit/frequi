@@ -9,8 +9,8 @@ export enum ColorPreferences {
 const CANDLE_GREEN = '#2fb383';
 const CANDLE_RED = '#e5604f';
 const MONEY_COLORS = {
-  dark: { profit: '#3cc48f', loss: '#f0685a' },
-  light: { profit: '#138a5e', loss: '#c8402f' },
+  dark: { profit: '#34d399', loss: '#f87171' },
+  light: { profit: '#047857', loss: '#b91c1c' },
 };
 
 export const useColorStore = defineStore('colorStore', {

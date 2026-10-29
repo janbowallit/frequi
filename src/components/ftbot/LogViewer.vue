@@ -102,7 +102,7 @@ function levelClass(logLevel: string) {
     case 'CRITICAL':
       return 'bg-error/15 text-error';
     case 'DEBUG':
-      return 'bg-elevated text-dimmed';
+      return 'bg-elevated text-muted';
     default:
       return 'bg-elevated text-muted';
   }

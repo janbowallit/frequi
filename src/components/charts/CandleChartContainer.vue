@@ -202,7 +202,7 @@ const singlePairSelection = computed({
             class="hidden max-w-56 truncate md:inline-flex"
             :title="$t('chartControls.strategyOn', { strategy: strategyName, timeframe })"
           >
-            {{ strategyName }}<span v-if="timeframe" class="text-dimmed">· {{ timeframe }}</span>
+            {{ strategyName }}<span v-if="timeframe" class="text-muted">· {{ timeframe }}</span>
           </UBadge>
           <UPopover :content="{ align: 'end' }">
             <UButton

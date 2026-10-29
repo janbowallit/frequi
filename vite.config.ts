@@ -155,6 +155,14 @@ export default defineConfig({
               sm: { base: 'text-xs/4 px-1.5 py-0.5 gap-1 rounded-sm' },
             },
           },
+          // Amber text on its own tint is 4.2:1 - one shade darker keeps tinted badges at AA
+          compoundVariants: [
+            {
+              color: 'primary',
+              variant: ['soft', 'subtle'],
+              class: 'text-amber-800 dark:text-amber-300',
+            },
+          ],
         },
         kbd: {
           variants: {
