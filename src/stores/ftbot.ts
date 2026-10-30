@@ -1,4 +1,5 @@
 import { t } from '@/i18n';
+import { journalUnsupported } from '@/utils/journal';
 import type {
   AllProfitStats,
   AvailablePairPayload,
@@ -931,7 +932,7 @@ export function createBotSubStore(botId: string, botName: string) {
           this.journal = res.data;
           this.journalSupported = true;
         } catch (error) {
-          if (axios.isAxiosError(error) && error.response?.status === 404) {
+          if (axios.isAxiosError(error) && journalUnsupported(error.response?.status)) {
             // Stock freqtrade (or an older image) has no journal endpoints
             this.journal = {};
             this.journalSupported = false;

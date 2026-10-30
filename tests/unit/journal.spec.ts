@@ -5,6 +5,7 @@ import {
   dayKey,
   feeSplit,
   groupByDay,
+  journalUnsupported,
   monthGrid,
   monthSummary,
   tagFilterItems,
@@ -167,5 +168,15 @@ describe('feeSplit', () => {
     );
     expect(split.gross).toBeCloseTo(-0.3);
     expect(split.feeShare).toBeNull();
+  });
+});
+
+describe('journalUnsupported', () => {
+  it('treats 404 and 405 as a bot without journal endpoints', () => {
+    // Older images match GET /trades/journal against DELETE /trades/{id} and answer 405
+    expect(journalUnsupported(404)).toBe(true);
+    expect(journalUnsupported(405)).toBe(true);
+    expect(journalUnsupported(500)).toBe(false);
+    expect(journalUnsupported(undefined)).toBe(false);
   });
 });

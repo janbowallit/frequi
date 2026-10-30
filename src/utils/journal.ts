@@ -129,3 +129,11 @@ export const ALL_TAGS = '__all__';
 export function tagFilterItems(tags: string[], allLabel: string) {
   return [{ label: allLabel, value: ALL_TAGS }, ...tags.map((tag) => ({ label: tag, value: tag }))];
 }
+
+/**
+ * Whether an HTTP status from GET /trades/journal means the bot has no journal endpoints.
+ * Older images answer 405: the path matches DELETE /trades/{id}.
+ */
+export function journalUnsupported(status: number | undefined): boolean {
+  return status === 404 || status === 405;
+}
