@@ -45,6 +45,7 @@ declare global {
   const customRef: typeof import('vue').customRef
   const dataZoomPartial: typeof import('./utils/charts/chartZoom').dataZoomPartial
   const dateFromString: typeof import('./utils/formatters/timeformat').dateFromString
+  const dayKey: typeof import('./utils/journal').dayKey
   const debouncedRef: typeof import('@vueuse/core').debouncedRef
   const debouncedWatch: typeof import('@vueuse/core').debouncedWatch
   const deepClone: typeof import('./utils/deepClone').deepClone
@@ -63,6 +64,7 @@ declare global {
   const extendLocale: typeof import('../node_modules/.pnpm/@nuxt+ui@4.7.1_@internationalized+date@3.12.1_@internationalized+number@3.6.5_@tiptap+e_9a5821af92adebbc7df50750f74fe1a1/node_modules/@nuxt/ui/dist/runtime/composables/defineLocale').extendLocale
   const extendRef: typeof import('@vueuse/core').extendRef
   const extractShortcuts: typeof import('../node_modules/.pnpm/@nuxt+ui@4.7.1_@internationalized+date@3.12.1_@internationalized+number@3.6.5_@tiptap+e_9a5821af92adebbc7df50750f74fe1a1/node_modules/@nuxt/ui/dist/runtime/composables/defineShortcuts').extractShortcuts
+  const feeSplit: typeof import('./utils/journal').feeSplit
   const findGridLayout: typeof import('./stores/layout').findGridLayout
   const fmtEntryPrice: typeof import('./composables/useNextEntry').fmtEntryPrice
   const fmtGap: typeof import('./composables/useNextEntry').fmtGap
@@ -86,6 +88,7 @@ declare global {
   const getCurrentScope: typeof import('vue').getCurrentScope
   const getCurrentWatcher: typeof import('vue').getCurrentWatcher
   const getDiffColumnsFromPlotConfig: typeof import('./utils/charts/areaPlotDataset').getDiffColumnsFromPlotConfig
+  const groupByDay: typeof import('./utils/journal').groupByDay
   const h: typeof import('vue').h
   const hasFeature: typeof import('./utils/features').hasFeature
   const heikinAshiDataset: typeof import('./utils/charts/heikinAshiDataset').heikinAshiDataset
@@ -110,6 +113,8 @@ declare global {
   const mapStores: typeof import('pinia').mapStores
   const mapWritableState: typeof import('pinia').mapWritableState
   const markRaw: typeof import('vue').markRaw
+  const monthGrid: typeof import('./utils/journal').monthGrid
+  const monthSummary: typeof import('./utils/journal').monthSummary
   const needText: typeof import('./composables/useNextEntry').needText
   const nextTick: typeof import('vue').nextTick
   const onActivated: typeof import('vue').onActivated
@@ -288,6 +293,7 @@ declare global {
   const useIntersectionObserver: typeof import('@vueuse/core').useIntersectionObserver
   const useInterval: typeof import('@vueuse/core').useInterval
   const useIntervalFn: typeof import('@vueuse/core').useIntervalFn
+  const useJournal: typeof import('./composables/useJournal').useJournal
   const useKbd: typeof import('../node_modules/.pnpm/@nuxt+ui@4.7.1_@internationalized+date@3.12.1_@internationalized+number@3.6.5_@tiptap+e_9a5821af92adebbc7df50750f74fe1a1/node_modules/@nuxt/ui/dist/runtime/composables/useKbd').useKbd
   const useKeyModifier: typeof import('@vueuse/core').useKeyModifier
   const useLastChanged: typeof import('@vueuse/core').useLastChanged
@@ -448,6 +454,9 @@ declare global {
   export type { SupportedSeriesTypes } from './utils/charts/candleChartSeries'
   import('./utils/charts/candleChartSeries')
   // @ts-ignore
+  export type { DayStats } from './utils/journal'
+  import('./utils/journal')
+  // @ts-ignore
   export type { StrategyReference } from './utils/strategyReference'
   import('./utils/strategyReference')
 }
@@ -494,6 +503,7 @@ declare module 'vue' {
     readonly customRef: UnwrapRef<typeof import('vue')['customRef']>
     readonly dataZoomPartial: UnwrapRef<typeof import('./utils/charts/chartZoom')['dataZoomPartial']>
     readonly dateFromString: UnwrapRef<typeof import('./utils/formatters/timeformat')['dateFromString']>
+    readonly dayKey: UnwrapRef<typeof import('./utils/journal')['dayKey']>
     readonly debouncedRef: UnwrapRef<typeof import('@vueuse/core')['debouncedRef']>
     readonly debouncedWatch: UnwrapRef<typeof import('@vueuse/core')['debouncedWatch']>
     readonly deepClone: UnwrapRef<typeof import('./utils/deepClone')['deepClone']>
@@ -512,6 +522,7 @@ declare module 'vue' {
     readonly extendLocale: UnwrapRef<typeof import('../node_modules/.pnpm/@nuxt+ui@4.7.1_@internationalized+date@3.12.1_@internationalized+number@3.6.5_@tiptap+e_9a5821af92adebbc7df50750f74fe1a1/node_modules/@nuxt/ui/dist/runtime/composables/defineLocale')['extendLocale']>
     readonly extendRef: UnwrapRef<typeof import('@vueuse/core')['extendRef']>
     readonly extractShortcuts: UnwrapRef<typeof import('../node_modules/.pnpm/@nuxt+ui@4.7.1_@internationalized+date@3.12.1_@internationalized+number@3.6.5_@tiptap+e_9a5821af92adebbc7df50750f74fe1a1/node_modules/@nuxt/ui/dist/runtime/composables/defineShortcuts')['extractShortcuts']>
+    readonly feeSplit: UnwrapRef<typeof import('./utils/journal')['feeSplit']>
     readonly fmtEntryPrice: UnwrapRef<typeof import('./composables/useNextEntry')['fmtEntryPrice']>
     readonly fmtGap: UnwrapRef<typeof import('./composables/useNextEntry')['fmtGap']>
     readonly formatDecimal: UnwrapRef<typeof import('./utils/formatters/numberformat')['formatDecimal']>
@@ -533,6 +544,7 @@ declare module 'vue' {
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
     readonly getCurrentWatcher: UnwrapRef<typeof import('vue')['getCurrentWatcher']>
     readonly getDiffColumnsFromPlotConfig: UnwrapRef<typeof import('./utils/charts/areaPlotDataset')['getDiffColumnsFromPlotConfig']>
+    readonly groupByDay: UnwrapRef<typeof import('./utils/journal')['groupByDay']>
     readonly h: UnwrapRef<typeof import('vue')['h']>
     readonly hasFeature: UnwrapRef<typeof import('./utils/features')['hasFeature']>
     readonly heikinAshiDataset: UnwrapRef<typeof import('./utils/charts/heikinAshiDataset')['heikinAshiDataset']>
@@ -557,6 +569,8 @@ declare module 'vue' {
     readonly mapStores: UnwrapRef<typeof import('pinia')['mapStores']>
     readonly mapWritableState: UnwrapRef<typeof import('pinia')['mapWritableState']>
     readonly markRaw: UnwrapRef<typeof import('vue')['markRaw']>
+    readonly monthGrid: UnwrapRef<typeof import('./utils/journal')['monthGrid']>
+    readonly monthSummary: UnwrapRef<typeof import('./utils/journal')['monthSummary']>
     readonly needText: UnwrapRef<typeof import('./composables/useNextEntry')['needText']>
     readonly nextTick: UnwrapRef<typeof import('vue')['nextTick']>
     readonly onActivated: UnwrapRef<typeof import('vue')['onActivated']>
@@ -731,6 +745,7 @@ declare module 'vue' {
     readonly useIntersectionObserver: UnwrapRef<typeof import('@vueuse/core')['useIntersectionObserver']>
     readonly useInterval: UnwrapRef<typeof import('@vueuse/core')['useInterval']>
     readonly useIntervalFn: UnwrapRef<typeof import('@vueuse/core')['useIntervalFn']>
+    readonly useJournal: UnwrapRef<typeof import('./composables/useJournal')['useJournal']>
     readonly useKbd: UnwrapRef<typeof import('../node_modules/.pnpm/@nuxt+ui@4.7.1_@internationalized+date@3.12.1_@internationalized+number@3.6.5_@tiptap+e_9a5821af92adebbc7df50750f74fe1a1/node_modules/@nuxt/ui/dist/runtime/composables/useKbd')['useKbd']>
     readonly useKeyModifier: UnwrapRef<typeof import('@vueuse/core')['useKeyModifier']>
     readonly useLastChanged: UnwrapRef<typeof import('@vueuse/core')['useLastChanged']>

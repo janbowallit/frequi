@@ -35,6 +35,13 @@ export function useAppNav() {
         visible: !botStore.canRunBacktest,
       },
       {
+        label: t('nav.journal'),
+        to: '/journal',
+        icon: 'i-lucide-notebook-pen',
+        description: t('home.journalHelp'),
+        visible: !botStore.canRunBacktest,
+      },
+      {
         label: t('nav.chart'),
         to: '/graph',
         icon: 'i-lucide-chart-line',

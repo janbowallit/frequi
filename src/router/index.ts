@@ -37,6 +37,12 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('@/views/DashboardView.vue'),
   },
   {
+    path: '/journal',
+    name: 'Freqtrade Journal',
+    meta: { title: 'nav.journal' },
+    component: () => import('@/views/JournalView.vue'),
+  },
+  {
     path: '/balance',
     meta: { title: 'trade.balance' },
     name: 'Freqtrade Balance',
