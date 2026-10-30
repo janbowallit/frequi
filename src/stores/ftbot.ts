@@ -23,6 +23,7 @@ import type {
   ClosedTrade,
   DeleteTradeResponse,
   DownloadDataPayload,
+  EntrySnapshot,
   EntryStats,
   Exchange,
   ExchangeListResult,
@@ -32,6 +33,8 @@ import type {
   FreqAIModelListResult,
   HyperoptLossListResponse,
   HyperoptLossObj,
+  JournalEntry,
+  JournalMap,
   LockResponse,
   LogLine,
   Markets,
@@ -92,6 +95,10 @@ export function createBotSubStore(botId: string, botName: string) {
         lastLogs: [] as LogLine[],
         refreshRequired: true,
         trades: [] as ClosedTrade[],
+        /** Journal notes and tags per trade id */
+        journal: {} as JournalMap,
+        /** Whether the bot has the journal endpoints; null until the first check */
+        journalSupported: null as boolean | null,
         openTrades: [] as Trade[],
         tradeCount: 0,
         performanceStats: [] as PerformanceEntry[],
@@ -248,6 +255,7 @@ export function createBotSubStore(botId: string, botName: string) {
             updates.push(this.getState());
             updates.push(this.getProfit());
             updates.push(this.getTrades());
+            updates.push(this.getJournal());
             updates.push(this.getBalance());
             updates.push(this.updateWalletChange());
             //     /* white/blacklist might be refreshed more often as they are not expensive on the backend */
@@ -914,6 +922,52 @@ export function createBotSubStore(botId: string, botName: string) {
           showAlert(t('alerts.customDataFailed', { id: tradeid }), 'error');
           return Promise.reject(error);
         }
+      },
+      async getJournal() {
+        try {
+          const { data } = await api.get<JournalMap>('/trades/journal');
+          this.journal = data;
+          this.journalSupported = true;
+        } catch (error) {
+          if (axios.isAxiosError(error) && error.response?.status === 404) {
+            // Stock freqtrade (or an older image) has no journal endpoints
+            this.journal = {};
+            this.journalSupported = false;
+            return;
+          }
+          console.error(error);
+        }
+      },
+      async saveJournal(tradeId: number, note: string, tags: string[]): Promise<JournalEntry> {
+        const { data } = await api.put<JournalEntry>(`/trades/${tradeId}/journal`, { note, tags });
+        const journal = { ...this.journal };
+        if (data.note || data.tags.length) {
+          journal[tradeId] = data;
+        } else {
+          delete journal[tradeId];
+        }
+        this.journal = journal;
+        return data;
+      },
+      async getEntrySnapshot(tradeId: number): Promise<EntrySnapshot | null> {
+        const { data } = await api.get<TradeCustomData[]>(`/trades/${tradeId}/custom-data`, {
+          params: { key: 'entry_snapshot' },
+        });
+        const entry = data[0]?.custom_data.find((d) => d.key === 'entry_snapshot');
+        return (entry?.value as EntrySnapshot | undefined) ?? null;
+      },
+      /** Candles for a pair without touching the chart page's candle state */
+      async fetchPairCandles(payload: PairCandlePayload): Promise<PairHistory> {
+        const settingsStore = useSettingsStore();
+        if (this.botFeatures.reducedPairCalls && settingsStore.useReducedPairCalls) {
+          const { data } = await api.post<PairCandlePayload, AxiosResponse<PairHistory>>(
+            '/pair_candles',
+            payload,
+          );
+          return data;
+        }
+        const { data } = await api.get<PairHistory>('/pair_candles', { params: { ...payload } });
+        return data;
       },
       async startTrade() {
         try {

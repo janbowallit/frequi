@@ -10,6 +10,7 @@ export * from './daily';
 export * from './downloadData';
 export * from './exchange';
 export * from './features';
+export * from './journal';
 export * from './locks';
 export * from './pairlists';
 export * from './plot';

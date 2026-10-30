@@ -4,6 +4,7 @@ import type {
   BotDescriptors,
   BotState,
   ClosedTrade,
+  JournalMap,
   TimeSummaryPayload,
   TimeSummaryRecord,
   TimeSummaryReturnValue,
@@ -137,6 +138,15 @@ export const useBotStore = defineStore('ftbot-wrapper', {
           ? b.close_timestamp - a.close_timestamp
           : b.trade_id - a.trade_id,
       );
+    },
+    allJournalSelectedBots: (state): Record<string, JournalMap> => {
+      const result: Record<string, JournalMap> = {};
+      Object.entries(state.botStores).forEach(([botId, botStore]) => {
+        if (botStore.isSelected) {
+          result[botId] = botStore.journal;
+        }
+      });
+      return result;
     },
     allTradesSelectedBots: (state): ClosedTrade[] => {
       const result: ClosedTrade[] = [];
