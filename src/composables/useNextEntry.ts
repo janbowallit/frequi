@@ -53,16 +53,20 @@ const ACRONYMS = new Set(['btc', 'eth', 'ema', 'sma', 'rsi', 'macd', 'adx', 'atr
 
 type NextEntryKey = keyof MessageSchema['nextEntry'];
 
+interface KnownCondition {
+  label: NextEntryKey;
+  help: NextEntryKey;
+  waiting?: NextEntryKey;
+  market?: true;
+}
+
 /**
- * Plain-language text (message keys in `nextEntry`) for the conditions BitpinBreakout
- * publishes. Other strategies fall back to the column name. `waiting` is the headline while a
- * market condition blocks every pair. `market` marks a condition that is the same for every
- * pair, even when one pair's copy of the gap is a candle behind.
+ * Plain-language text (message keys in `nextEntry`) for the conditions BitpinBreakout and
+ * NobitexScalp publish. Other strategies fall back to the column name. `waiting` is the headline
+ * while a market condition blocks every pair. `market` marks a condition that is the same for
+ * every pair, even when one pair's copy of the gap is a candle behind.
  */
-const KNOWN: Record<
-  string,
-  { label: NextEntryKey; help: NextEntryKey; waiting?: NextEntryKey; market?: true }
-> = {
+const KNOWN: Record<string, KnownCondition> = {
   btc_trend: {
     label: 'btcTrend',
     market: true,
@@ -72,10 +76,21 @@ const KNOWN: Record<
   uptrend: { label: 'uptrend', help: 'uptrendHelp' },
   breakout: { label: 'breakout', help: 'breakoutHelp' },
   volume_spike: { label: 'volumeSpike', help: 'volumeSpikeHelp' },
+  below_band: { label: 'belowBand', help: 'belowBandHelp' },
+  oversold: { label: 'oversold', help: 'oversoldHelp' },
 };
 
-function label(key: string): string {
-  if (KNOWN[key]) return t(`nextEntry.${KNOWN[key].label}`);
+/** Strategies whose condition of the same name works differently */
+const STRATEGY_KNOWN: Record<string, Record<string, KnownCondition>> = {
+  NobitexScalp: { btc_trend: { ...KNOWN.btc_trend!, help: 'btcGuardHelp' } },
+};
+
+function knownFor(strategy: string, key: string): KnownCondition | undefined {
+  return STRATEGY_KNOWN[strategy]?.[key] ?? KNOWN[key];
+}
+
+function label(key: string, known: KnownCondition | undefined): string {
+  if (known) return t(`nextEntry.${known.label}`);
   const words = key.split('_').map((w) => (ACRONYMS.has(w) ? w.toUpperCase() : w));
   const text = words.join(' ');
   return text.charAt(0).toUpperCase() + text.slice(1);
@@ -118,6 +133,7 @@ export function durationText(ms: number): string {
 
 function useNextEntryState() {
   const botStore = useBotStore();
+  const settingsStore = useSettingsStore();
   const now = useNow({ interval: 30_000 });
 
   const results = ref<PairReadiness[]>([]);
@@ -129,6 +145,8 @@ function useNextEntryState() {
   const whitelist = computed(() => bot.value?.whitelist ?? []);
   const timeframe = computed(() => bot.value?.timeframe ?? '');
   const timeframeMs = computed(() => (bot.value?.botState?.timeframe_min ?? 0) * 60_000);
+  const strategy = computed(() => bot.value?.botState?.strategy ?? '');
+  const known = (key: string) => knownFor(strategy.value, key);
 
   function parse(pair: string, analysis: PairHistory): PairReadiness | null {
     const lastRow = analysis.data[analysis.data.length - 1] as unknown[] | undefined;
@@ -142,11 +160,11 @@ function useNextEntryState() {
           key,
           // Getters, so the text follows the UI language without a refetch
           get label() {
-            return label(key);
+            return label(key, known(key));
           },
           get help() {
-            const known = KNOWN[key];
-            return known ? t(`nextEntry.${known.help}`) : null;
+            const k = known(key);
+            return k ? t(`nextEntry.${k.help}`) : null;
           },
           met: row[col] === 1,
           gap: num(row[`entry_gap__${key}`]),
@@ -201,7 +219,8 @@ function useNextEntryState() {
    * Known conditions use their `market` flag, so a per-coin check that happens to be unmet on
    * every pair (no coin has a volume spike) stays with the coins. Known market conditions only
    * need to agree on met/not met: a pair analysed just before the newest BTC candle arrived
-   * carries an older gap until its next candle. Unknown conditions are guessed from agreement.
+   * carries an older gap until its next candle. Unknown conditions are guessed from agreement
+   * on a real gap: an unknown check without a gap that is unmet everywhere is still per coin.
    */
   const marketKeys = computed(() => {
     const rows = results.value;
@@ -210,12 +229,13 @@ function useNextEntryState() {
     return new Set(
       first
         .filter((c) => {
-          const known = KNOWN[c.key];
-          if (known && !known.market) return false;
+          const k = known(c.key);
+          if (k && !k.market) return false;
+          if (!k && c.gap === null) return false;
           return rows.every((r) => {
             const other = r.conditions.find((o) => o.key === c.key);
             if (!other || other.met !== c.met) return false;
-            return known?.market || sameValue(other.gap, c.gap);
+            return k?.market || sameValue(other.gap, c.gap);
           });
         })
         .map((c) => c.key),
@@ -315,7 +335,7 @@ function useNextEntryState() {
           return c.at ? t('nextEntry.byNextCheck', { what: text, time: fmtTime(c.at) }) : text;
         }),
       );
-      const waiting = KNOWN[first.key]?.waiting;
+      const waiting = known(first.key)?.waiting;
       return {
         title:
           blockers.value.length === 1 && waiting
@@ -352,11 +372,21 @@ function useNextEntryState() {
     () => !slotsFull.value && verdict.value.tone === 'waiting' && earliest.value !== null,
   );
 
+  /** Time in the timezone chosen in Settings (like the logs and trade tables), zone included */
   function fmtTime(ts: number): string {
+    const timeZone = settingsStore.timezone;
     const d = new Date(ts);
-    const time = d.toLocaleTimeString(intlLocale(), { hour: '2-digit', minute: '2-digit' });
-    const sameDay = d.toDateString() === now.value.toDateString();
-    return sameDay ? time : `${d.toLocaleDateString(intlLocale(), { weekday: 'short' })} ${time}`;
+    const time = d.toLocaleTimeString(intlLocale(), {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone,
+      timeZoneName: 'short',
+    });
+    const day = (x: Date) => x.toLocaleDateString('en-CA', { timeZone });
+    const sameDay = day(d) === day(now.value);
+    return sameDay
+      ? time
+      : `${d.toLocaleDateString(intlLocale(), { weekday: 'short', timeZone })} ${time}`;
   }
 
   /** "in 7 hours, 31 minutes" / "now" */

@@ -333,6 +333,14 @@ export default {
     breakoutHelp: 'The candle must close higher than every close of the last 72 hours.',
     volumeSpike: 'Volume spike',
     volumeSpikeHelp: 'Trading volume must be at least 2x its average of the last 48 hours.',
+    btcGuardHelp:
+      "BTC's hourly close must be at most 3% below its 200-hour average, so no dip is bought in a sell-off. Checked every hour.",
+    belowBand: 'Below band',
+    belowBandHelp:
+      'The candle must close below the lower Bollinger band (20 candles, 2 deviations), so the price is stretched down.',
+    oversold: 'Oversold',
+    oversoldHelp:
+      'RSI (14) must be below 30 and higher than on the candle before, so the drop is starting to turn.',
     notMetYet: 'not met yet',
     toTarget: '(to {price})',
     needsRise: 'needs a {gap} rise',

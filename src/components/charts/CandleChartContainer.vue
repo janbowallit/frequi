@@ -64,17 +64,32 @@ onMounted(() => {
     assignFirstPair();
   }
   plotStore.plotConfigChanged();
-  // Draw the strategy's own lines until the user sets up a plot config of their own
-  if (!botStore.activeBot.isWebserverMode) {
-    botStore.activeBot
-      .getStrategyPlotConfig()
-      .then((config) => {
-        plotStore.strategyPlotConfig = config ?? null;
-        refresh();
-      })
-      .catch(() => {});
-  }
+  loadStrategyPlotConfig();
 });
+
+/** Draw the strategy's own lines until the user sets up a plot config of their own */
+function loadStrategyPlotConfig() {
+  if (botStore.activeBot.isWebserverMode) return;
+  const botId = botStore.selectedBot;
+  botStore.activeBot
+    .getStrategyPlotConfig()
+    .then((config) => {
+      // Ignore a late answer from a bot that is no longer selected
+      if (botStore.selectedBot !== botId) return;
+      plotStore.strategyPlotConfig = config ?? null;
+      refresh();
+    })
+    .catch(() => {});
+}
+
+// Each bot runs its own strategy, so its lines have to be fetched again after a switch
+watch(
+  () => botStore.selectedBot,
+  () => {
+    plotStore.strategyPlotConfig = null;
+    loadStrategyPlotConfig();
+  },
+);
 
 function refresh() {
   for (const pair of botStore.activeBot.plotMultiPairs) {
