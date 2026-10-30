@@ -16,10 +16,23 @@ const props = defineProps<{
   };
 }>();
 
-const saved = props.bot.journal[props.trade.trade_id];
-const note = ref(saved?.note ?? '');
-const tags = ref<string[]>([...(saved?.tags ?? [])]);
+const note = ref('');
+const tags = ref<string[]>([]);
 const status = ref<'idle' | 'saving' | 'saved' | 'error'>('idle');
+/** Set on the first local change; until then the box follows the bot's copy */
+let edited = false;
+
+// The journal can arrive (or be refreshed by another device's edit) after the box opened.
+// Starting from an empty or old copy would let the next save wipe a stored note.
+watch(
+  () => props.bot.journal[props.trade.trade_id],
+  (entry) => {
+    if (edited) return;
+    note.value = entry?.note ?? '';
+    tags.value = [...(entry?.tags ?? [])];
+  },
+  { immediate: true },
+);
 
 /** Tags used on other trades of this bot, offered as one-click suggestions */
 const suggestions = computed(() => {
@@ -53,6 +66,7 @@ function scheduleSave() {
 }
 
 function setTags(value: string[]) {
+  edited = true;
   const seen = new Set<string>();
   tags.value = value
     .map((tag) => tag.trim().slice(0, MAX_TAG))
@@ -67,6 +81,7 @@ function setTags(value: string[]) {
 }
 
 function onNote(value: string) {
+  edited = true;
   note.value = value;
   scheduleSave();
 }
@@ -81,11 +96,13 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div v-if="bot.journalSupported !== false" class="flex flex-col gap-2">
+  <div v-if="bot.journalSupported === true" class="flex flex-col gap-2">
     <div class="flex items-center justify-between gap-2">
       <h3 class="text-sm font-semibold">{{ $t('journal.yourNotes') }}</h3>
       <span v-if="status === 'saving'" class="text-xs text-muted">{{ $t('journal.saving') }}</span>
-      <span v-else-if="status === 'saved'" class="text-xs text-profit">{{ $t('journal.saved') }}</span>
+      <span v-else-if="status === 'saved'" class="text-xs text-profit">{{
+        $t('journal.saved')
+      }}</span>
       <button
         v-else-if="status === 'error'"
         type="button"

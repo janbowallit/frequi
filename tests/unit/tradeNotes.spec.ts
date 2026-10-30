@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { flushPromises, mount } from '@vue/test-utils';
+import { nextTick, reactive } from 'vue';
 import { i18n } from '@/i18n';
 import TradeNotes from '@/components/journal/TradeNotes.vue';
 import type { ClosedTrade, JournalEntry } from '@/types';
@@ -8,10 +9,18 @@ import type { ClosedTrade, JournalEntry } from '@/types';
 const trade = { trade_id: 1, botId: 'a' } as ClosedTrade;
 
 function makeBot(save = vi.fn().mockResolvedValue({ trade_id: 1, note: 'late', tags: [] })) {
-  return { journal: {} as Record<number, JournalEntry>, journalSupported: true, saveJournal: save };
+  return reactive({
+    journal: {} as Record<number, JournalEntry>,
+    journalSupported: true as boolean | null,
+    saveJournal: save,
+  });
 }
 
-function mountNotes(bot: ReturnType<typeof makeBot>) {
+function mountNotes(bot: {
+  journal: Record<number, JournalEntry>;
+  journalSupported: boolean | null;
+  saveJournal: ReturnType<typeof vi.fn>;
+}) {
   return mount(TradeNotes, {
     props: { trade, bot },
     global: {
@@ -67,5 +76,28 @@ describe('TradeNotes', () => {
   it('is hidden on a bot without journal endpoints', () => {
     const bot = { ...makeBot(), journalSupported: false };
     expect(mountNotes(bot).find('textarea').exists()).toBe(false);
+  });
+
+  it('waits until the journal has loaded', () => {
+    const bot = makeBot();
+    bot.journalSupported = null;
+    expect(mountNotes(bot).find('textarea').exists()).toBe(false);
+  });
+
+  it('shows a note that arrives after opening', async () => {
+    const bot = makeBot();
+    const wrapper = mountNotes(bot);
+    bot.journal = { 1: { trade_id: 1, note: 'from my phone', tags: ['late'] } };
+    await nextTick();
+    expect((wrapper.find('textarea').element as HTMLTextAreaElement).value).toBe('from my phone');
+  });
+
+  it('keeps local edits when the journal refreshes', async () => {
+    const bot = makeBot();
+    const wrapper = mountNotes(bot);
+    await wrapper.find('textarea').setValue('mine');
+    bot.journal = { 1: { trade_id: 1, note: 'older', tags: [] } };
+    await nextTick();
+    expect((wrapper.find('textarea').element as HTMLTextAreaElement).value).toBe('mine');
   });
 });

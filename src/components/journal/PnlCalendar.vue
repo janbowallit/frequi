@@ -21,10 +21,12 @@ const weekdays = computed(() =>
 );
 
 const monthTitle = computed(() =>
-  new Date(Date.UTC(month.value.year, month.value.month - 1, 1)).toLocaleDateString(
-    intlLocale(),
-    { month: 'long', year: 'numeric', timeZone: 'UTC', calendar: 'gregory' },
-  ),
+  new Date(Date.UTC(month.value.year, month.value.month - 1, 1)).toLocaleDateString(intlLocale(), {
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+    calendar: 'gregory',
+  }),
 );
 
 const botItems = computed(() => [
@@ -144,7 +146,10 @@ const selectedStats = computed(() => (selectedDay.value ? days.value[selectedDay
 
     <p v-if="selectedStats" class="text-sm sm:hidden">
       {{ selectedDay }}:
-      <span :class="selectedStats.profitAbs >= 0 ? 'text-profit' : 'text-loss'" class="font-semibold">
+      <span
+        :class="selectedStats.profitAbs >= 0 ? 'text-profit' : 'text-loss'"
+        class="font-semibold"
+      >
         {{ money(selectedStats.profitAbs) }} USDT
       </span>
       · {{ $t('journal.tradeCount', selectedStats.tradeCount) }}
@@ -173,13 +178,21 @@ const selectedStats = computed(() => (selectedDay.value ? days.value[selectedDay
       <div>
         <dt class="text-xs text-muted">{{ $t('journal.bestDay') }}</dt>
         <dd class="font-semibold tabular-nums">
-          {{ summary.bestDay ? `${money(summary.bestDay.profitAbs)} (${summary.bestDay.date.slice(8)})` : '–' }}
+          {{
+            summary.bestDay
+              ? `${money(summary.bestDay.profitAbs)} (${summary.bestDay.date.slice(8)})`
+              : '–'
+          }}
         </dd>
       </div>
       <div>
         <dt class="text-xs text-muted">{{ $t('journal.worstDay') }}</dt>
         <dd class="font-semibold tabular-nums">
-          {{ summary.worstDay ? `${money(summary.worstDay.profitAbs)} (${summary.worstDay.date.slice(8)})` : '–' }}
+          {{
+            summary.worstDay
+              ? `${money(summary.worstDay.profitAbs)} (${summary.worstDay.date.slice(8)})`
+              : '–'
+          }}
         </dd>
       </div>
       <div>

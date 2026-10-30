@@ -13,7 +13,7 @@ use([CanvasRenderer, CandlestickChart, GridComponent, MarkPointComponent, Toolti
 
 const PAD = 10;
 
-type Bot = Pick<BotSubStore, 'botId' | 'botState' | 'fetchPairCandles' | 'selectedPair'>;
+type Bot = Pick<BotSubStore, 'botId' | 'botState' | 'fetchPairCandles'>;
 const props = defineProps<{ trade: ClosedTrade; bot: Bot }>();
 
 /** [ts, open, close, low, high] rows per bot and trade, or null when not available */
@@ -107,7 +107,8 @@ const option = computed<EChartsOption>(() => ({
 }));
 
 function openChart() {
-  props.bot.selectedPair = props.trade.pair;
+  const bot = useBotStore().botStores[props.bot.botId];
+  if (bot) bot.selectedPair = props.trade.pair;
   router.push('/graph');
 }
 </script>

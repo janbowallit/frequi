@@ -23,6 +23,8 @@ async function loadSnapshot() {
   snapshot.value = snapshots.get(key);
 }
 watch(() => [props.bot.botId, props.trade.trade_id], loadSnapshot, { immediate: true });
+// Notes may have changed on another device since the journal was last loaded
+onMounted(() => props.bot.getJournal());
 
 const strategy = computed(() => props.bot.botState?.strategy ?? '');
 const checks = computed(() =>
@@ -33,8 +35,12 @@ const checks = computed(() =>
     ...check,
   })),
 );
-const values = computed(() =>
-  Object.entries(snapshot.value?.values ?? {}).filter(([, v]) => v !== null) as [string, number][],
+const values = computed(
+  () =>
+    Object.entries(snapshot.value?.values ?? {}).filter(([, v]) => v !== null) as [
+      string,
+      number,
+    ][],
 );
 
 const exitReason = computed(() => {
@@ -55,7 +61,9 @@ const currency = computed(() => props.bot.stakeCurrency);
       </h3>
       <USkeleton v-if="snapshot === undefined" class="h-16 w-full" />
       <p v-else-if="!snapshot" class="text-sm text-muted">
-        <template v-if="trade.enter_tag">{{ $t('journal.enterTag', { tag: trade.enter_tag }) }}<br /></template>
+        <template v-if="trade.enter_tag"
+          >{{ $t('journal.enterTag', { tag: trade.enter_tag }) }}<br
+        /></template>
         {{ $t('journal.noSnapshot') }}
       </p>
       <template v-else>
@@ -69,9 +77,7 @@ const currency = computed(() => props.bot.stakeCurrency);
             />
             <div class="min-w-0">
               <span class="font-medium">{{ c.label }}</span>
-              <span v-if="c.gap !== null && !c.met" class="text-muted">
-                · {{ fmtGap(c.gap) }}</span
-              >
+              <span v-if="c.gap !== null && !c.met" class="text-muted"> · {{ fmtGap(c.gap) }}</span>
               <p v-if="c.help" class="text-xs text-muted">{{ c.help }}</p>
             </div>
           </li>
