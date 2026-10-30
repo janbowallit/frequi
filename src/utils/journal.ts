@@ -108,9 +108,15 @@ export function monthGrid(year: number, month: number, weekStartsOn: 0 | 1 | 6):
   return grid;
 }
 
-/** Profit before fees, fees paid and net profit of a closed trade */
+/**
+ * Profit before fees, fees paid and net profit of a closed trade, in the stake currency.
+ * Fees come from the fee rates: the fee costs can be in the coin (Bitpin and Nobitex charge
+ * buy fees in the base currency).
+ */
 export function feeSplit(trade: ClosedTrade) {
-  const fees = (trade.fee_open_cost ?? 0) + (trade.fee_close_cost ?? 0);
+  const fees =
+    trade.amount * trade.open_rate * (trade.fee_open ?? 0) +
+    trade.amount * (trade.close_rate ?? 0) * (trade.fee_close ?? 0);
   const net = trade.profit_abs ?? 0;
   const gross = net + fees;
   return { gross, fees, net, feeShare: gross > 0 ? fees / gross : null };

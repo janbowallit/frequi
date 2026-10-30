@@ -115,9 +115,39 @@ describe('tagFilterItems', () => {
   });
 });
 
+describe('feeSplit in the stake currency', () => {
+  it('ignores a buy fee charged in the coin (Bitpin, Nobitex)', () => {
+    const split = feeSplit(
+      trade({
+        amount: 2.5,
+        open_rate: 0.2,
+        close_rate: 0.21,
+        fee_open: 0.0013,
+        fee_close: 0.0013,
+        // 0.0013 * 2.5 DOGE: the cost is in DOGE, not USDT
+        fee_open_cost: 0.00325,
+        fee_open_currency: 'DOGE',
+        fee_close_cost: 0.0006825,
+        profit_abs: 0.0236675,
+      }),
+    );
+    expect(split.fees).toBeCloseTo(2.5 * 0.2 * 0.0013 + 2.5 * 0.21 * 0.0013, 10);
+    expect(split.gross).toBeCloseTo(0.0236675 + split.fees, 10);
+  });
+});
+
 describe('feeSplit', () => {
   it('splits a winning trade', () => {
-    const split = feeSplit(trade({ profit_abs: 0.3, fee_open_cost: 0.13, fee_close_cost: 0.13 }));
+    const split = feeSplit(
+      trade({
+        profit_abs: 0.3,
+        amount: 1,
+        open_rate: 100,
+        close_rate: 100,
+        fee_open: 0.0013,
+        fee_close: 0.0013,
+      }),
+    );
     expect(split.gross).toBeCloseTo(0.56);
     expect(split.fees).toBeCloseTo(0.26);
     expect(split.net).toBeCloseTo(0.3);
@@ -125,7 +155,16 @@ describe('feeSplit', () => {
   });
 
   it('has no fee share when there was no gross profit', () => {
-    const split = feeSplit(trade({ profit_abs: -0.5, fee_open_cost: 0.1, fee_close_cost: 0.1 }));
+    const split = feeSplit(
+      trade({
+        profit_abs: -0.5,
+        amount: 1,
+        open_rate: 100,
+        close_rate: 100,
+        fee_open: 0.001,
+        fee_close: 0.001,
+      }),
+    );
     expect(split.gross).toBeCloseTo(-0.3);
     expect(split.feeShare).toBeNull();
   });
