@@ -430,7 +430,7 @@ declare global {
   export type { ExitLine, TradeExitPlan } from './composables/useExitPlan'
   import('./composables/useExitPlan')
   // @ts-ignore
-  export type { EntryCondition, ExitLevel, PairReadiness, EntryTone } from './composables/useNextEntry'
+  export type { EntryCondition, ExitLevel, PairReadiness, EntryTone, EntryVerdict } from './composables/useNextEntry'
   import('./composables/useNextEntry')
   // @ts-ignore
   export type { ColorPreferences } from './stores/colors'

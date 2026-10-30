@@ -115,18 +115,9 @@ const columns = computed<TableColumn<ComparisonTableItems>[]>(() => [
     :data="botStore.botCount > 1 ? tableItems : tableItems.filter((i) => i.botId)"
     :columns="columns"
   >
+    <!-- The Summary row's checkbox selects all bots -->
     <template #botName-header>
-      <div class="flex w-full flex-row items-center justify-between gap-2">
-        <span>{{ $t('comparison.bot') }}</span>
-        <UButton
-          v-if="botStore.botCount > 1"
-          color="neutral"
-          variant="soft"
-          size="xs"
-          :label="$t('comparison.selectAll')"
-          @click="botStore.toggleBotsByState('all')"
-        />
-      </div>
+      <span>{{ $t('comparison.bot') }}</span>
     </template>
     <template #botName-cell="{ row }">
       <div class="flex flex-row items-center justify-between gap-2">

@@ -30,15 +30,18 @@ const props = withDefaults(
   },
 );
 
-// Live mode: show how many entry conditions each pair meets (shared with the Next entry panel)
+// Live mode: show how many of its own entry checks each pair meets (shared with the Next entry
+// panel). Market-wide checks such as a BTC filter are left out - the status strip shows those.
 const nextEntry = props.backtestMode ? undefined : useNextEntry();
 const readiness = computed(() => {
   const map = new Map<string, { met: number; total: number; signal: boolean }>();
+  const market = nextEntry?.marketKeys.value ?? new Set<string>();
   for (const r of nextEntry?.pairs.value ?? []) {
-    if (r.conditions.length === 0) continue;
+    const own = r.conditions.filter((c) => !market.has(c.key));
+    if (own.length === 0) continue;
     map.set(r.pair, {
-      met: r.conditions.filter((c) => c.met).length,
-      total: r.conditions.length,
+      met: own.filter((c) => c.met).length,
+      total: own.length,
       signal: r.signal,
     });
   }
@@ -136,7 +139,19 @@ const combinedPairList = computed(() => {
       :title="filterText ? $t('pairs.noMatch') : $t('pairs.noWhitelist')"
       icon="lucide:search-x"
     />
-    <ul v-else class="flex flex-col gap-1" :aria-label="$t('pairs.label')">
+    <div
+      v-if="combinedPairList.length > 0 && readiness.size > 0"
+      class="flex justify-between px-2.5 text-xs text-muted"
+      aria-hidden="true"
+    >
+      <span>{{ $t('pairs.label') }}</span>
+      <span>{{ $t('pairs.checksHeader') }}</span>
+    </div>
+    <ul
+      v-if="combinedPairList.length > 0"
+      class="flex flex-col gap-1"
+      :aria-label="$t('pairs.label')"
+    >
       <li v-for="comb in combinedPairList" :key="comb.pair">
         <button
           type="button"
@@ -184,7 +199,7 @@ const combinedPairList = computed(() => {
           />
           <span
             v-else-if="readiness.get(comb.pair)"
-            class="flex h-1.5 w-12 shrink-0 gap-0.5"
+            class="flex shrink-0 items-center gap-2"
             role="img"
             :aria-label="
               $t('pairs.checksMet', {
@@ -193,12 +208,17 @@ const combinedPairList = computed(() => {
               })
             "
           >
-            <span
-              v-for="i in readiness.get(comb.pair)!.total"
-              :key="i"
-              class="flex-1 rounded-full"
-              :class="i <= readiness.get(comb.pair)!.met ? 'bg-profit' : 'bg-accented'"
-            />
+            <span class="flex h-1.5 w-10 gap-0.5" aria-hidden="true">
+              <span
+                v-for="i in readiness.get(comb.pair)!.total"
+                :key="i"
+                class="flex-1 rounded-full"
+                :class="i <= readiness.get(comb.pair)!.met ? 'bg-profit' : 'bg-accented'"
+              />
+            </span>
+            <span class="w-7 text-end text-xs text-muted tabular-nums" aria-hidden="true">
+              {{ readiness.get(comb.pair)!.met }}/{{ readiness.get(comb.pair)!.total }}
+            </span>
           </span>
           <ProfitPill
             v-if="backtestMode && comb.tradeCount > 0"

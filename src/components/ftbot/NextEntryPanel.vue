@@ -220,7 +220,7 @@ function selectPair(pair: string) {
             >
               <button
                 type="button"
-                class="justify-self-start truncate rounded-sm text-start text-sm font-medium text-highlighted hover:text-primary focus-visible:outline-2 focus-visible:outline-primary"
+                class="justify-self-start truncate rounded-sm text-start text-sm font-medium text-highlighted hover:text-primary focus-visible:outline-2 focus-visible:outline-primary pointer-coarse:min-h-11"
                 :title="$t('nextEntry.showOnChart', { pair: r.pair })"
                 @click="selectPair(r.pair)"
               >

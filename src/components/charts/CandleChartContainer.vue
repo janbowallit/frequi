@@ -168,7 +168,7 @@ const singlePairSelection = computed({
   <div class="flex h-full">
     <div class="flex h-full w-full min-w-0 flex-col">
       <div
-        class="flex flex-wrap items-center gap-2 border-b border-default px-2 py-2"
+        class="flex flex-wrap items-center gap-2 border-b border-default px-2 py-2 pointer-coarse:[&_button:not([role=switch])]:min-h-11 pointer-coarse:[&_button:not([role=switch])]:min-w-11"
         role="toolbar"
         :aria-label="$t('chartControls.controls')"
       >
@@ -208,6 +208,7 @@ const singlePairSelection = computed({
           :label="$t('chartControls.multiPair')"
           size="sm"
           class="shrink-0"
+          :ui="{ root: 'items-center', label: 'pointer-coarse:py-3' }"
         />
         <div class="ms-auto flex items-center gap-2">
           <UBadge

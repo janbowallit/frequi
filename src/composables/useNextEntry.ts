@@ -46,6 +46,14 @@ export interface PairReadiness {
 /** waiting = brass, ready = profit green, blocked = bot can't enter (paused, slots full) */
 export type EntryTone = 'ready' | 'waiting' | 'blocked';
 
+export interface EntryVerdict {
+  title: string;
+  detail: string;
+  /** One-line detail for the status strip, which shows the next check time itself */
+  short?: string;
+  tone: EntryTone;
+}
+
 const PREFIX = 'entry_check__';
 const EXIT_PREFIX = 'exit_target__';
 const REFRESH_MS = 60_000;
@@ -297,7 +305,7 @@ function useNextEntryState() {
     return max >= 0 && (bot.value?.openTradeCount ?? 0) >= max;
   });
 
-  const verdict = computed<{ title: string; detail: string; tone: EntryTone }>(() => {
+  const verdict = computed<EntryVerdict>(() => {
     const st = state.value;
     if (st && st.state !== BotStates.RUNNING) {
       return {
@@ -342,6 +350,7 @@ function useNextEntryState() {
             ? t(`nextEntry.${waiting}`)
             : t('nextEntry.waitingFor', { what: joinAnd(blockers.value.map((c) => c.label)) }),
         detail: t('nextEntry.blockedDetail', { what }),
+        short: joinList(blockers.value.map((c) => `${c.label} ${needText(c)}`)),
         tone: 'waiting',
       };
     }

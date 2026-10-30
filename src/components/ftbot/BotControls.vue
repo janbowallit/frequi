@@ -126,7 +126,10 @@ async function handleForceEntry() {
       </div>
     </div>
     <!-- Equal widths when they fit; a long label (e.g. Persian) widens its button or wraps the row instead of being cut off -->
-    <div class="flex flex-wrap gap-1.5 [&>*]:min-w-fit [&>*]:flex-1 [&>*]:basis-0">
+    <!-- Unavailable actions fade further than Nuxt UI's default so the live ones stand out; Stop reads as the risky one -->
+    <div
+      class="flex flex-wrap gap-1.5 [&>*]:min-w-fit [&>*]:flex-1 [&>*]:basis-0 [&>*]:disabled:opacity-40 [&>*]:pointer-coarse:min-h-11"
+    >
       <UButton
         :color="isRunning ? 'neutral' : 'success'"
         :variant="isRunning ? 'outline' : 'solid'"
@@ -150,7 +153,7 @@ async function handleForceEntry() {
         @click="handleStopBuy()"
       />
       <UButton
-        color="neutral"
+        :color="isRunning || isPaused ? 'error' : 'neutral'"
         variant="outline"
         class="justify-center"
         :disabled="!canTrade || !(isRunning || isPaused)"
@@ -161,7 +164,7 @@ async function handleForceEntry() {
         @click="handleStopBot()"
       />
     </div>
-    <div class="flex flex-wrap items-center gap-1.5">
+    <div class="flex flex-wrap items-center gap-1.5 [&>*]:pointer-coarse:min-h-11">
       <UButton
         v-if="botStore.activeBot.botState && botStore.activeBot.botState.force_entry_enable"
         color="neutral"

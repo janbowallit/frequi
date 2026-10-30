@@ -16,12 +16,22 @@ const title = computed(() => {
 </script>
 
 <template>
-  <UDashboardNavbar :title="title" :icon="page?.icon" :ui="{ root: 'bg-default/80 backdrop-blur' }">
+  <!-- pointer-coarse: 44px touch targets on phones and tablets -->
+  <UDashboardNavbar
+    :title="title"
+    :icon="page?.icon"
+    :toggle="{ class: 'pointer-coarse:size-11 justify-center' }"
+    :ui="{ root: 'bg-default/80 backdrop-blur' }"
+  >
     <template #leading>
       <UDashboardSidebarCollapse class="hidden lg:inline-flex" />
     </template>
     <template #right>
-      <UDashboardSearchButton :label="undefined" collapsed class="lg:hidden" />
+      <UDashboardSearchButton
+        :label="undefined"
+        collapsed
+        class="justify-center lg:hidden pointer-coarse:size-11"
+      />
       <ReloadControl v-if="botStore.hasBots" />
     </template>
   </UDashboardNavbar>

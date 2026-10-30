@@ -28,19 +28,35 @@ onMounted(async () => {
   >
     <BotSummaryStats />
 
-    <!-- Money over time -->
-    <div class="grid gap-4 lg:gap-5 xl:grid-cols-3">
+    <!-- Every bot side by side, full width so no column is cut off -->
+    <PanelSection
+      v-if="multiBot"
+      :title="$t('dashboard.botComparison')"
+      :info="$t('dashboard.botComparisonInfo')"
+      body-class="overflow-x-auto"
+    >
+      <BotComparisonList />
+    </PanelSection>
+
+    <!-- Money over time - an empty chart would only push the live panels down -->
+    <div
+      v-if="hasClosedTrades || !multiBot"
+      class="grid gap-4 lg:gap-5"
+      :class="{ 'xl:grid-cols-3': !multiBot }"
+    >
       <PanelSection
+        v-if="hasClosedTrades"
         :title="multiBot ? $t('dashboard.profitOverTimeAll') : $t('dashboard.profitOverTime')"
         class="h-96 xl:col-span-2"
         body-class="overflow-hidden"
       >
         <PeriodBreakdown multi-bot-view />
       </PanelSection>
-      <PanelSection v-if="multiBot" :title="$t('dashboard.botComparison')" class="h-96">
-        <BotComparisonList />
-      </PanelSection>
-      <section v-else class="h-96 overflow-auto card">
+      <section
+        v-if="!multiBot"
+        class="h-96 overflow-auto card"
+        :class="{ 'xl:col-span-3': !hasClosedTrades }"
+      >
         <BotBalance />
       </section>
     </div>

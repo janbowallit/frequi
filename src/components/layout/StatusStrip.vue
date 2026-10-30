@@ -51,7 +51,24 @@ const message = computed<{ title: string; detail?: string }>(() => {
   if (!supported.value) {
     return b.openTradeCount > 0 ? { title: t('status.managing') } : { title: t('status.looking') };
   }
-  return { title: verdict.value.title, detail: verdict.value.detail };
+  return { title: verdict.value.title, detail: verdict.value.short ?? verdict.value.detail };
+});
+
+/** How fresh the numbers are - turns amber when nothing came back for 5 minutes */
+const now = useNow({ interval: 10_000 });
+const STALE_MS = 5 * 60_000;
+const updated = computed<{ text: string; stale: boolean; exact: string } | null>(() => {
+  const ts = bot.value?.lastUpdate;
+  if (!ts || !bot.value?.isBotOnline) return null;
+  const age = Math.max(now.value.getTime() - ts, 0);
+  return {
+    text:
+      age < 60_000
+        ? t('status.updatedJustNow')
+        : t('status.updatedAgo', { ago: humanizeMs(age, { largest: 1, round: true }) }),
+    stale: age > STALE_MS,
+    exact: timestampms(ts),
+  };
 });
 
 const stakeCurrency = computed(() => bot.value?.stakeCurrency ?? '');
@@ -92,7 +109,8 @@ const maxTrades = computed(() => bot.value?.botState?.max_open_trades ?? 0);
       </span>
 
       <!-- What the bot is doing -->
-      <p class="min-w-0 flex-1 truncate text-start">
+      <!-- Wraps to a second line rather than cutting off the reason -->
+      <p class="line-clamp-2 min-w-0 flex-1 text-start">
         <span class="font-medium text-highlighted">{{ message.title }}</span>
         <span v-if="message.detail" class="ms-2 hidden text-muted md:inline">
           {{ message.detail }}
@@ -140,6 +158,14 @@ const maxTrades = computed(() => bot.value?.botState?.max_open_trades ?? 0);
           </template>
           <template #until>{{ untilText(earliest) }}</template>
         </I18nT>
+        <span
+          v-if="updated"
+          class="hidden border-s border-default ps-4 xl:inline"
+          :class="{ 'font-medium text-warning': updated.stale }"
+          :title="updated.exact"
+        >
+          {{ updated.text }}
+        </span>
       </div>
 
       <UButton

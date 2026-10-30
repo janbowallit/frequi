@@ -86,6 +86,8 @@ export function createBotSubStore(botId: string, botName: string) {
         isBotLoggedIn: true,
         autoRefresh: false,
         refreshing: false,
+        /** When open trades last came back from the bot (epoch ms), to show how fresh the data is */
+        lastUpdate: null as number | null,
         versionState: '',
         lastLogs: [] as LogLine[],
         refreshRequired: true,
@@ -340,6 +342,7 @@ export function createBotSubStore(botId: string, botName: string) {
               this.selectedPair = openTrades[0]?.pair || '';
             }
           }
+          this.lastUpdate = Date.now();
         } catch (data) {
           return console.error(data);
         }
