@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { ClosedTrade } from '@/types';
+
 /** Details of the selected trade, sliding in from the right on any page. */
 const botStore = useBotStore();
 const route = useRoute();
@@ -29,11 +31,14 @@ const open = computed({
     :close="{ color: 'neutral', variant: 'ghost' }"
   >
     <template #body>
-      <TradeDetail
-        v-if="bot?.tradeDetail"
-        :trade="bot.tradeDetail"
-        :stake-currency="bot.stakeCurrency"
-      />
+      <template v-if="bot?.tradeDetail">
+        <!-- Closed trades open with the journal review: why it entered, why it exited, notes -->
+        <template v-if="!bot.tradeDetail.is_open">
+          <TradeReview :trade="bot.tradeDetail as ClosedTrade" :bot="bot" />
+          <USeparator class="my-6" />
+        </template>
+        <TradeDetail :trade="bot.tradeDetail" :stake-currency="bot.stakeCurrency" />
+      </template>
     </template>
   </USlideover>
 </template>

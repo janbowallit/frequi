@@ -1,11 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import type { ClosedTrade } from '@/types';
 import {
+  ALL_TAGS,
   dayKey,
   feeSplit,
   groupByDay,
   monthGrid,
   monthSummary,
+  tagFilterItems,
   type DayStats,
 } from '@/utils/journal';
 
@@ -101,6 +103,15 @@ describe('monthGrid', () => {
     const grid = monthGrid(2026, 10, 1);
     expect(grid.slice(0, 3)).toEqual([null, null, null]);
     expect(grid[3]).toBe('2026-10-01');
+  });
+});
+
+describe('tagFilterItems', () => {
+  it('never uses an empty value (Select items reject it)', () => {
+    const items = tagFilterItems(['FOMO', 'late'], 'All tags');
+    expect(items.map((i) => i.label)).toEqual(['All tags', 'FOMO', 'late']);
+    expect(items.every((i) => i.value !== '')).toBe(true);
+    expect(items[0]!.value).toBe(ALL_TAGS);
   });
 });
 

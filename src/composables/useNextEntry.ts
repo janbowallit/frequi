@@ -104,6 +104,17 @@ function label(key: string, known: KnownCondition | undefined): string {
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
+/** Plain-language name of an entry check, as the Next entry panel shows it */
+export function checkLabel(strategy: string, key: string): string {
+  return label(key, knownFor(strategy, key));
+}
+
+/** What an entry check means, when it is a known one */
+export function checkHelp(strategy: string, key: string): string | null {
+  const known = knownFor(strategy, key);
+  return known ? t(`nextEntry.${known.help}`) : null;
+}
+
 function num(value: unknown): number | null {
   return typeof value === 'number' && Number.isFinite(value) ? value : null;
 }

@@ -4,6 +4,7 @@ import { getPaginationRowModel } from '@tanstack/vue-table';
 import type { TableColumn, TableRow } from '@nuxt/ui';
 import type { ClosedTrade } from '@/types';
 import { t } from '@/i18n';
+import { ALL_TAGS, tagFilterItems } from '@/utils/journal';
 
 const botStore = useBotStore();
 const { trades, selectedDay, tagFilter, notesOnly, allTags, journalFor } = useJournal();
@@ -22,13 +23,10 @@ const columns = computed<TableColumn<ClosedTrade>[]>(() => [
   { id: 'journal', header: t('journal.notes') },
 ]);
 
-const tagItems = computed(() => [
-  { label: t('journal.allTags'), value: '' },
-  ...allTags.value.map((tag) => ({ label: tag, value: tag })),
-]);
+const tagItems = computed(() => tagFilterItems(allTags.value, t('journal.allTags')));
 const tagModel = computed({
-  get: () => tagFilter.value ?? '',
-  set: (value: string) => (tagFilter.value = value || null),
+  get: () => tagFilter.value ?? ALL_TAGS,
+  set: (value: string) => (tagFilter.value = value === ALL_TAGS ? null : value),
 });
 
 function duration(trade: ClosedTrade) {

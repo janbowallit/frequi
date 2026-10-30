@@ -6,6 +6,7 @@
 // biome-ignore lint: disable
 export {}
 declare global {
+  const ALL_TAGS: typeof import('./utils/journal').ALL_TAGS
   const ColorPreferences: typeof import('./stores/colors').ColorPreferences
   const DashboardLayout: typeof import('./stores/layout').DashboardLayout
   const EffectScope: typeof import('vue').EffectScope
@@ -22,6 +23,8 @@ declare global {
   const binData: typeof import('./utils/charts/binCount').binData
   const calculateDiff: typeof import('./utils/charts/areaPlotDataset').calculateDiff
   const chartSeriesLabel: typeof import('./composables/useCandleChartTooltip').chartSeriesLabel
+  const checkHelp: typeof import('./composables/useNextEntry').checkHelp
+  const checkLabel: typeof import('./composables/useNextEntry').checkLabel
   const computed: typeof import('vue').computed
   const computedAsync: typeof import('@vueuse/core').computedAsync
   const computedEager: typeof import('@vueuse/core').computedEager
@@ -172,6 +175,7 @@ declare global {
   const storeToRefs: typeof import('pinia').storeToRefs
   const syncRef: typeof import('@vueuse/core').syncRef
   const syncRefs: typeof import('@vueuse/core').syncRefs
+  const tagFilterItems: typeof import('./utils/journal').tagFilterItems
   const templateRef: typeof import('@vueuse/core').templateRef
   const throttledRef: typeof import('@vueuse/core').throttledRef
   const throttledWatch: typeof import('@vueuse/core').throttledWatch
@@ -466,6 +470,7 @@ import { UnwrapRef } from 'vue'
 declare module 'vue' {
   interface GlobalComponents {}
   interface ComponentCustomProperties {
+    readonly ALL_TAGS: UnwrapRef<typeof import('./utils/journal')['ALL_TAGS']>
     readonly ColorPreferences: UnwrapRef<typeof import('./stores/colors')['ColorPreferences']>
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
     readonly OpenTradeVizOptions: UnwrapRef<typeof import('./stores/settings')['OpenTradeVizOptions']>
@@ -480,6 +485,8 @@ declare module 'vue' {
     readonly binData: UnwrapRef<typeof import('./utils/charts/binCount')['binData']>
     readonly calculateDiff: UnwrapRef<typeof import('./utils/charts/areaPlotDataset')['calculateDiff']>
     readonly chartSeriesLabel: UnwrapRef<typeof import('./composables/useCandleChartTooltip')['chartSeriesLabel']>
+    readonly checkHelp: UnwrapRef<typeof import('./composables/useNextEntry')['checkHelp']>
+    readonly checkLabel: UnwrapRef<typeof import('./composables/useNextEntry')['checkLabel']>
     readonly computed: UnwrapRef<typeof import('vue')['computed']>
     readonly computedAsync: UnwrapRef<typeof import('@vueuse/core')['computedAsync']>
     readonly computedEager: UnwrapRef<typeof import('@vueuse/core')['computedEager']>
@@ -627,6 +634,7 @@ declare module 'vue' {
     readonly storeToRefs: UnwrapRef<typeof import('pinia')['storeToRefs']>
     readonly syncRef: UnwrapRef<typeof import('@vueuse/core')['syncRef']>
     readonly syncRefs: UnwrapRef<typeof import('@vueuse/core')['syncRefs']>
+    readonly tagFilterItems: UnwrapRef<typeof import('./utils/journal')['tagFilterItems']>
     readonly templateRef: UnwrapRef<typeof import('@vueuse/core')['templateRef']>
     readonly throttledRef: UnwrapRef<typeof import('@vueuse/core')['throttledRef']>
     readonly throttledWatch: UnwrapRef<typeof import('@vueuse/core')['throttledWatch']>

@@ -115,3 +115,11 @@ export function feeSplit(trade: ClosedTrade) {
   const gross = net + fees;
   return { gross, fees, net, feeShare: gross > 0 ? fees / gross : null };
 }
+
+/** Value of the "all tags" option - Select items can't use an empty string */
+export const ALL_TAGS = '__all__';
+
+/** Options for the tag filter: "all tags" first, then every tag */
+export function tagFilterItems(tags: string[], allLabel: string) {
+  return [{ label: allLabel, value: ALL_TAGS }, ...tags.map((tag) => ({ label: tag, value: tag }))];
+}

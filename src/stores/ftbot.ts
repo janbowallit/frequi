@@ -925,8 +925,10 @@ export function createBotSubStore(botId: string, botName: string) {
       },
       async getJournal() {
         try {
-          const { data } = await api.get<JournalMap>('/trades/journal');
-          this.journal = data;
+          const res = await api.get<JournalMap>('/trades/journal');
+          // The api layer answers a logged-out bot with no response at all
+          if (!res) return;
+          this.journal = res.data;
           this.journalSupported = true;
         } catch (error) {
           if (axios.isAxiosError(error) && error.response?.status === 404) {
