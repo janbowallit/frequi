@@ -80,7 +80,7 @@ const quickLinks = computed(() =>
         <li v-for="link in quickLinks" :key="link.to">
           <RouterLink
             :to="link.to"
-            class="group flex h-full items-start gap-3 rounded-xl border border-default bg-default p-4 transition-colors hover:border-accented hover:bg-elevated/40 focus-visible:outline-2 focus-visible:outline-primary"
+            class="group flex h-full items-start gap-3 card p-4 transition-[color,background-color,border-color,box-shadow,translate] duration-200 hover:border-accented hover:bg-elevated/40 hover:shadow-md motion-safe:hover:-translate-y-0.5 dark:hover:shadow-none focus-visible:outline-2 focus-visible:outline-primary"
           >
             <span
               class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary ring ring-primary/20 ring-inset"

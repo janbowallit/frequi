@@ -30,6 +30,8 @@ const timeframe = computed((): string => {
 const showSavedResults = ref(false);
 
 const btFormMode = ref<BtRunModes>(BtRunModes.results);
+const resultTabsRef = useTemplateRef('resultTabsEl');
+const { fadeClass: resultFadeClass } = useTabOverflow(resultTabsRef, btFormMode);
 const pollInterval = ref<number | null>(null);
 
 function selectBacktestResult() {
@@ -126,10 +128,7 @@ const resultTabs = computed(() => [
         </PanelSection>
       </div>
 
-      <section
-        class="rounded-xl border border-default bg-default min-w-0 overflow-hidden"
-        :aria-label="$t('backtest.result')"
-      >
+      <section class="card min-w-0 overflow-hidden" :aria-label="$t('backtest.result')">
         <EmptyState
           v-if="!hasBacktestResult || !botStore.activeBot.selectedBacktestResult"
           class="py-24"
@@ -139,12 +138,16 @@ const resultTabs = computed(() => [
         />
         <UTabs
           v-else
+          ref="resultTabsEl"
           v-model="btFormMode"
           :items="resultTabs"
           variant="link"
           :ui="{
             root: 'gap-0',
-            list: 'overflow-x-auto border-b border-default px-2',
+            list: [
+              'overflow-x-auto border-b border-default px-2 max-lg:[scrollbar-width:none]',
+              resultFadeClass,
+            ],
             trigger: 'shrink-0 grow-0 px-3 py-3 text-sm',
             label: 'overflow-visible',
             content: 'min-w-0 p-3',

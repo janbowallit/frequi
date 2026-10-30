@@ -24,11 +24,11 @@ export function formatPercent(value: number | undefined | null, decimals = 3): s
  * @returns Formatted string
  */
 export function formatNumber(value: number | null | undefined, decimals = 15): string {
-  // const format = new Intl.NumberFormat('', {maximumFractionDigits: decimals}
+  // Grouped like the chart axes ("77,607.02"), with Latin digits in every UI language
   return ltr(
     isNotUndefined(value)
-      ? value.toLocaleString('fullwide', {
-          useGrouping: false,
+      ? value.toLocaleString('en-US', {
+          useGrouping: true,
           maximumFractionDigits: decimals,
         })
       : 'N/A',

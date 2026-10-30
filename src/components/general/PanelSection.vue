@@ -24,7 +24,7 @@ withDefaults(
 
 <template>
   <section
-    class="rounded-xl border border-default bg-default flex min-w-0 flex-col overflow-hidden text-start"
+    class="card flex min-w-0 flex-col overflow-hidden text-start"
     :aria-label="title || undefined"
     v-bind="$attrs"
   >

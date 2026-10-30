@@ -99,10 +99,7 @@ async function startDownload() {
   <div class="flex w-full flex-col gap-4 text-start">
     <BackgroundJobTracking />
 
-    <form
-      class="rounded-xl border border-default bg-default flex flex-col divide-y divide-default"
-      @submit.prevent="startDownload"
-    >
+    <form class="card flex flex-col divide-y divide-default" @submit.prevent="startDownload">
       <!-- Pairs -->
       <section class="flex flex-col gap-3 p-5" aria-labelledby="dl-pairs">
         <div class="flex flex-col gap-1">

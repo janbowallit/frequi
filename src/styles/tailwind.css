@@ -50,6 +50,19 @@
   --ui-text-dimmed: var(--ui-color-neutral-400);
 }
 
+/* Page surface for panels and cards: a hairline border, plus a faint lift on the light page */
+@utility card {
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--ui-border);
+  background-color: var(--ui-bg);
+  box-shadow:
+    0 1px 2px 0 rgb(0 0 0 / 0.04),
+    0 1px 3px 0 rgb(0 0 0 / 0.03);
+  @variant dark {
+    box-shadow: none;
+  }
+}
+
 @layer base {
   /* Tailwind v4 borders default to currentColor - use the theme border instead */
   *,

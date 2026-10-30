@@ -106,7 +106,7 @@ watch(
     <section
       v-if="botStore.activeBot.isWebserverMode"
       aria-labelledby="chart-source"
-      class="rounded-xl border border-default bg-default flex flex-col gap-3 p-4"
+      class="card flex flex-col gap-3 p-4"
     >
       <div class="flex items-center gap-2">
         <h2 id="chart-source" class="text-sm font-semibold text-highlighted">

@@ -12,6 +12,33 @@ const sections = computed(() => [
   { id: 'settings-backtest-section', label: t('settings.backtesting') },
 ]);
 
+// Highlight the section being read: the top-most one crossing the upper part of the view
+const activeSection = ref('settings-ui-section');
+const visibleSections = new Set<string>();
+// After a click, the clicked section stays highlighted even if it can't scroll to the top
+let clickedAt = 0;
+function selectSection(id: string) {
+  activeSection.value = id;
+  clickedAt = Date.now();
+}
+onMounted(() => {
+  const els = sections.value
+    .map((s) => document.getElementById(s.id))
+    .filter((el): el is HTMLElement => !!el);
+  useIntersectionObserver(
+    els,
+    (entries) => {
+      for (const e of entries) {
+        if (e.isIntersecting) visibleSections.add(e.target.id);
+        else visibleSections.delete(e.target.id);
+      }
+      const first = sections.value.find((s) => visibleSections.has(s.id));
+      if (first && Date.now() - clickedAt > 1000) activeSection.value = first.id;
+    },
+    { rootMargin: '0px 0px -55% 0px' },
+  );
+});
+
 const metricItems = computed(() =>
   availableBacktestMetrics.value.map((m) => ({ ...m, header: metricLabel(m.header) })),
 );
@@ -44,13 +71,20 @@ const colorPreferenceOptions = computed(() => [
           v-for="section in sections"
           :key="section.id"
           :href="`#${section.id}`"
-          class="rounded-md px-3 py-1.5 text-sm text-muted hover:bg-elevated hover:text-highlighted"
+          :aria-current="activeSection === section.id ? 'location' : undefined"
+          class="relative rounded-md px-3 py-1.5 text-sm transition-colors before:absolute before:inset-y-1.5 before:start-0 before:w-0.5 before:rounded-full before:transition-colors"
+          :class="
+            activeSection === section.id
+              ? 'bg-elevated font-medium text-highlighted before:bg-primary'
+              : 'text-muted before:bg-transparent hover:bg-elevated/60 hover:text-highlighted'
+          "
+          @click="selectSection(section.id)"
           >{{ section.label }}</a
         >
       </nav>
       <div class="flex min-w-0 flex-col gap-4">
         <section
-          class="rounded-xl border border-default bg-default flex scroll-mt-4 flex-col gap-5 p-5"
+          class="card flex scroll-mt-4 flex-col gap-5 p-5"
           id="settings-ui-section"
           aria-labelledby="settings-ui"
         >
@@ -94,7 +128,7 @@ const colorPreferenceOptions = computed(() => [
         </section>
 
         <section
-          class="rounded-xl border border-default bg-default flex scroll-mt-4 flex-col gap-5 p-5"
+          class="card flex scroll-mt-4 flex-col gap-5 p-5"
           id="settings-chart-section"
           aria-labelledby="settings-chart"
         >
@@ -188,7 +222,7 @@ const colorPreferenceOptions = computed(() => [
         </section>
 
         <section
-          class="rounded-xl border border-default bg-default flex scroll-mt-4 flex-col gap-5 p-5"
+          class="card flex scroll-mt-4 flex-col gap-5 p-5"
           id="settings-notifications-section"
           aria-labelledby="settings-notifications"
         >
@@ -215,7 +249,7 @@ const colorPreferenceOptions = computed(() => [
         </section>
 
         <section
-          class="rounded-xl border border-default bg-default flex scroll-mt-4 flex-col gap-5 p-5"
+          class="card flex scroll-mt-4 flex-col gap-5 p-5"
           id="settings-backtest-section"
           aria-labelledby="settings-backtest"
         >

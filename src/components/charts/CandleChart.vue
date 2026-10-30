@@ -71,9 +71,12 @@ const props = defineProps<{
 
 const isLabelLeft = computed(() => props.labelSide === 'left');
 // Chart default options
-const MARGINLEFT = isLabelLeft.value ? '5.5%' : '1%';
-const MARGINRIGHT = isLabelLeft.value ? '1%' : '5.5%';
-const NAMEGAP = 55;
+// Price labels need a fixed width ("112,345.67"): a percentage cut them off on narrow charts
+const LABEL_MARGIN = 80;
+const EDGE_MARGIN = 12;
+const MARGINLEFT = isLabelLeft.value ? LABEL_MARGIN : EDGE_MARGIN;
+const MARGINRIGHT = isLabelLeft.value ? EDGE_MARGIN : LABEL_MARGIN;
+const NAMEGAP = 64;
 const SUBPLOTHEIGHT = 8; // Value in %
 // minimal helpers for debugging
 const showAxisLine = false;
@@ -569,6 +572,10 @@ function updateChart(initial = false) {
       localGrid.bottom = '50px';
       delete localGrid.top;
     }
+    // Without subplots the candles sit on the volume bars: keep them above the zoom slider too
+    // (a percentage put the lowest price label on top of the slider in short charts)
+    const mainGrid = options.grid[0];
+    if (subplotCount === 1 && mainGrid) mainGrid.bottom = '56px';
   }
 
   const nameTrades = 'Trades';

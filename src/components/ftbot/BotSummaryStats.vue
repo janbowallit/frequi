@@ -7,6 +7,8 @@ const botStore = useBotStore();
 interface StatCard {
   label: string;
   value: string;
+  /** Currency, shown smaller after the value so the number itself never gets cut off */
+  unit?: string;
   detail: string;
   icon: string;
   /** Sign of the value - colors it as profit / loss */
@@ -53,15 +55,15 @@ const summary = computed(() => {
   };
 });
 
-function money(value: number): string {
+function money(value: number): Pick<StatCard, 'value' | 'unit'> {
   const s = summary.value;
-  if (!s.sameCurrency) return t('summary.mixed');
-  return formatPriceCurrency(value, s.currency, s.decimals);
+  if (!s.sameCurrency) return { value: t('summary.mixed') };
+  return { value: formatPrice(value, s.decimals), unit: s.currency };
 }
 
-function signed(value: number): string {
-  const text = money(value);
-  return value > 0 && summary.value.sameCurrency ? ltr(`+${text}`) : text;
+function signed(value: number): Pick<StatCard, 'value' | 'unit'> {
+  const m = money(value);
+  return value > 0 && summary.value.sameCurrency ? { ...m, value: ltr(`+${m.value}`) } : m;
 }
 
 const cards = computed<StatCard[]>(() => {
@@ -71,7 +73,7 @@ const cards = computed<StatCard[]>(() => {
     {
       label: t('summary.realized'),
       icon: 'i-lucide-badge-dollar-sign',
-      value: signed(s.closedProfit),
+      ...signed(s.closedProfit),
       detail:
         s.closedRatio !== undefined && s.closedTrades > 0
           ? t('summary.realizedDetail', { pct: formatPercent(s.closedRatio, 2), n: s.closedTrades })
@@ -81,7 +83,7 @@ const cards = computed<StatCard[]>(() => {
     {
       label: t('summary.openProfit'),
       icon: 'i-lucide-trending-up',
-      value: signed(s.openProfit),
+      ...signed(s.openProfit),
       detail: s.maxOpenTrades
         ? t('summary.slotsInUse', { open: s.openTrades, max: s.maxOpenTrades })
         : t('summary.openTrades', { n: s.openTrades }),
@@ -90,7 +92,7 @@ const cards = computed<StatCard[]>(() => {
     {
       label: t('summary.balance'),
       icon: 'i-lucide-wallet',
-      value: money(s.balance),
+      ...money(s.balance),
       detail: s.isDryRun
         ? t('summary.dryRunFunds')
         : s.isLive
@@ -114,11 +116,7 @@ const cards = computed<StatCard[]>(() => {
     :aria-label="$t('summary.label')"
     class="grid grid-cols-2 gap-3 text-start xl:grid-cols-4"
   >
-    <div
-      v-for="card in cards"
-      :key="card.label"
-      class="relative min-w-0 overflow-hidden rounded-xl border border-default bg-default p-4"
-    >
+    <div v-for="card in cards" :key="card.label" class="relative min-w-0 overflow-hidden card p-4">
       <div class="flex items-center justify-between gap-2">
         <p class="truncate text-sm font-medium text-muted">{{ card.label }}</p>
         <span
@@ -133,17 +131,20 @@ const cards = computed<StatCard[]>(() => {
         </span>
       </div>
       <p
-        class="mt-2 truncate text-2xl font-semibold tracking-tight tabular-nums lg:text-3xl"
+        class="mt-2 flex min-w-0 flex-wrap items-baseline gap-x-1.5 font-semibold tracking-tight tabular-nums"
         :class="{
           'text-highlighted': !card.sign,
           'text-profit': card.sign === 1,
           'text-loss': card.sign === -1,
         }"
-        :title="card.value"
+        :title="card.unit ? `${card.value} ${card.unit}` : card.value"
       >
-        {{ card.value }}
+        <span class="text-xl sm:text-2xl lg:text-3xl">{{ card.value }}</span>
+        <span v-if="card.unit" class="text-xs font-medium text-muted sm:text-sm">{{
+          card.unit
+        }}</span>
       </p>
-      <p class="mt-1 truncate text-xs text-muted" :title="card.detail">{{ card.detail }}</p>
+      <p class="mt-1 line-clamp-2 text-xs text-muted">{{ card.detail }}</p>
     </div>
   </section>
 </template>

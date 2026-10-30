@@ -67,10 +67,7 @@ function stopEditBot(botId: string) {
     <h3 v-if="!small && !embedded" class="mb-2 text-lg font-semibold">
       {{ $t('bots.available') }}
     </h3>
-    <ul
-      ref="sortContainer"
-      class="rounded-xl border border-default bg-default flex flex-col divide-y divide-default overflow-hidden"
-    >
+    <ul ref="sortContainer" class="card flex flex-col divide-y divide-default overflow-hidden">
       <li
         v-for="bot in botListComp"
         :key="bot.botId"

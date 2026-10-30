@@ -14,6 +14,8 @@ function refreshOHLCV(pair: string, columns: string[]) {
 }
 
 const activeTab = useStorage('ftTradeTab', 'open-trades');
+const tabsRef = useTemplateRef('tabs');
+const { fadeClass } = useTabOverflow(tabsRef, activeTab);
 // On a phone the pair list moves into a tab so the chart comes right after the controls
 const isDesktop = useBreakpoints(breakpointsTailwind).greaterOrEqual('lg');
 watch(isDesktop, (desktop) => {
@@ -81,6 +83,7 @@ const tradingTabItems = computed<TabsItem[]>(() => [
       </section>
 
       <UTabs
+        ref="tabs"
         v-model="activeTab"
         :items="tradingTabItems"
         variant="link"
@@ -88,7 +91,10 @@ const tradingTabItems = computed<TabsItem[]>(() => [
         class="gap-0"
         :ui="{
           root: 'gap-0',
-          list: 'sticky top-0 z-10 overflow-x-auto border-b border-default bg-default px-2',
+          list: [
+            'sticky top-0 z-10 overflow-x-auto border-b border-default bg-default px-2 max-lg:[scrollbar-width:none]',
+            fadeClass,
+          ],
           trigger: 'shrink-0 grow-0 px-3 py-3 text-sm',
           label: 'overflow-visible',
           content: 'min-w-0',

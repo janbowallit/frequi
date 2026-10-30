@@ -15,7 +15,7 @@ const botStore = useBotStore();
             : $t('trade.openCount', botStore.activeBot.openTrades.length)
         "
       />
-      <div class="rounded-xl border border-default bg-default overflow-hidden">
+      <div class="card overflow-hidden">
         <CustomTradeList
           v-if="!history"
           :trades="botStore.activeBot.openTrades"
@@ -46,7 +46,7 @@ const botStore = useBotStore();
         icon="lucide:arrow-left"
         :ui="{ leadingIcon: 'rtl:-scale-x-100' }"
       />
-      <div class="rounded-xl border border-default bg-default overflow-hidden">
+      <div class="card overflow-hidden">
         <TradeDetail
           :trade="botStore.activeBot.tradeDetail"
           :stake-currency="botStore.activeBot.stakeCurrency"

@@ -40,7 +40,7 @@ onMounted(async () => {
       <PanelSection v-if="multiBot" :title="$t('dashboard.botComparison')" class="h-96">
         <BotComparisonList />
       </PanelSection>
-      <section v-else class="h-96 overflow-auto rounded-xl border border-default bg-default">
+      <section v-else class="h-96 overflow-auto card">
         <BotBalance />
       </section>
     </div>

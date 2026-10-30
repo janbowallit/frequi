@@ -40,13 +40,20 @@ const props = withDefaults(
 );
 const settingsStore = useSettingsStore();
 
+/** Share of each currency, for the legend (outside slice labels got cut off in narrow panels) */
+const shares = computed(() => {
+  const total = props.currencies.reduce((a, c) => a + (c.est_stake ?? 0), 0);
+  return Object.fromEntries(
+    props.currencies.map((c) => [c.currency, total ? (c.est_stake ?? 0) / total : 0]),
+  );
+});
+
 const balanceChartOptions = computed((): EChartsOption => {
   return {
     title: {
       text: t('charts.balance'),
       show: props.showTitle,
     },
-    center: ['50%', '50%'],
     backgroundColor: 'rgba(0, 0, 0, 0)',
     dataset: {
       dimensions: ['balance', 'currency', 'est_stake', 'free', 'used', 'stake'],
@@ -60,25 +67,32 @@ const balanceChartOptions = computed((): EChartsOption => {
         }% (${formatPriceCurrency(params.value.est_stake, params.value.stake)})`;
       },
     },
-    // legend: {
-    //   orient: 'vertical',
-    //   right: 10,
-    //   top: 20,
-    //   bottom: 20,
-    // },
+    legend: {
+      orient: 'vertical',
+      right: '4%',
+      top: 'middle',
+      icon: 'circle',
+      itemWidth: 10,
+      itemHeight: 10,
+      itemGap: 10,
+      textStyle: { fontSize: 12 },
+      formatter: (name: string) => `${name}  ${((shares.value[name] ?? 0) * 100).toFixed(1)}%`,
+    },
     series: [
       {
         type: 'pie',
-        radius: ['40%', '70%'],
+        radius: ['52%', '78%'],
+        center: ['32%', '50%'],
+        padAngle: 2,
+        itemStyle: { borderRadius: 4 },
 
         encode: {
           value: 'est_stake',
           itemName: 'currency',
           tooltip: ['balance', 'currency'],
         },
-        label: {
-          formatter: '{b} - {d}%',
-        },
+        label: { show: false },
+        emphasis: { scale: true, scaleSize: 4 },
         tooltip: {
           show: true,
         },
@@ -96,7 +110,7 @@ const balanceChartOptions = computed((): EChartsOption => {
     ref="balanceChart"
     :option="balanceChartOptions"
     :theme="settingsStore.chartTheme"
-    :style="{ height: Math.min(width * 0.6, 280) + 'px' }"
+    :style="{ height: Math.min(width * 0.5, 220) + 'px' }"
     autoresize
   />
 </template>

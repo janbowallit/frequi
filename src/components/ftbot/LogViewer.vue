@@ -120,7 +120,7 @@ function scrollToBottom() {
 
 <template>
   <section
-    class="rounded-xl border border-default bg-default relative flex h-full flex-col overflow-hidden text-start"
+    class="card relative flex h-full flex-col overflow-hidden text-start"
     :aria-label="$t('logs.label')"
   >
     <div class="flex flex-wrap items-center gap-2 border-b border-default px-3 py-2">
