@@ -235,7 +235,7 @@ const exitPlan = computed(() => plans.value.find((p) => p.trade.trade_id === pro
             <span
               class="font-semibold capitalize"
               :style="{
-                color: order.ft_order_side === 'buy' ? colorStore.colorUp : colorStore.colorDown,
+                color: order.ft_order_side === 'buy' ? colorStore.textUp : colorStore.textDown,
               }"
             >
               {{ apiText('orderSide', order.ft_order_side) }}

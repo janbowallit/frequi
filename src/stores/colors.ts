@@ -28,6 +28,13 @@ export const useColorStore = defineStore('colorStore', {
     colorLoss(): string {
       return MONEY_COLORS[useSettingsStore().currentTheme === 'light' ? 'light' : 'dark'].loss;
     },
+    /** colorUp as text: the candle colors are too light to read on a light page */
+    textUp(): string {
+      return this.colorPreference === ColorPreferences.GREEN_UP ? this.colorProfit : this.colorLoss;
+    },
+    textDown(): string {
+      return this.colorPreference === ColorPreferences.GREEN_UP ? this.colorLoss : this.colorProfit;
+    },
   },
   actions: {
     updateProfitLossColor() {
