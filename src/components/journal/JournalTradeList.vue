@@ -41,8 +41,9 @@ function openTrade(_e: Event, row: TableRow<ClosedTrade>) {
 </script>
 
 <template>
-  <div class="flex flex-col gap-3">
-    <div class="flex flex-wrap items-center gap-2">
+  <!-- The table runs edge to edge (its cells have their own padding); the rest is inset -->
+  <div class="flex flex-col gap-3 py-3 sm:py-4">
+    <div class="flex flex-wrap items-center gap-3 px-3 sm:px-4">
       <UBadge
         v-if="selectedDay"
         color="primary"
@@ -66,7 +67,7 @@ function openTrade(_e: Event, row: TableRow<ClosedTrade>) {
       <USwitch v-model="notesOnly" :label="$t('journal.notesOnly')" />
     </div>
 
-    <p v-if="!trades.length" class="py-6 text-center text-sm text-muted">
+    <p v-if="!trades.length" class="px-3 py-8 text-center text-sm text-muted sm:px-4">
       {{ selectedDay ? $t('journal.emptyDay') : $t('journal.emptyMonth') }}
     </p>
     <UTable
@@ -78,6 +79,9 @@ function openTrade(_e: Event, row: TableRow<ClosedTrade>) {
       :ui="{ tr: 'cursor-pointer' }"
       @select="openTrade"
     >
+      <template #botName-cell="{ row }">
+        {{ botStore.botStores[row.original.botId]?.uiBotName || row.original.botName }}
+      </template>
       <template #close_timestamp-cell="{ row }">
         <DateTimeTZ :date="row.original.close_timestamp" />
       </template>
@@ -103,7 +107,7 @@ function openTrade(_e: Event, row: TableRow<ClosedTrade>) {
         </div>
       </template>
     </UTable>
-    <div v-if="trades.length > pagination.pageSize" class="flex justify-end">
+    <div v-if="trades.length > pagination.pageSize" class="flex justify-end px-3 sm:px-4">
       <UPagination
         :page="pagination.pageIndex + 1"
         :items-per-page="pagination.pageSize"

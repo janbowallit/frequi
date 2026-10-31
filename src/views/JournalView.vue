@@ -21,7 +21,11 @@ onMounted(refresh);
       </UBadge>
     </div>
 
-    <PanelSection :title="$t('journal.calendar')" :info="$t('journal.calendarInfo')">
+    <PanelSection
+      :title="$t('journal.calendar')"
+      :info="$t('journal.calendarInfo')"
+      body-class="p-3 sm:p-4"
+    >
       <PnlCalendar />
     </PanelSection>
 

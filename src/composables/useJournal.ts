@@ -30,9 +30,7 @@ function useJournalState() {
   }
 
   /** Every day with closed trades, any month */
-  const days = computed(() =>
-    groupByDay(closedTrades.value, settingsStore.timezone, botIds.value),
-  );
+  const days = computed(() => groupByDay(closedTrades.value, settingsStore.timezone, botIds.value));
   const monthDays = computed<DayStats[]>(() =>
     Object.values(days.value).filter((d) => d.date.startsWith(monthPrefix.value)),
   );
